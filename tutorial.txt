@@ -1,0 +1,53 @@
+project-name/
+│
+├── backend/
+│   ├── src/
+│   │   ├── controllers/     # לוגיקת API (פונקציות שמטפלות בבקשות)
+│   │   ├── models/          # קבצים שמתארים את הטבלאות ב-PostgreSQL
+│   │   ├── routes/          # הגדרת המסלולים (endpoints)
+│   │   ├── middlewares/     # קוד שמורץ בין הבקשה לתגובה
+│   │   ├── services/        # לוגיקה מורכבת כמו עיבוד תמונה
+│   │   ├── config/          # הגדרות כלליות (כמו חיבור לבסיס הנתונים)
+│   │   └── server.js         # קובץ הכניסה הראשי שמפעיל את השרת
+│   │
+│   ├── .env                 # משתני סביבה (למשל חיבור ל-DB)
+│   ├── package.json         # תלות של הבקאנד
+│   └── server.js            # קובץ השרת הראשי
+│
+├── frontend/
+│   ├── public/              # קבצים סטטיים (favicon, index.html)
+│   ├── src/
+│   │   ├── components/      # רכיבי React
+│   │   ├── pages/           # דפי פרונטאנד (למשל, Home, About)
+│   │   ├── services/        # קריאות ל-API (Axios)
+│   │   └── App.js           # רכיב ראשי של ה-React
+│   │
+│   ├── package.json         # תלות של הפרונטאנד
+│   └── node_modules/
+│
+└── README.md
+מה זה נחשב API?
+API הוא מערכת של מסלולים (routes) שדרכם הלקוח (הפרונטאנד) מתקשר עם השרת (הבקאנד).
+למשל, אם יש לך טבלה בשם users, את תצרי מסלולים כמו:
+
+GET /users – לקבלת כל המשתמשים.
+POST /users – להוספת משתמש חדש.
+PUT /users/:id – לעדכון משתמש לפי ID.
+DELETE /users/:id – למחיקת משתמש.
+הקבצים ב-routes ו-controllers הם חלק מה-API.
+
+האם צריך Middleware?
+כן, ברוב המקרים כדאי להשתמש ב-Middleware למטרות שונות. הנה כמה דוגמאות:
+
+Middleware לאימות (Authentication):
+
+לוודא שמשתמש מחובר ומורשה לבצע את הבקשה.
+Middleware לטיפול בשגיאות (Error Handling):
+
+טיפול מרכזי בשגיאות והחזרת הודעה ידידותית למשתמש.
+Middleware לעיבוד תמונה:
+
+למשל, אם את מקבלת תמונה מהפרונט, אפשר להשתמש ב-Middleware לעיבוד ראשוני של התמונה לפני שממשיכים.
+Middleware ל-CORS (Cross-Origin Resource Sharing):
+
+אם הפרונטאנד והבקאנד עובדים מדומיינים שונים, Middleware ל-CORS יאפשר תקשורת ביניהם.
