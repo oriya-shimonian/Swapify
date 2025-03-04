@@ -9,10 +9,10 @@ const HeroMainSection = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
 
       {/* Content Section */}
-      <div className="relative z-10 flex md:flex-row-reverse sm:flex-row-reverse justify-between w-full px-6 md:px-12 sm:px-12 lg:px-20 text-right space-y-4 sm:space-y-0 md:space-y-0 sm:items-center md:items-center">
+      <div className="relative z-10 flex sm:flex-col md:flex-row-reverse justify-between w-full px-6 md:px-12 sm:px-12 lg:px-20 text-right space-y-4 sm:space-y-0 md:space-y-0 sm:items-center md:items-center">
         
         {/* כותרת בצד ימין */}
-        <p className="text-2xl sm:text-3xl md:text-5xl font-bold md:text-white max-w-md md:max-w-lg lg:max-w-xl leading-tight self-end md:self-auto">
+        <p className="text-2xl sm:text-2xl md:text-5xl font-bold md:text-white max-w-md md:max-w-lg lg:max-w-xl leading-tight self-end md:self-auto">
           החלף את מה שיש לך במה שאתה באמת רוצה
         </p>
 

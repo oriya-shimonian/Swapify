@@ -1,5 +1,5 @@
 import HeroMainSection from "@/components/Hero/HeroMainSection";
-import REcommendations from "@/components/Hero/REcommendations";
+import Recommendations from "@/components/Hero/Recommendations";
 import SomeProducts from "@/components/Hero/SomeProducts";
 import WhySwapify from "@/components/Hero/WhySwapify";
 import { useEffect } from "react";
@@ -21,7 +21,7 @@ const HeroPage = () => {
       <HeroMainSection />
       <WhySwapify />
       <SomeProducts />
-      <REcommendations />
+      <Recommendations />
       {/* <FeaturesSection />
       <ProductShowcase />
       <Testimonials />
