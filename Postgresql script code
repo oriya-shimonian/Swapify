@@ -7,6 +7,7 @@ CREATE TYPE subcategory_puzzle AS ENUM ('Nature', 'Art', 'Kids', '3 D');
 CREATE TYPE subcategory_book AS ENUM ('Romance', 'Thriller', 'Fantasy', 'Sci-Fi', 'Children', 'Non-fiction', 'Biography', 'Textbook');
 CREATE TYPE subcategory_board_game AS ENUM ('Strategy', 'Kids', 'Party', 'Puzzle', 'Two-player', 'Group');
 CREATE TYPE role_names AS ENUM ('Admin', 'Guest', 'User');
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 ALTER TABLE Puzzles ADD CONSTRAINT fk_puzzle_product FOREIGN KEY (product_id) REFERENCES Products (product_id) ON DELETE CASCADE;
 ALTER TABLE Books ADD CONSTRAINT fk_book_product FOREIGN KEY (product_id) REFERENCES Products (product_id) ON DELETE CASCADE;
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS Users (
     Password_hash VARCHAR (255) NOT NULL,         -- סיסמת המשתמש (בצורת גיבוב)
     Profile_picture VARCHAR (255),                -- URL לתמונת פרופיל
     Location VARCHAR (100),                       -- מקום מגוריו של המשתמש
-    Auth_provider VARCHAR (100),                  -- מקור ההתחברות (לדוג' Facebook, Google)
+    Auth_provider VARCHAR (100) CHECK (Auth_provider IN ('Facebook', 'Google', 'Regular')) NOT NULL DEFAULT 'Regular', -- מקור ההתחברות (לדוג' Facebook, Google)
     Role_id INT NOT NULL,                        -- מזהה תפקיד המשתמש
     Notification_enabled BOOLEAN DEFAULT TRUE,   -- האם המשתמש רוצה לקבל התראות
     Is_banned BOOLEAN DEFAULT FALSE,            -- האם המשתמש חסום
@@ -161,9 +162,9 @@ CREATE TABLE IF NOT EXISTS Audit_Logs (
 
 INSERT INTO Users (name, email, password_hash, profile_picture, location, auth_provider, role_id, notification_enabled, is_banned)
 VALUES
-  ('Alice Johnson', 'alice@gmail.com', 'hash123', 'https://example.com/alice.jpg', 'New York', 'Google', 3, TRUE, FALSE),
-  ('Bob Smith', 'bob@yahoo.com', 'hash456', 'https://example.com/bob.jpg', 'Los Angeles', 'Facebook', 2, TRUE, FALSE),
-  ('Charlie Davis', 'charlie@outlook.com', 'hash789', NULL, 'Chicago', 'Email', 2, TRUE, FALSE);
+  ('Alice Johnson', 'alice@gmail.com',crypt('hash123', gen_salt('bf')), 'https://example.com/alice.jpg', 'New York', 'Regular', 3, TRUE, FALSE),
+  ('Bob Smith', 'bob@yahoo.com', crypt('hash456', gen_salt('bf')), 'https://example.com/bob.jpg', 'Los Angeles', 'Facebook', 2, TRUE, FALSE),
+  ('Charlie Davis', 'charlie@outlook.com', crypt('hash789', gen_salt('bf')), NULL, 'Chicago', 'Google', 2, TRUE, FALSE);
 
 
 INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url)
