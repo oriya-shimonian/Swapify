@@ -1,7 +1,7 @@
 export const NAV_LINKS = [
-    { name: "עמוד הבית", path: "/" },
-    { name: "חיפוש פריטים", path: "/explore" },
-    { name: "עלינו", path: "/about" },
-    { name: "צור קשר", path: "/contact" },
-    { name: "משוב", path: "/feedback" },
-  ];
+  { name: "משוב", path: "/feedback" },
+  { name: "צור קשר", path: "/contact" },
+  { name: "קצת עלינו", path: "/about" },
+  { name: "חיפוש פריטים", path: "/explore" },
+  { name: "עמוד הבית", path: "/" },
+];

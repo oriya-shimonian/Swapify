@@ -1,9 +1,26 @@
+import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login, checkAuth } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await login(email, password); // 🔹 ניסיון התחברות
+      await checkAuth(); // 🔹 בדיקת התחברות לאחר ההתחברות
+      navigate("/"); // 🟢 מעבר לדף הבית
+    } catch (error) {
+      //
+    }
+  };
 
   return (
     <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300 overflow-hidden`}>
@@ -55,21 +72,25 @@ const LoginPage = () => {
         </div>
 
         {/* Login Form */}
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleLogin}>
           <input 
             type="email" 
             placeholder="האימייל שלך" 
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 bg-gray-100 dark:bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
             style={{ direction: "rtl", textAlign: "right" }}
           />
           <input 
             type="password" 
             placeholder="הסיסמה שלך" 
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 bg-gray-100 dark:bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
             style={{ direction: "rtl", textAlign: "right" }}
           />
           
           <motion.button 
+            type="submit" 
+            disabled={!email ||!password}
             whileTap={{ scale: 0.99 }}
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity"
           >

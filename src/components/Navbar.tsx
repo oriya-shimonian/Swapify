@@ -5,26 +5,61 @@ import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import ButtonLink from "@/components/ButtonLink";
 import { NAV_LINKS } from "@/constants/navigationLinks";
+import { useAuth } from "@/context/AuthContext";
+
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { user, logout } = useAuth(); // 🟢 קבלת המשתמש מהקונטקסט
 
   return (
-    // bg-white dark:bg-gray-900
     <nav className="fixed top-0 right-0 w-full bg-gray-100/15 dark:bg-black/30 shadow-md transition-all duration-300 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center ">
-        {/* צד שמאל - מצב אור/חושך + כניסה */}
-        <div className="flex items-center space-x-4">
-          {/* <Link
-            to="/login"
-            className="px-6 py-2 rounded-lg text-white font-semibold text-lg shadow-lg transition-all duration-300
-            bg-gradient-to-r from-blue-500 to-indigo-600
-            dark:from-blue-700 dark:to-indigo-800
-            hover:shadow-xl hover:scale-x-105"
-          >
-            כניסה
-          </Link> */}
-          <ButtonLink to="/login">כניסה</ButtonLink>
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        {/* צד שמאל - מצב אור/חושך + כניסה/תפריט משתמש */}
+        <div className="flex items-center space-x-4 relative">
+          {user ? (
+            // 🟢 תפריט למשתמש מחובר
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex items-center space-x-2 bg-gray-200 dark:bg-gray-800 px-4 py-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+              >
+                <span className="bg-gradient-to-r from-blue-400 to-indigo-800 dark:from-blue-300 dark:to-indigo-500 inline-block text-transparent bg-clip-text">
+                  {user.name} ,שלום
+                </span>
+              </button>
+
+              {isProfileMenuOpen && (
+                <motion.div
+                  className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden z-50"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    פרופיל
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsProfileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                  >
+                    יציאה
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          ) : (
+            // 🔹 כפתור "כניסה" אם המשתמש לא מחובר
+            <ButtonLink to="/login">כניסה</ButtonLink>
+          )}
 
           {/* כפתור מצב אור/חושך */}
           <button
@@ -66,51 +101,22 @@ const Navbar = () => {
 
         {/* לוגו + שם האפליקציה */}
         <div className="flex items-center space-x-3">
-          <span className="lg:text-xl sm:text-md font-bold text-gray-900 dark:text-white">
-            SWAPIFY
-          </span>
-          <motion.img
-            src="/logo-without bg.png"
-            alt="הלוגו של SWAPIFY"
-            className="lg:h-10 md:h-8 sm:h-4 h-5"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          />
+          <Link to="/" className="flex items-center space-x-3">
+            <span className="lg:text-xl sm:text-md font-bold text-gray-900 dark:text-white">
+              SWAPIFY
+            </span>
+            <motion.img
+              src="/logo-without bg.png"
+              alt="הלוגו של SWAPIFY"
+              className="lg:h-10 md:h-8 sm:h-4 h-5"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+          </Link>
         </div>
       </div>
 
-      {/* תפריט למובייל */}
-      {/* {isMenuOpen && (
-        <motion.div
-          className="md:hidden flex flex-col bg-white dark:bg-gray-900 shadow-lg absolute top-16 right-0 w-full p-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Link
-            to="/explore"
-            className="block text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-3 text-center rounded-lg transition"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            חיפוש פריטים
-          </Link>
-          <Link
-            to="/about"
-            className="block text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-3 text-center rounded-lg transition"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            עלינו
-          </Link>
-          <Link
-            to="/contact"
-            className="block text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-3 text-center rounded-lg transition"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            צור קשר
-          </Link>
-        </motion.div>
-      )} */}
       {/* תפריט למובייל */}
       {isMenuOpen && (
         <motion.div
