@@ -1,4 +1,10 @@
--- יצירת ENUM עבור סטטוסים
+-- קביעת אזור הזמן של ה-DB לזמן ישראל
+ALTER DATABASE swapify SET timezone TO 'Asia/Jerusalem';
+
+-- הוספת הרחבה להצפנה
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- יצירת ENUMs לסטטוסים
 CREATE TYPE request_status AS ENUM ('Pending', 'Approved', 'Rejected');
 CREATE TYPE notification_status AS ENUM ('Unread', 'Read');
 CREATE TYPE user_report_status AS ENUM ('Open', 'Under Review', 'Closed');
@@ -7,41 +13,37 @@ CREATE TYPE subcategory_puzzle AS ENUM ('Nature', 'Art', 'Kids', '3 D');
 CREATE TYPE subcategory_book AS ENUM ('Romance', 'Thriller', 'Fantasy', 'Sci-Fi', 'Children', 'Non-fiction', 'Biography', 'Textbook');
 CREATE TYPE subcategory_board_game AS ENUM ('Strategy', 'Kids', 'Party', 'Puzzle', 'Two-player', 'Group');
 CREATE TYPE role_names AS ENUM ('Admin', 'Guest', 'User');
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-ALTER TABLE Puzzles ADD CONSTRAINT fk_puzzle_product FOREIGN KEY (product_id) REFERENCES Products (product_id) ON DELETE CASCADE;
-ALTER TABLE Books ADD CONSTRAINT fk_book_product FOREIGN KEY (product_id) REFERENCES Products (product_id) ON DELETE CASCADE;
-ALTER TABLE Board_Games ADD CONSTRAINT fk_boardgame_product FOREIGN KEY (product_id) REFERENCES Products (product_id) ON DELETE CASCADE;
-
-
+-- טבלת Roles
 CREATE TABLE IF NOT EXISTS Roles (
-    Role_id SERIAL PRIMARY KEY,      -- מזהה ייחודי לכל תפקיד
-    Role_name role_names NOT NULL   -- שם התפקיד, לדוג' "User", "Admin"
+    Role_id SERIAL PRIMARY KEY,
+    Role_name role_names NOT NULL UNIQUE
 );
 
-INSERT INTO Roles (role_name)
-VALUES ('Guest'), ('User'), ('Admin');
+-- הכנסת תפקידים למערכת
+INSERT INTO Roles (role_name) VALUES ('Guest'), ('User'), ('Admin') ON CONFLICT DO NOTHING;
 
+-- טבלת Users
 CREATE TABLE IF NOT EXISTS Users (
-    User_id SERIAL PRIMARY KEY,                 -- מזהה ייחודי למשתמש
-    Name VARCHAR (100) NOT NULL,                  -- שם המשתמש
-    Email VARCHAR (255) NOT NULL UNIQUE,          -- כתובת הדוא"ל של המשתמש
-    Password_hash VARCHAR (255) NOT NULL,         -- סיסמת המשתמש (בצורת גיבוב)
-    Profile_picture VARCHAR (255),                -- URL לתמונת פרופיל
-    Location VARCHAR (100),                       -- מקום מגוריו של המשתמש
-    Auth_provider VARCHAR (100) CHECK (Auth_provider IN ('Facebook', 'Google', 'Regular')) NOT NULL DEFAULT 'Regular', -- מקור ההתחברות (לדוג' Facebook, Google)
-    Role_id INT NOT NULL,                        -- מזהה תפקיד המשתמש
-    Notification_enabled BOOLEAN DEFAULT TRUE,   -- האם המשתמש רוצה לקבל התראות
-    Is_banned BOOLEAN DEFAULT FALSE,            -- האם המשתמש חסום
-    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- תאריך יצירת המשתמש
-    Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- תאריך עדכון אחרון של המשתמש
-    CONSTRAINT fk_role
-        FOREIGN KEY (role_id) REFERENCES Roles (role_id) ON DELETE RESTRICT  -- קשר עם טבלת Roles
+    User_id SERIAL PRIMARY KEY,
+    Name VARCHAR (100) NOT NULL,
+    Email VARCHAR (255) NOT NULL UNIQUE,
+    Password_hash VARCHAR (255) NOT NULL,
+    Profile_picture VARCHAR (255),
+    Location VARCHAR (100),
+    Auth_provider VARCHAR (100) CHECK (Auth_provider IN ('Facebook', 'Google', 'Regular')) NOT NULL DEFAULT 'Regular',
+    Role_id INT NOT NULL,
+    Notification_enabled BOOLEAN DEFAULT TRUE,
+    Is_banned BOOLEAN DEFAULT FALSE,
+    Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES Roles (role_id) ON DELETE RESTRICT
 );
 
+-- טבלת Products
 CREATE TABLE IF NOT EXISTS Products (
     Product_id SERIAL PRIMARY KEY,
-    User_id INT REFERENCES Users (user_id),
+    User_id INT REFERENCES Users (user_id) ON DELETE CASCADE,
     Title VARCHAR (255) NOT NULL,
     Description TEXT NOT NULL,
     Category VARCHAR (50) NOT NULL,
@@ -53,18 +55,17 @@ CREATE TABLE IF NOT EXISTS Products (
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- יצירת טבלת Puzzles (מתחברת לטבלת Products)
+-- יצירת טבלאות נלוות ל-Products
 CREATE TABLE IF NOT EXISTS Puzzles (
-    Product_id INT PRIMARY KEY REFERENCES Products (product_id),
+    Product_id INT PRIMARY KEY REFERENCES Products (product_id) ON DELETE CASCADE,
     Manufacturer VARCHAR (255),
     Pieces_count INT,
     Image_url VARCHAR (255),
     Subcategory subcategory_puzzle
 );
 
--- יצירת טבלת Books (מתחברת לטבלת Products)
 CREATE TABLE IF NOT EXISTS Books (
-    Product_id INT PRIMARY KEY REFERENCES Products (product_id),
+    Product_id INT PRIMARY KEY REFERENCES Products (product_id) ON DELETE CASCADE,
     Author VARCHAR (255),
     Publish_year INT,
     Publisher VARCHAR (255),
@@ -73,9 +74,8 @@ CREATE TABLE IF NOT EXISTS Books (
     Subcategory subcategory_book
 );
 
--- יצירת טבלת Board_Games (מתחברת לטבלת Products)
 CREATE TABLE IF NOT EXISTS Board_Games (
-    Product_id INT PRIMARY KEY REFERENCES Products (product_id),
+    Product_id INT PRIMARY KEY REFERENCES Products (product_id) ON DELETE CASCADE,
     Game_name VARCHAR (255),
     Min_players INT,
     Max_players INT,
@@ -159,13 +159,13 @@ CREATE TABLE IF NOT EXISTS Audit_Logs (
     Details TEXT
 );
 
-
-INSERT INTO Users (name, email, password_hash, profile_picture, location, auth_provider, role_id, notification_enabled, is_banned)
+-- הכנסת משתמשים לדוגמה
+INSERT INTO Users (name, email, password_hash, role_id)
 VALUES
-  ('Alice Johnson', 'alice@gmail.com',crypt('hash123', gen_salt('bf')), 'https://example.com/alice.jpg', 'New York', 'Regular', 3, TRUE, FALSE),
-  ('Bob Smith', 'bob@yahoo.com', crypt('hash456', gen_salt('bf')), 'https://example.com/bob.jpg', 'Los Angeles', 'Facebook', 2, TRUE, FALSE),
-  ('Charlie Davis', 'charlie@outlook.com', crypt('hash789', gen_salt('bf')), NULL, 'Chicago', 'Google', 2, TRUE, FALSE);
-
+  ('Alice Johnson', 'alice@gmail.com', crypt('hash123', gen_salt('bf')), 3),
+  ('Bob Smith', 'bob@yahoo.com', crypt('hash456', gen_salt('bf')), 2),
+  ('Charlie Davis', 'charlie@outlook.com', crypt('hash789', gen_salt('bf')), 2)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url)
 VALUES
