@@ -31,7 +31,7 @@ require('dotenv').config();
 
 // Middleware לוודא שהמשתמש מחובר
 exports.authenticateUser = (req, res, next) => {
-    const token = req.header('Authorization');
+    const token = req.header('Authorization')?.split(" ")[1]; // להוציא רק את הטוקן עצמו
 
     if (!token) {
         return res.status(401).json({ error: 'Access denied. No token provided.' });

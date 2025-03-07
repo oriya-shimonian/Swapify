@@ -15,7 +15,7 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        console.log(user.rows[0], "users rows", password, "password", user.rows[0].password_hash, "password_hash", email, "email");
+        // console.log(user.rows[0], "users rows", password, "password", user.rows[0].password_hash, "password_hash", email, "email");
         // בדיקת הסיסמה (השוואת סיסמאות עם bcrypt)
         const isMatch = await bcrypt.compare(password, user.rows[0].password_hash);
         if (!isMatch) {
@@ -28,8 +28,8 @@ exports.loginUser = async (req, res) => {
             process.env.JWT_SECRET,  // ה-SECRET מתוך `.env`
             { expiresIn: '7d' }      // תוקף הטוקן: שבוע
         );
-
-        res.status(200).json({ token });
+        
+        res.status(200).json({ token, user: user.rows[0] });
 
     } catch (error) {
         console.error(error);

@@ -251,15 +251,35 @@ const { notFoundHandler } = require('./middlewares/404Midlleware');
 // חיבור הנתיבים ל-API
 // app.use(cors()); // לאפשר לכל מקור לגשת ל-API
 
+// app.use(cors({
+//   origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//           callback(null, true);
+//       } else {
+//           callback(new Error('Not allowed by CORS'));
+//       }
+//   },
+//   credentials: true
+// }));
+
+
+const allowedOrigins = [
+    'http://localhost:5173', // Vite
+    'http://localhost:3000', // React ב-Dev
+    'https://your-production-domain.com' // לשנות לדומיין שלך בפרודקשן
+];
+
 app.use(cors({
-  origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-      } else {
-          callback(new Error('Not allowed by CORS'));
-      }
-  },
-  credentials: true
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use('/api/auth', authRoutes);
