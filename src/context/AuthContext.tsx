@@ -1,4 +1,10 @@
-import { createContext, useContext, useReducer, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useState,
+} from "react";
 import axios from "axios";
 import { authRoutes } from "@/settings";
 import { IUser } from "@/types/type";
@@ -28,7 +34,12 @@ const initialState: AuthState = {
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case "LOGIN":
-      return { ...state, user: action.payload.user, token: action.payload.token, loading: false };
+      return {
+        ...state,
+        user: action.payload.user,
+        token: action.payload.token,
+        loading: false,
+      };
     case "LOGOUT":
       return { ...state, user: null, token: null, loading: false };
     case "SET_LOADING":
@@ -58,25 +69,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { token, user } = response.data;
       setUser(user);
       localStorage.setItem("token", token);
+
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // הגדרת טוקן קבועה
-  
+
       dispatch({ type: "LOGIN", payload: { user, token } });
-  
     } catch (error: any) {
-      console.error("Login failed", error);
-  
       // הצגת שגיאות מפורטות
       if (error.response) {
-        toast.error(`שגיאה: ${error.response.data.message || "נכשל ניסיון ההתחברות"}`);
+        toast.error(
+          `שגיאה: ${error.response.data.message || "ניסיון ההתחברות נכשל"}`
+        );
       } else {
         toast.error("אירעה שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
       }
     }
   };
-  
 
   // פונקציה להתנתקות
   const logout = () => {
+    console.log("Logging out...");
+    
     localStorage.removeItem("token");
     setUser(null);
     delete axios.defaults.headers.common["Authorization"];
@@ -86,6 +98,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // בדיקה אם המשתמש מחובר
   const checkAuth = async () => {
+    // if (!localStorage.getItem("token")) {
+    //   return;
+    // }
     dispatch({ type: "SET_LOADING", payload: true });
 
     try {
@@ -93,7 +108,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
-      dispatch({ type: "LOGIN", payload: { user: response.data.user, token: localStorage.getItem("token")! } });
+      dispatch({
+        type: "LOGIN",
+        payload: {
+          user: response.data.user,
+          token: localStorage.getItem("token")!,
+        },
+      });
     } catch (error) {
       logout();
     } finally {
@@ -107,7 +128,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       checkAuth();
     }
   }, []);
-
 
   return (
     <AuthContext.Provider value={{ user, state, login, logout, checkAuth }}>
