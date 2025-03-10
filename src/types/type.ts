@@ -26,10 +26,9 @@ export interface IUser {
   profile_picture: string | null;
   location: string;
   auth_provider: "Regular" | "Facebook" | "Google";
-  role_id: number;
+  role_name: number;
   notification_enabled: boolean;
   is_banned: boolean;
   created_at: string; // אפשר להשתמש גם ב-Date אם רוצים 
   updated_at: string;
 }
-

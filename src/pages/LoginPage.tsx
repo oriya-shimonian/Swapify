@@ -16,7 +16,7 @@ const LoginPage = () => {
     try {
       await login(email, password); // 🔹 ניסיון התחברות
       await checkAuth(); // 🔹 בדיקת התחברות לאחר ההתחברות
-      navigate("/"); // 🟢 מעבר לדף הבית
+      navigate("/all-products"); // 🟢 מעבר לדף הבית
     } catch (error) {
       //
     }

@@ -1,12 +1,21 @@
-import React, { useState, useRef, FormEvent, ChangeEvent } from 'react';
+import React, { useState, useRef, ChangeEvent } from 'react';
 import { motion } from 'framer-motion';
-import { FaCamera, FaMapMarkerAlt, FaTimes } from 'react-icons/fa';
+import { FaCamera, FaTimes } from 'react-icons/fa';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { MdImageNotSupported } from "react-icons/md";
+import { useUserActions } from '@/hooks/useUserActions';
+import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
+interface Errors {
+  [key: string]: string;
+}
 
 const SignupPage: React.FC = () => {
   const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -14,8 +23,51 @@ const SignupPage: React.FC = () => {
   const [locations, setLocations] = useState<string[]>([]);
   const [locationInput, setLocationInput] = useState<string>('');
   const [suggestedLocations, setSuggestedLocations] = useState<{ label: string }[]>([]);
-  
+  const [errors, setErrors] = useState<Errors>({});
+   const { checkAuth } = useAuth();
+   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { createUser, loading } = useUserActions();
+
+  const validateField = (name: string, value: string): void => {
+    const newErrors = { ...errors };
+    
+    switch (name) {
+      case 'username':
+        if (!value) newErrors.username = 'שם משתמש נדרש';
+        else delete newErrors.username;
+        break;
+      case 'email':
+        if (!value) newErrors.email = 'אימייל נדרש';
+        else if (!/\S+@\S+\.\S+/.test(value)) newErrors.email = 'אימייל לא תקין';
+        else delete newErrors.email;
+        break;
+      case 'password':
+        if (!value) newErrors.password = 'סיסמה נדרשת';
+        else if (!/^[a-zA-Z0-9]{6,12}$/.test(value)) newErrors.password = '6-12 תווים, אותיות ומספרים בלבד';
+        else delete newErrors.password;
+        break;
+      case 'confirmPassword':
+        if (!value) newErrors.confirmPassword = 'אישור סיסמה נדרש';
+        else if (value !== password) newErrors.confirmPassword = 'הסיסמאות אינן תואמות';
+        else delete newErrors.confirmPassword;
+        break;
+    }
+    setErrors(newErrors);
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'username': setUsername(value); break;
+      case 'email': setEmail(value); break;
+      case 'password': setPassword(value); break;
+      case 'confirmPassword': setConfirmPassword(value); break;
+    }
+    if (value.length >= 3 || value.length === 0) {
+      validateField(name, value);
+    }
+  };
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,6 +96,7 @@ const SignupPage: React.FC = () => {
   const selectLocation = (location: string) => {
     if (!locations.includes(location)) {
       setLocations([...locations, location]);
+      setErrors({...errors, locations: '' });
     }
     setLocationInput('');
     setSuggestedLocations([]);
@@ -52,6 +105,39 @@ const SignupPage: React.FC = () => {
   const removeLocation = (locationToRemove: string) => {
     setLocations(locations.filter(loc => loc !== locationToRemove));
   };
+
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !email || !password || !confirmPassword || locations.length === 0) {
+      setErrors({
+        ...errors,
+        ...(username ? {} : { username: 'שם משתמש נדרש' }),
+        ...(email ? {} : { email: 'אימייל נדרש' }),
+        ...(password ? {} : { password: 'סיסמה נדרשת' }),
+        ...(confirmPassword ? {} : { confirmPassword: 'אישור סיסמה נדרש' }),
+        ...(locations.length > 0 ? {} : { locations: 'מיקום נדרש' })
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrors({ ...errors, confirmPassword: 'הסיסמאות אינן תואמות' });
+      return;
+    }
+    
+    try {
+      await createUser(username, email, password, notifications, locations);
+      await checkAuth();
+      navigate("/all-products");
+    } catch (error) {
+      console.log(error, "Error creating");
+      
+      // Handle error if needed
+    }
+    
+  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300 overflow-auto">
@@ -64,17 +150,17 @@ const SignupPage: React.FC = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl p-8 space-y-6 mt-14"
+        className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl p-8 mt-14"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-4">הרשמה</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">הרשמה</h2>
 
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-3">
           <div className="relative">
             {profileImage ? (
-              <img src={profileImage} alt="Profile" className="w-32 h-32 rounded-full object-fit border-4 border-blue-500" />
+              <img src={profileImage} alt="Profile" className="w-24 h-24 rounded-full object-fit border-4 border-blue-500" />
             ) : (
-              <div className="w-28 h-28 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+              <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
                 <MdImageNotSupported className="text-gray-500 text-3xl" />
               </div>
             )}
@@ -85,10 +171,37 @@ const SignupPage: React.FC = () => {
           </div>
         </div>
 
-        <form onSubmit={()=>  console.log("submit")} className="space-y-4">
-          <Input type="text" placeholder="שם משתמש" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full dark:bg-white" style={{ direction: "rtl", textAlign: "right" }}/>
-          <Input type="password" placeholder="סיסמה" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full dark:bg-white" style={{ direction: "rtl", textAlign: "right" }}/>
-          <Input type="password" placeholder="אישור סיסמה" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full dark:bg-white" style={{ direction: "rtl", textAlign: "right" }}/>
+        <form onSubmit={ handleSignup } className="space-y-2">
+          <div>
+            <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
+              {errors.username && `* ${errors.username}`}
+            </label>
+            <Input type="text" name='username' placeholder="שם משתמש" value={username} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.username && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
+          </div>
+          <div>
+            <label className="block text-red-500 text-sm min-h-6 "  style={{ direction: "rtl", textAlign: "right" }}>
+                {errors.email && `* ${errors.email}`}
+            </label>
+            <Input type="email" name="email" placeholder="אימייל" value={email} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.email && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
+
+          </div>
+
+          <div>
+            <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
+                {errors.password && `* ${errors.password}`}
+            </label>
+            <Input type="password" name="password" placeholder="סיסמה" value={password} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.password && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
+
+          </div>
+
+          <div>
+            <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
+                {errors.confirmPassword && `* ${errors.confirmPassword}`}
+            </label>
+            <Input type="password" name="confirmPassword" placeholder="אישור סיסמה" value={confirmPassword} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.confirmPassword && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
+
+          </div>
+
 
           <div className="flex items-center justify-between">
             <Switch checked={notifications} onCheckedChange={setNotifications} />
@@ -96,7 +209,10 @@ const SignupPage: React.FC = () => {
           </div>
 
           <div className="relative">
-            <Input type="text" placeholder="חפש מיקום" value={locationInput} onChange={handleLocationInputChange} className="w-full dark:bg-white" style={{ direction: "rtl", textAlign: "right" }}/>
+          <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
+                {errors.locations && `* ${errors.locations}`}
+              </label>
+            <Input type="text" placeholder="חפש מיקום" value={locationInput} onChange={handleLocationInputChange} className={`w-full dark:bg-white ${errors.locations && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
             {suggestedLocations.length > 0 && (
               <ul className="absolute w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-40 overflow-auto shadow-lg z-10">
                 {suggestedLocations.map((loc, index) => (
@@ -119,8 +235,8 @@ const SignupPage: React.FC = () => {
             ))}
           </div>
 
-          <motion.button type="submit" whileTap={{ scale: 0.95 }} className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity">
-            הירשם
+          <motion.button type="submit" whileTap={{ scale: 0.95 }} className={`w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity ${loading && "loading-dots"}`}>
+              {loading ? "נרשם..." : "הרשמה"}
           </motion.button>
         </form>
       </motion.div>
