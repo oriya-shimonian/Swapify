@@ -44,15 +44,15 @@ const Navbar = () => {
                   >
                     פרופיל
                   </Link>
-                  <button
+                  <Link to="/"
                     onClick={() => {
                       logout();
                       setIsProfileMenuOpen(false);
                     }}
-                    className="w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    className="block w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     יציאה
-                  </button>
+                  </Link>
                 </motion.div>
               )}
             </div>

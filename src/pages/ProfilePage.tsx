@@ -273,6 +273,8 @@ import { Input } from "@/components/ui/input";
 import { MdImageNotSupported } from "react-icons/md";
 import { useUserActions } from "@/hooks/useUserActions";
 import toast from "react-hot-toast";
+import { TiArrowBackOutline } from "react-icons/ti";
+import { FaEdit } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -282,14 +284,21 @@ interface Errors {
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
   const { updateUser, loading } = useUserActions();
   const [username, setUsername] = useState<string>(user!.name);
   const [email, setEmail] = useState<string>(user!.email);
-//   const [password, setPassword] = useState<string>();
-//   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string | null>(user!.profile_picture);
-  const [notifications, setNotifications] = useState<boolean>(user!.notification_enabled);
-  const [locations, setLocations] = useState<string[]>(user!.location.split(', '));
+  //   const [password, setPassword] = useState<string>();
+  //   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [profileImage, setProfileImage] = useState<string | null>(
+    user!.profile_picture
+  );
+  const [notifications, setNotifications] = useState<boolean>(
+    user!.notification_enabled
+  );
+  const [locations, setLocations] = useState<string[]>(
+    user!.location.split(", ")
+  );
   const [locationInput, setLocationInput] = useState<string>("");
   const [suggestedLocations, setSuggestedLocations] = useState<
     { label: string }[]
@@ -377,11 +386,7 @@ export default function ProfilePage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !username ||
-      !email ||
-      locations.length === 0
-    ) {
+    if (!username || !email || locations.length === 0) {
       setErrors({
         ...errors,
         ...(username ? {} : { username: "שם משתמש נדרש" }),
@@ -416,12 +421,20 @@ export default function ProfilePage() {
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">
-         הפרופיל של {user?.name}
+        {user?.name} הפרופיל של
         </h2>
+        <div>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="absolute top-4 left-4 text-gray-500 bg-transparent hover:text-gray-600 transition-colors"
+          >
+            {isEditing ? <TiArrowBackOutline size={20}/>: <FaEdit size={20}/> }
+          </button>
+        </div>
 
         <form onSubmit={handleSignup}>
           <div className="grid grid-cols-2 gap-12">
-          <div>
+            <div>
               {/* password, confirm password, locations */}
               <div className="relative">
                 <label
@@ -430,16 +443,20 @@ export default function ProfilePage() {
                 >
                   {errors.locations && `* ${errors.locations}`}
                 </label>
-                <Input
-                  type="text"
-                  placeholder="חפש מיקום"
-                  value={locationInput}
-                  onChange={handleLocationInputChange}
-                  className={`w-full dark:bg-white dark:text-black  ${
-                    errors.locations && "border border-red-500"
-                  }`}
-                  style={{ direction: "rtl", textAlign: "right" }}
-                />
+                {!isEditing ? (
+                  <p>:מיקומים מועדפים להחלפה</p>
+                ) : (
+                  <Input
+                    type="text"
+                    placeholder="חפש מיקום"
+                    value={locationInput}
+                    onChange={handleLocationInputChange}
+                    className={`w-full dark:bg-white dark:text-black  ${
+                      errors.locations && "border border-red-500"
+                    }`}
+                    style={{ direction: "rtl", textAlign: "right" }}
+                  />
+                )}
                 {suggestedLocations.length > 0 && (
                   <ul className="absolute w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-40 overflow-auto shadow-lg z-10">
                     {suggestedLocations.map((loc, index) => (
@@ -474,7 +491,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-
             <div>
               {/* profile picture, username, email, notifications */}
               <div className="flex justify-center mb-3">
@@ -490,20 +506,24 @@ export default function ProfilePage() {
                       <MdImageNotSupported className="text-gray-500 text-3xl" />
                     </div>
                   )}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
-                  >
-                    <FaCamera />
-                  </button>
+                  {isEditing && (
+                    <>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+                      >
+                        <FaCamera />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
               <div>
@@ -513,17 +533,21 @@ export default function ProfilePage() {
                 >
                   {errors.username && `* ${errors.username}`}
                 </label>
-                <Input
-                  type="text"
-                  name="username"
-                  placeholder="שם משתמש"
-                  value={username}
-                  onChange={handleInputChange}
-                  className={`w-full dark:bg-white dark:text-black ${
-                    errors.username && "border border-red-500"
-                  }`}
-                  style={{ direction: "rtl", textAlign: "right" }}
-                />
+                {!isEditing ? (
+                  <p>{username} :שם משתמש</p>
+                ) : (
+                  <Input
+                    type="text"
+                    name="username"
+                    placeholder="שם משתמש"
+                    value={username}
+                    onChange={handleInputChange}
+                    className={`w-full dark:bg-white dark:text-black ${
+                      errors.username && "border border-red-500"
+                    }`}
+                    style={{ direction: "rtl", textAlign: "right" }}
+                  />
+                )}
               </div>
               <div>
                 <label
@@ -532,41 +556,47 @@ export default function ProfilePage() {
                 >
                   {errors.email && `* ${errors.email}`}
                 </label>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="אימייל"
-                  value={email}
-                  onChange={handleInputChange}
-                  className={`w-full dark:bg-white dark:text-black ${
-                    errors.email && "border border-red-500"
-                  }`}
-                  style={{ direction: "rtl", textAlign: "right" }}
-                />
+                {!isEditing ? (
+                  <p>{email} :מייל</p>
+                ) : (
+                  <Input
+                    type="email"
+                    name="email"
+                    placeholder="אימייל"
+                    value={email}
+                    onChange={handleInputChange}
+                    className={`w-full dark:bg-white dark:text-black ${
+                      errors.email && "border border-red-500"
+                    }`}
+                    style={{ direction: "rtl", textAlign: "right" }}
+                  />
+                )}
               </div>
               <div className="flex items-center justify-between my-3">
                 <Switch
                   checked={notifications}
                   onCheckedChange={setNotifications}
+                  disabled={!isEditing}
                 />
                 <span className="text-gray-700 dark:text-gray-300">
                   קבלת התראות
                 </span>
               </div>
             </div>
-
           </div>
 
           {/* submit button */}
-          <motion.button
-            type="submit"
-            whileTap={{ scale: 0.95 }}
-            className={`w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity ${
-              loading && "loading-dots"
-            }`}
-          >
-            {loading ? "נרשם..." : "הרשמה"}
-          </motion.button>
+          {isEditing && (
+            <motion.button
+              type="submit"
+              whileTap={{ scale: 0.95 }}
+              className={`w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity ${
+                loading && "loading-dots"
+              }`}
+            >
+              {loading ? "נרשם..." : "הרשמה"}
+            </motion.button>
+          )}
         </form>
       </motion.div>
     </div>

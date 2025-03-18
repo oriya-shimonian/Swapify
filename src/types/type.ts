@@ -6,17 +6,6 @@ export type Feature = {
   description: string;
 };
 
-// Define product type
-export interface IProduct {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  subcategory: string;
-  condition: string;
-  location: string;
-  image_url: string | null; // Image URL may be null for now
-}
 
 export interface IUser {
   user_id: number;

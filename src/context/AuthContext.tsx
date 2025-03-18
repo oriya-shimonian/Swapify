@@ -3,7 +3,6 @@ import {
   useContext,
   useReducer,
   useEffect,
-  useState,
 } from "react";
 import axios from "axios";
 import { authRoutes } from "@/settings";
@@ -61,13 +60,13 @@ const AuthContext = createContext<{
 // Provider
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  const [user, setUser] = useState<IUser | null>(null);
+  // const [user, setUser] = useState<IUser | null>(null);
   // פונקציה להתחברות
   const login = async (email: string, password: string) => {
     try {
       const response = await axios.post(authRoutes.login, { email, password });
       const { token, user } = response.data;
-      setUser(user);
+      state.user(user);
       localStorage.setItem("token", token);
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // הגדרת טוקן קבועה
@@ -90,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("Logging out...");
     
     localStorage.removeItem("token");
-    setUser(null);
+    state.user(null);
     delete axios.defaults.headers.common["Authorization"];
 
     dispatch({ type: "LOGOUT" });
@@ -107,6 +106,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const response = await axios.get(authRoutes.checkAuth, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+      console.log(response.data, "response");
+      
 
       dispatch({
         type: "LOGIN",
@@ -130,7 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, state, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user: state.user, state, login, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

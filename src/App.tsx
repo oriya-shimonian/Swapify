@@ -45,7 +45,7 @@ function App() {
           </Routes>
         </main>
         {!hideFooter && (
-          <Footer design={addDesignToFooter ? "fixed bottom-0" : ""} />
+          <Footer design="" />
         )}
       </div>
     </>
