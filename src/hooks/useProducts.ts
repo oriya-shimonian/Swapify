@@ -1,5 +1,5 @@
 import { productRoutes } from "@/settings";
-import { IProduct } from "@/types/type";
+import { IProduct } from "@/types/products";
 import { useState, useEffect } from "react";
 
 const useProducts = () => {
@@ -24,7 +24,7 @@ const useProducts = () => {
     };
     fetchProducts();
   }, []);
-
+  
   return { products, loading, error };
 };
 

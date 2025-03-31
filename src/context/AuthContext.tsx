@@ -62,18 +62,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   // const [user, setUser] = useState<IUser | null>(null);
   // פונקציה להתחברות
+  // const login = async (email: string, password: string) => {
+  //   try {
+  //     const response = await axios.post(authRoutes.login, { email, password });
+  //     const { token, user } = response.data;
+  //     state.user(user);
+  //     localStorage.setItem("token", token);
+
+  //     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // הגדרת טוקן קבועה
+
+  //     dispatch({ type: "LOGIN", payload: { user, token } });
+  //   } catch (error: any) {
+  //     // הצגת שגיאות מפורטות
+  //     if (error.response) {
+  //       toast.error(
+  //         `שגיאה: ${error.response.data.message || "ניסיון ההתחברות נכשל"}`
+  //       );
+  //     } else {
+  //       toast.error("אירעה שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
+  //     }
+  //   }
+  // };
+
   const login = async (email: string, password: string) => {
     try {
       const response = await axios.post(authRoutes.login, { email, password });
       const { token, user } = response.data;
-      state.user(user);
+  
       localStorage.setItem("token", token);
-
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // הגדרת טוקן קבועה
-
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  
       dispatch({ type: "LOGIN", payload: { user, token } });
     } catch (error: any) {
-      // הצגת שגיאות מפורטות
       if (error.response) {
         toast.error(
           `שגיאה: ${error.response.data.message || "ניסיון ההתחברות נכשל"}`
@@ -83,6 +103,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
   };
+  
 
   // פונקציה להתנתקות
   const logout = () => {

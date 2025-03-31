@@ -277,6 +277,7 @@ import { TiArrowBackOutline } from "react-icons/ti";
 import { FaEdit } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import LocationPicker from "@/components/LocationPicker";
 
 interface Errors {
   [key: string]: string;
@@ -299,10 +300,6 @@ export default function ProfilePage() {
   const [locations, setLocations] = useState<string[]>(
     user!.location.split(", ")
   );
-  const [locationInput, setLocationInput] = useState<string>("");
-  const [suggestedLocations, setSuggestedLocations] = useState<
-    { label: string }[]
-  >([]);
   const [errors, setErrors] = useState<Errors>({});
   const { checkAuth } = useAuth();
   const navigate = useNavigate();
@@ -352,38 +349,6 @@ export default function ProfilePage() {
     }
   };
 
-  const fetchLocations = async (query: string) => {
-    if (!query.trim()) return;
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&accept-language=he`
-    );
-    const data = await response.json();
-    setSuggestedLocations(
-      data.slice(0, 5).map((loc: { display_name: string }) => ({
-        label: loc.display_name.split(",")[0],
-      }))
-    );
-  };
-
-  const handleLocationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocationInput(value);
-    fetchLocations(value);
-  };
-
-  const selectLocation = (location: string) => {
-    if (!locations.includes(location)) {
-      setLocations([...locations, location]);
-      setErrors({ ...errors, locations: "" });
-    }
-    setLocationInput("");
-    setSuggestedLocations([]);
-  };
-
-  const removeLocation = (locationToRemove: string) => {
-    setLocations(locations.filter((loc) => loc !== locationToRemove));
-  };
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !email || locations.length === 0) {
@@ -421,14 +386,18 @@ export default function ProfilePage() {
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">
-        {user?.name} הפרופיל של
+          {user?.name} הפרופיל של
         </h2>
         <div>
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="absolute top-4 left-4 text-gray-500 bg-transparent hover:text-gray-600 transition-colors"
           >
-            {isEditing ? <TiArrowBackOutline size={20}/>: <FaEdit size={20}/> }
+            {isEditing ? (
+              <TiArrowBackOutline size={20} />
+            ) : (
+              <FaEdit size={20} />
+            )}
           </button>
         </div>
 
@@ -437,57 +406,36 @@ export default function ProfilePage() {
             <div>
               {/* password, confirm password, locations */}
               <div className="relative">
-                <label
-                  className="block text-red-500 text-sm min-h-6 "
-                  style={{ direction: "rtl", textAlign: "right" }}
-                >
-                  {errors.locations && `* ${errors.locations}`}
-                </label>
                 {!isEditing ? (
-                  <p>:מיקומים מועדפים להחלפה</p>
+                  <>
+                    <label
+                      className="block text-red-500 text-sm min-h-6"
+                      style={{ direction: "rtl", textAlign: "right" }}
+                    >
+                      {errors.locations && `* ${errors.locations}`}
+                    </label>
+                    <p>:מיקומים מועדפים להחלפה</p>
+                    <div className="flex flex-wrap flex-row-reverse gap-2 mt-2">
+                      {locations.map((location) => (
+                        <div
+                          key={location}
+                          className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-3 py-1 text-sm"
+                        >
+                          {location}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : (
-                  <Input
-                    type="text"
-                    placeholder="חפש מיקום"
-                    value={locationInput}
-                    onChange={handleLocationInputChange}
-                    className={`w-full dark:bg-white dark:text-black  ${
-                      errors.locations && "border border-red-500"
-                    }`}
-                    style={{ direction: "rtl", textAlign: "right" }}
+                  <LocationPicker
+                    selectedLocations={locations}
+                    onChange={(newLocations) => {
+                      setLocations(newLocations);
+                      setErrors({ ...errors, locations: "" });
+                    }}
+                    error={errors.locations}
                   />
                 )}
-                {suggestedLocations.length > 0 && (
-                  <ul className="absolute w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-40 overflow-auto shadow-lg z-10">
-                    {suggestedLocations.map((loc, index) => (
-                      <li
-                        key={index}
-                        className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                        onClick={() => selectLocation(loc.label)}
-                      >
-                        {loc.label}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              <div className="flex flex-wrap flex-row-reverse gap-2 mt-2">
-                {locations.map((location) => (
-                  <div
-                    key={location}
-                    className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-3 py-1 text-sm"
-                  >
-                    {location}
-                    <button
-                      type="button"
-                      onClick={() => removeLocation(location)}
-                      className="ml-2 text-red-500 hover:text-red-600"
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                ))}
               </div>
             </div>
 

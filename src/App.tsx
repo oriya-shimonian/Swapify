@@ -14,6 +14,7 @@ import Footer from "./components/footer";
 import HomePage from "./pages/HomePage";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProfilePage from "./pages/ProfilePage";
+import ProductDetailPage from "./components/ProductDetailPage";
 // import Home from "@/pages/Home";
 // import About from "@/pages/About";
 // import Contact from "@/pages/Contact";
@@ -40,6 +41,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/all-products" element={<HomePage />} />
+            <Route path="/product/:productId" element={<ProductDetailPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

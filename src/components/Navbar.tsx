@@ -12,7 +12,8 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth(); // 🟢 קבלת המשתמש מהקונטקסט
-
+  
+  
   return (
     <nav className="fixed top-0 right-0 w-full bg-gray-100/15 dark:bg-black/30 shadow-md transition-all duration-300 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">

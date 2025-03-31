@@ -1,55 +1,57 @@
-import React, { useState, useRef, ChangeEvent } from 'react';
-import { motion } from 'framer-motion';
-import { FaCamera, FaTimes } from 'react-icons/fa';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
+import React, { useState, useRef, ChangeEvent } from "react";
+import { motion } from "framer-motion";
+import { FaCamera, FaTimes } from "react-icons/fa";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { MdImageNotSupported } from "react-icons/md";
-import { useUserActions } from '@/hooks/useUserActions';
-import toast from 'react-hot-toast';
-import { useAuth } from '@/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useUserActions } from "@/hooks/useUserActions";
+import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import LocationPicker from "@/components/LocationPicker";
 
 interface Errors {
   [key: string]: string;
 }
 
 export default function SignupPage() {
-  const [username, setUsername] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<boolean>(false);
   const [locations, setLocations] = useState<string[]>([]);
-  const [locationInput, setLocationInput] = useState<string>('');
-  const [suggestedLocations, setSuggestedLocations] = useState<{ label: string }[]>([]);
   const [errors, setErrors] = useState<Errors>({});
-   const { checkAuth } = useAuth();
-   const navigate = useNavigate();
+  const { checkAuth } = useAuth();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { createUser, loading } = useUserActions();
 
   const validateField = (name: string, value: string): void => {
     const newErrors = { ...errors };
-    
+
     switch (name) {
-      case 'username':
-        if (!value) newErrors.username = 'שם משתמש נדרש';
+      case "username":
+        if (!value) newErrors.username = "שם משתמש נדרש";
         else delete newErrors.username;
         break;
-      case 'email':
-        if (!value) newErrors.email = 'אימייל נדרש';
-        else if (!/\S+@\S+\.\S+/.test(value)) newErrors.email = 'אימייל לא תקין';
+      case "email":
+        if (!value) newErrors.email = "אימייל נדרש";
+        else if (!/\S+@\S+\.\S+/.test(value))
+          newErrors.email = "אימייל לא תקין";
         else delete newErrors.email;
         break;
-      case 'password':
-        if (!value) newErrors.password = 'סיסמה נדרשת';
-        else if (!/^[a-zA-Z0-9]{6,12}$/.test(value)) newErrors.password = '6-12 תווים, אותיות ומספרים בלבד';
+      case "password":
+        if (!value) newErrors.password = "סיסמה נדרשת";
+        else if (!/^[a-zA-Z0-9]{6,12}$/.test(value))
+          newErrors.password = "6-12 תווים, אותיות ומספרים בלבד";
         else delete newErrors.password;
         break;
-      case 'confirmPassword':
-        if (!value) newErrors.confirmPassword = 'אישור סיסמה נדרש';
-        else if (value !== password) newErrors.confirmPassword = 'הסיסמאות אינן תואמות';
+      case "confirmPassword":
+        if (!value) newErrors.confirmPassword = "אישור סיסמה נדרש";
+        else if (value !== password)
+          newErrors.confirmPassword = "הסיסמאות אינן תואמות";
         else delete newErrors.confirmPassword;
         break;
     }
@@ -59,10 +61,18 @@ export default function SignupPage() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     switch (name) {
-      case 'username': setUsername(value); break;
-      case 'email': setEmail(value); break;
-      case 'password': setPassword(value); break;
-      case 'confirmPassword': setConfirmPassword(value); break;
+      case "username":
+        setUsername(value);
+        break;
+      case "email":
+        setEmail(value);
+        break;
+      case "password":
+        setPassword(value);
+        break;
+      case "confirmPassword":
+        setConfirmPassword(value);
+        break;
     }
     if (value.length >= 3 || value.length === 0) {
       validateField(name, value);
@@ -80,64 +90,42 @@ export default function SignupPage() {
     }
   };
 
-  const fetchLocations = async (query: string) => {
-    if (!query.trim()) return;
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&accept-language=he`);
-    const data = await response.json();
-    setSuggestedLocations(data.slice(0, 5).map((loc: { display_name: string }) => ({ label: loc.display_name.split(",")[0] })));
-  };
-
-  const handleLocationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocationInput(value);
-    fetchLocations(value);
-  };
-
-  const selectLocation = (location: string) => {
-    if (!locations.includes(location)) {
-      setLocations([...locations, location]);
-      setErrors({...errors, locations: '' });
-    }
-    setLocationInput('');
-    setSuggestedLocations([]);
-  };
-
-  const removeLocation = (locationToRemove: string) => {
-    setLocations(locations.filter(loc => loc !== locationToRemove));
-  };
-
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !email || !password || !confirmPassword || locations.length === 0) {
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      locations.length === 0
+    ) {
       setErrors({
         ...errors,
-        ...(username ? {} : { username: 'שם משתמש נדרש' }),
-        ...(email ? {} : { email: 'אימייל נדרש' }),
-        ...(password ? {} : { password: 'סיסמה נדרשת' }),
-        ...(confirmPassword ? {} : { confirmPassword: 'אישור סיסמה נדרש' }),
-        ...(locations.length > 0 ? {} : { locations: 'מיקום נדרש' })
+        ...(username ? {} : { username: "שם משתמש נדרש" }),
+        ...(email ? {} : { email: "אימייל נדרש" }),
+        ...(password ? {} : { password: "סיסמה נדרשת" }),
+        ...(confirmPassword ? {} : { confirmPassword: "אישור סיסמה נדרש" }),
+        ...(locations.length > 0 ? {} : { locations: "מיקום נדרש" }),
       });
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrors({ ...errors, confirmPassword: 'הסיסמאות אינן תואמות' });
+      setErrors({ ...errors, confirmPassword: "הסיסמאות אינן תואמות" });
       return;
     }
-    
+
     try {
       await createUser(username, email, password, notifications, locations);
       await checkAuth();
       navigate("/all-products");
     } catch (error) {
       console.log(error, "Error creating");
-      
+
       // Handle error if needed
     }
-    
   };
-
 
   return (
     <div className="min-h-screen sm:overflow-x-hidden flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 transition-all duration-300 overflow-auto">
@@ -153,93 +141,150 @@ export default function SignupPage() {
         className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl p-6 mt-14"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">הרשמה</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">
+          הרשמה
+        </h2>
 
         <div className="flex justify-center mb-3">
           <div className="relative">
             {profileImage ? (
-              <img src={profileImage} alt="Profile" className="w-24 h-24 rounded-full object-fit border-4 border-blue-500" />
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="w-24 h-24 rounded-full object-fit border-4 border-blue-500"
+              />
             ) : (
               <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
                 <MdImageNotSupported className="text-gray-500 text-3xl" />
               </div>
             )}
-            <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+            >
               <FaCamera />
             </button>
           </div>
         </div>
 
-        <form onSubmit={ handleSignup } className="space-y-2">
+        <form onSubmit={handleSignup} className="space-y-2">
           <div>
-            <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
+            <label
+              className="block text-red-500 text-sm min-h-6 "
+              style={{ direction: "rtl", textAlign: "right" }}
+            >
               {errors.username && `* ${errors.username}`}
             </label>
-            <Input type="text" name='username' placeholder="שם משתמש" value={username} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.username && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
+            <Input
+              type="text"
+              name="username"
+              placeholder="שם משתמש"
+              value={username}
+              onChange={handleInputChange}
+              className={`w-full dark:bg-white ${
+                errors.username && "border border-red-500"
+              }`}
+              style={{ direction: "rtl", textAlign: "right" }}
+            />
           </div>
           <div>
-            <label className="block text-red-500 text-sm min-h-6 "  style={{ direction: "rtl", textAlign: "right" }}>
-                {errors.email && `* ${errors.email}`}
+            <label
+              className="block text-red-500 text-sm min-h-6 "
+              style={{ direction: "rtl", textAlign: "right" }}
+            >
+              {errors.email && `* ${errors.email}`}
             </label>
-            <Input type="email" name="email" placeholder="אימייל" value={email} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.email && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
-
+            <Input
+              type="email"
+              name="email"
+              placeholder="אימייל"
+              value={email}
+              onChange={handleInputChange}
+              className={`w-full dark:bg-white ${
+                errors.email && "border border-red-500"
+              }`}
+              style={{ direction: "rtl", textAlign: "right" }}
+            />
           </div>
 
           <div>
-            <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
-                {errors.password && `* ${errors.password}`}
+            <label
+              className="block text-red-500 text-sm min-h-6 "
+              style={{ direction: "rtl", textAlign: "right" }}
+            >
+              {errors.password && `* ${errors.password}`}
             </label>
-            <Input type="password" name="password" placeholder="סיסמה" value={password} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.password && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
-
+            <Input
+              type="password"
+              name="password"
+              placeholder="סיסמה"
+              value={password}
+              onChange={handleInputChange}
+              className={`w-full dark:bg-white ${
+                errors.password && "border border-red-500"
+              }`}
+              style={{ direction: "rtl", textAlign: "right" }}
+            />
           </div>
 
           <div>
-            <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
-                {errors.confirmPassword && `* ${errors.confirmPassword}`}
+            <label
+              className="block text-red-500 text-sm min-h-6 "
+              style={{ direction: "rtl", textAlign: "right" }}
+            >
+              {errors.confirmPassword && `* ${errors.confirmPassword}`}
             </label>
-            <Input type="password" name="confirmPassword" placeholder="אישור סיסמה" value={confirmPassword} onChange={handleInputChange} className={`w-full dark:bg-white ${errors.confirmPassword && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
-
+            <Input
+              type="password"
+              name="confirmPassword"
+              placeholder="אישור סיסמה"
+              value={confirmPassword}
+              onChange={handleInputChange}
+              className={`w-full dark:bg-white ${
+                errors.confirmPassword && "border border-red-500"
+              }`}
+              style={{ direction: "rtl", textAlign: "right" }}
+            />
           </div>
-
 
           <div className="flex items-center justify-between">
-            <Switch checked={notifications} onCheckedChange={setNotifications} />
-            <span className="text-gray-700 dark:text-gray-300">קבלת התראות</span>
+            <Switch
+              checked={notifications}
+              onCheckedChange={setNotifications}
+            />
+            <span className="text-gray-700 dark:text-gray-300">
+              קבלת התראות
+            </span>
           </div>
 
-          <div className="relative">
-          <label className="block text-red-500 text-sm min-h-6 " style={{ direction: "rtl", textAlign: "right" }}>
-                {errors.locations && `* ${errors.locations}`}
-              </label>
-            <Input type="text" placeholder="חפש מיקום" value={locationInput} onChange={handleLocationInputChange} className={`w-full dark:bg-white ${errors.locations && 'border border-red-500'}`} style={{ direction: "rtl", textAlign: "right" }}/>
-            {suggestedLocations.length > 0 && (
-              <ul className="absolute w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-40 overflow-auto shadow-lg z-10">
-                {suggestedLocations.map((loc, index) => (
-                  <li key={index} className="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600" onClick={() => selectLocation(loc.label)}>
-                    {loc.label}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <LocationPicker
+            selectedLocations={locations}
+            onChange={(newLocations) => {
+              setLocations(newLocations);
+              setErrors({ ...errors, locations: "" });
+            }}
+            error={errors.locations}
+          />
 
-          <div className="flex flex-wrap flex-row-reverse gap-2 mt-2">
-            {locations.map((location) => (
-              <div key={location} className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-3 py-1 text-sm">
-                {location}
-                <button type="button" onClick={() => removeLocation(location)} className="ml-2 text-red-500 hover:text-red-600">
-                  <FaTimes />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <motion.button type="submit" whileTap={{ scale: 0.95 }} className={`w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity ${loading && "loading-dots"}`}>
-              {loading ? "נרשם..." : "הרשמה"}
+          <motion.button
+            type="submit"
+            whileTap={{ scale: 0.95 }}
+            className={`w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:opacity-90 transition-opacity ${
+              loading && "loading-dots"
+            }`}
+          >
+            {loading ? "נרשם..." : "הרשמה"}
           </motion.button>
         </form>
       </motion.div>
     </div>
   );
-};
+}

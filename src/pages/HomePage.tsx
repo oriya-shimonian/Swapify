@@ -548,7 +548,7 @@ export default function HomePage() {
       {/* כפתור הוספת מוצר */}
       <div className="flex justify-end mb-4">
         <Button onClick={() => navigate("/add-product")} className="bg-green-500 text-white">
-          + Add Product
+          הוספת מוצר + 
         </Button>
       </div>
 
