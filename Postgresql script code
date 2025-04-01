@@ -12,6 +12,7 @@ CREATE TYPE exchange_status AS ENUM ('Completed', 'Pending', 'Rejected');
 CREATE TYPE subcategory_puzzle AS ENUM ('Nature', 'Art', 'Kids', '3 D');
 CREATE TYPE subcategory_book AS ENUM ('Romance', 'Thriller', 'Fantasy', 'Sci-Fi', 'Children', 'Non-fiction', 'Biography', 'Textbook');
 CREATE TYPE subcategory_board_game AS ENUM ('Strategy', 'Kids', 'Party', 'Puzzle', 'Two-player', 'Group');
+ALTER TYPE subcategory_board_game ADD VALUE 'Family' AFTER 'Group';
 CREATE TYPE role_names AS ENUM ('Admin', 'Guest', 'User');
 
 -- טבלת Roles
@@ -76,7 +77,6 @@ CREATE TABLE IF NOT EXISTS Books (
 
 CREATE TABLE IF NOT EXISTS Board_Games (
     Product_id INT PRIMARY KEY REFERENCES Products (product_id) ON DELETE CASCADE,
-    Game_name VARCHAR (255),
     Min_players INT,
     Max_players INT,
     Duration INT,
@@ -167,8 +167,54 @@ VALUES
   ('Charlie Davis', 'charlie@outlook.com', crypt('hash789', gen_salt('bf')), 2)
 ON CONFLICT DO NOTHING;
 
+-- TRUNCATE TABLE Products RESTART IDENTITY CASCADE;
+
 INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url)
 VALUES
   (1, '1000-piece Nature Puzzle', 'Beautiful puzzle with nature scenes.', 'Puzzle', 'Nature', 'New', 'New York', 'https://example.com/puzzle.jpg'),
   (2, 'Thriller Book: The Lost Key', 'A thrilling mystery novel.', 'Book', 'Thriller', 'Used', 'Los Angeles', 'https://example.com/book.jpg'),
-  (3, 'Strategy Board Game: Conquer', 'Engaging strategy board game for 2-4 players.', 'Board Game', 'Strategy', 'Good Condition', 'Chicago', 'https://example.com/boardgame.jpg');
+  (3, 'Strategy Board Game: Conquer', 'Engaging strategy board game for 2-4 players.', 'Board Game', 'Strategy', 'Good Condition', 'Chicago', 'https://example.com/boardgame.jpg'),
+
+  -- סינון - ערכים תקניים
+  (1, '500-piece Sunset Puzzle', 'Puzzle with a breathtaking sunset.', 'Puzzle', 'Nature', 'Used', 'Boston', 'https://example.com/puzzle2.jpg'), -- Scenic -> Nature
+  (2, 'Science Fiction: Beyond the Stars', 'A sci-fi adventure book.', 'Book', 'Sci-Fi', 'New', 'San Francisco', 'https://example.com/book2.jpg'), -- Science Fiction -> Sci-Fi
+  (3, 'Family Board Game: Fun Night', 'Great for family game nights!', 'Board Game', 'Group', 'New', 'Miami', 'https://example.com/boardgame2.jpg'), -- Family -> Group
+
+  -- מצבים שונים
+  (1, 'Vintage Chess Set', 'Classic wooden chess set.', 'Board Game', 'Two-player', 'Good Condition', 'Chicago', NULL), -- Classic -> Two-player
+  (2, 'Hardcover History Book', 'Detailed book on world history.', 'Book', 'Non-fiction', 'Used', 'Los Angeles', 'https://example.com/book3.jpg'), -- Non-Fiction -> Non-fiction
+  (1, '3D Puzzle: Eiffel Tower', 'Challenging 3D puzzle of the Eiffel Tower.', 'Puzzle', '3 D', 'New', 'New York', 'https://example.com/puzzle3.jpg'), -- 3D -> 3 D
+
+  -- ספרים נוספים עם התאמות
+  (3, 'Historical Fiction: The War Within', 'A novel set during wartime.', 'Book', 'Fantasy', 'Good Condition', 'Los Angeles', 'https://example.com/book4.jpg'), -- Fiction -> Fantasy
+  (2, 'Children’s Storybook', 'A wonderful bedtime storybook.', 'Book', 'Children', 'New', 'Boston', 'https://example.com/book5.jpg'), -- Fiction -> Children
+
+  -- מוצרים נוספים עם אותו מקום
+  (1, 'Monopoly Deluxe Edition', 'Classic Monopoly board game.', 'Board Game', 'Strategy', 'Used', 'New York', 'https://example.com/boardgame3.jpg'),
+  (3, 'The Great Puzzle Challenge', 'Unique puzzle game for the whole family.', 'Puzzle', 'Art', 'Good Condition', 'Chicago', 'https://example.com/puzzle4.jpg'); -- Challenge -> Art
+
+
+-- הכנסת נתונים לטבלת Puzzles
+INSERT INTO Puzzles (product_id, manufacturer, pieces_count, image_url, subcategory)
+VALUES
+  (1, 'PuzzleCo', 1000, 'https://example.com/puzzle.jpg', 'Nature'),
+  (4, 'SunsetArt', 500, 'https://example.com/puzzle2.jpg', 'Nature'), -- Scenic -> Nature
+  (9, '3D Puzzlers Inc.', 750, 'https://example.com/puzzle3.jpg', '3 D'), -- "3D" -> "3 D"
+  (13, 'FamilyPuzzle Inc.', 600, 'https://example.com/puzzle4.jpg', 'Art'); -- Challenge -> Art
+
+-- הכנסת נתונים לטבלת Books
+INSERT INTO Books (product_id, author, publish_year, publisher, page_count, image_url, subcategory)
+VALUES
+  (2, 'John Thriller', 2018, 'Mystery House', 350, 'https://example.com/book.jpg', 'Thriller'),
+  (5, 'Jane Space', 2021, 'SciFi World', 400, 'https://example.com/book2.jpg', 'Sci-Fi'), -- Science Fiction -> Sci-Fi
+  (8, 'Hist Buff', 2010, 'World Press', 500, 'https://example.com/book3.jpg', 'Non-fiction'), -- Non-Fiction -> Non-fiction
+  (10, 'A. Novelist', 2015, 'Fictional Press', 420, 'https://example.com/book4.jpg', 'Fantasy'), -- Fiction -> Fantasy
+  (11, 'Kids Author', 2020, 'Story Time', 100, 'https://example.com/book5.jpg', 'Children'); -- Fiction -> Children (מותאם לפי שם הספר)
+
+-- הכנסת נתונים לטבלת Board_Games
+INSERT INTO Board_Games (product_id, min_players, max_players, duration, image_url, subcategory)
+VALUES
+  (3, 2, 4, 60, 'https://example.com/boardgame.jpg', 'Strategy'),
+  (6, 2, 6, 45, 'https://example.com/boardgame2.jpg', 'Group'), -- Family -> Group
+  (7,  2, 2, 30, NULL, 'Two-player'), -- Classic -> Two-player
+  (12, 2, 6, 90, 'https://example.com/boardgame3.jpg', 'Strategy');
