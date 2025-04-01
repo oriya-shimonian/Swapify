@@ -2,14 +2,14 @@ const db = require('../config/db'); // חיבור ל-PostgreSQL
 
 // Create Board Game
 exports.createBoardGame = async (req, res) => {
-    const { userId, title, description, condition, location, imageUrl, minPlayers, maxPlayers, duration, subcategory } = req.body;
+    const { userId, title, description, condition, locations, imageUrl, min_players, max_players, duration, subcategory } = req.body;
 
     try {
         // 1️⃣ קודם כל מוסיפים את המוצר ל-`Products`
         const productResult = await db.query(
             `INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url) 
-             VALUES ($1, $2, $3, 'BoardGame', $4, $5, $6, $7) RETURNING product_id`,
-            [userId, title, description, subcategory, condition, location, imageUrl]
+             VALUES ($1, $2, $3, 'Board Game', $4, $5, $6, $7) RETURNING product_id`,
+            [userId, title, description, subcategory, condition, locations, imageUrl]
         );
 
         const productId = productResult.rows[0].product_id;
@@ -18,7 +18,7 @@ exports.createBoardGame = async (req, res) => {
         const boardGameResult = await db.query(
             `INSERT INTO Board_Games (product_id, min_players, max_players, duration, image_url, subcategory) 
              VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [productId, minPlayers, maxPlayers, duration, imageUrl, subcategory]
+            [productId, min_players, max_players, duration, imageUrl, subcategory]
         );
 
         res.status(201).json(boardGameResult.rows[0]);

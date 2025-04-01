@@ -2,14 +2,14 @@ const db = require('../config/db');
 
 // יצירת ספר חדש
 exports.createBook = async (req, res) => {
-    const { userId, title, description, condition, location, imageUrl, author, publishYear, publisher, pageCount, subcategory } = req.body;
+    const { userId, title, description, condition, locations, imageUrl, author, publish_year, publisher, page_count, subcategory } = req.body;
 
     try {
         // 1️⃣ קודם כל מוסיפים את הספר ל-`Products`
         const productResult = await db.query(
             `INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url) 
              VALUES ($1, $2, $3, 'Book', $4, $5, $6, $7) RETURNING product_id`,
-            [userId, title, description, subcategory, condition, location, imageUrl]
+            [userId, title, description, subcategory, condition, locations, imageUrl]
         );
 
         const productId = productResult.rows[0].product_id;
@@ -18,7 +18,7 @@ exports.createBook = async (req, res) => {
         const bookResult = await db.query(
             `INSERT INTO Books (product_id, author, publish_year, publisher, page_count, image_url, subcategory) 
             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [productId, author, publishYear, publisher, pageCount, imageUrl, subcategory]
+            [productId, author, publish_year, publisher, page_count, imageUrl, subcategory]
         );
 
         res.status(201).json(bookResult.rows[0]);
