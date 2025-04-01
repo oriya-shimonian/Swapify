@@ -1,3 +1,6 @@
+
+
+
 // Enum for product conditions
 export enum ProductCondition {
     NEW = "New",
@@ -20,7 +23,7 @@ export enum ProductCondition {
   
   export enum BookSubcategory {
     FICTION = "Fiction",
-    NON_FICTION = "Non-Fiction",
+    NON_FICTION = "Non-fiction",
     SCIENCE_FICTION = "Science Fiction",
   }
   
@@ -49,7 +52,7 @@ export enum ProductCondition {
     category: ProductCategory.PUZZLE;
     subcategory?: PuzzleSubcategory;
     manufacturer?: string;
-    pieces_count?: number;
+    piecesCount?: number;
   }
   
   export interface IBookProduct extends IProductBase {
@@ -69,6 +72,44 @@ export enum ProductCondition {
     max_players?: number;
     duration?: number; // Duration in minutes
   }
+
+
+// Unified mapping object for Hebrew label -> enum value and reverse
+export const subcategoryMaps = {
+  [ProductCategory.BOOK]: {
+    fromLabel: {
+      "סיפורת": BookSubcategory.FICTION,
+      "עיון": BookSubcategory.NON_FICTION,
+      "מדע בדיוני": BookSubcategory.SCIENCE_FICTION,
+    },
+    toLabel: {
+      [BookSubcategory.FICTION]: "סיפורת",
+      [BookSubcategory.NON_FICTION]: "עיון",
+      [BookSubcategory.SCIENCE_FICTION]: "מדע בדיוני",
+    },
+  },
+  [ProductCategory.PUZZLE]: {
+    fromLabel: {
+      "פאזל תמונה": PuzzleSubcategory.JIGSAW,
+      "לוגיקה": PuzzleSubcategory.LOGIC,
+    },
+    toLabel: {
+      [PuzzleSubcategory.JIGSAW]: "פאזל תמונה",
+      [PuzzleSubcategory.LOGIC]: "לוגיקה",
+    },
+  },
+  [ProductCategory.BOARD_GAME]: {
+    fromLabel: {
+      "אסטרטגיה": BoardGameSubcategory.STRATEGY,
+      "משפחתי": BoardGameSubcategory.FAMILY,
+    },
+    toLabel: {
+      [BoardGameSubcategory.STRATEGY]: "אסטרטגיה",
+      [BoardGameSubcategory.FAMILY]: "משפחתי",
+    },
+  },
+};
+
   
   // General product type (union of all specific products)
   export type IProduct = IPuzzleProduct | IBookProduct | IBoardGameProduct;

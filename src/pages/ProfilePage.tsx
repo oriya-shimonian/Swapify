@@ -410,7 +410,7 @@ export default function ProfilePage() {
                   <>
                     <label
                       className="block text-red-500 text-sm min-h-6"
-                      style={{ direction: "rtl", textAlign: "right" }}
+
                     >
                       {errors.locations && `* ${errors.locations}`}
                     </label>
@@ -477,7 +477,7 @@ export default function ProfilePage() {
               <div>
                 <label
                   className="block text-red-500 text-sm min-h-6 "
-                  style={{ direction: "rtl", textAlign: "right" }}
+                  
                 >
                   {errors.username && `* ${errors.username}`}
                 </label>
@@ -493,14 +493,14 @@ export default function ProfilePage() {
                     className={`w-full dark:bg-white dark:text-black ${
                       errors.username && "border border-red-500"
                     }`}
-                    style={{ direction: "rtl", textAlign: "right" }}
+                    
                   />
                 )}
               </div>
               <div>
                 <label
                   className="block text-red-500 text-sm min-h-6 "
-                  style={{ direction: "rtl", textAlign: "right" }}
+                  
                 >
                   {errors.email && `* ${errors.email}`}
                 </label>
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                     className={`w-full dark:bg-white dark:text-black ${
                       errors.email && "border border-red-500"
                     }`}
-                    style={{ direction: "rtl", textAlign: "right" }}
+                    
                   />
                 )}
               </div>

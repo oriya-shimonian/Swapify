@@ -38,7 +38,7 @@ export default function LocationPicker({ selectedLocations, onChange, error }: L
 
   return (
     <div className="relative">
-      <label className="block text-red-500 text-sm min-h-6" style={{ direction: "rtl", textAlign: "right" }}>
+      <label className="block text-red-500 text-sm min-h-6">
         {error && `* ${error}`}
       </label>
       <Input
@@ -47,7 +47,6 @@ export default function LocationPicker({ selectedLocations, onChange, error }: L
         value={input}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
         className={`w-full dark:bg-white ${error && 'border border-red-500'}`}
-        style={{ direction: "rtl", textAlign: "right" }}
       />
       {suggested.length > 0 && (
         <ul className="absolute w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-40 overflow-auto shadow-lg z-10">
@@ -63,13 +62,13 @@ export default function LocationPicker({ selectedLocations, onChange, error }: L
         </ul>
       )}
 
-      <div className="flex flex-wrap flex-row-reverse gap-2 mt-2">
+      <div className="flex flex-wrap gap-2 mt-2">
         {selectedLocations.map(location => (
           <div key={location} className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-3 py-1 text-sm">
-            {location}
             <button type="button" onClick={() => handleRemove(location)} className="ml-2 text-red-500 hover:text-red-600">
               <FaTimes />
             </button>
+            {location}
           </div>
         ))}
       </div>

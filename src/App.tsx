@@ -14,7 +14,8 @@ import Footer from "./components/footer";
 import HomePage from "./pages/HomePage";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProfilePage from "./pages/ProfilePage";
-import ProductDetailPage from "./components/ProductDetailPage";
+import ProductDetailPage from "./pages/Products/ProductDetailPage";
+import AddProductPage from "./pages/Products/AddProductPage";
 // import Home from "@/pages/Home";
 // import About from "@/pages/About";
 // import Contact from "@/pages/Contact";
@@ -43,6 +44,7 @@ function App() {
             <Route path="/all-products" element={<HomePage />} />
             <Route path="/product/:productId" element={<ProductDetailPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/add-product" element={<AddProductPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

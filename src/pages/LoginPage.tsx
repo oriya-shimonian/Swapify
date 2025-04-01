@@ -78,14 +78,12 @@ const LoginPage = () => {
             placeholder="האימייל שלך" 
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 bg-gray-100 dark:bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
-            style={{ direction: "rtl", textAlign: "right" }}
           />
           <input 
             type="password" 
             placeholder="הסיסמה שלך" 
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 bg-gray-100 dark:bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
-            style={{ direction: "rtl", textAlign: "right" }}
           />
           
           <motion.button 

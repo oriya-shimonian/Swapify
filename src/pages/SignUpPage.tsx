@@ -179,7 +179,7 @@ export default function SignupPage() {
           <div>
             <label
               className="block text-red-500 text-sm min-h-6 "
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             >
               {errors.username && `* ${errors.username}`}
             </label>
@@ -192,13 +192,13 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.username && "border border-red-500"
               }`}
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             />
           </div>
           <div>
             <label
               className="block text-red-500 text-sm min-h-6 "
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             >
               {errors.email && `* ${errors.email}`}
             </label>
@@ -211,14 +211,14 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.email && "border border-red-500"
               }`}
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             />
           </div>
 
           <div>
             <label
               className="block text-red-500 text-sm min-h-6 "
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             >
               {errors.password && `* ${errors.password}`}
             </label>
@@ -231,14 +231,14 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.password && "border border-red-500"
               }`}
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             />
           </div>
 
           <div>
             <label
               className="block text-red-500 text-sm min-h-6 "
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             >
               {errors.confirmPassword && `* ${errors.confirmPassword}`}
             </label>
@@ -251,7 +251,7 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.confirmPassword && "border border-red-500"
               }`}
-              style={{ direction: "rtl", textAlign: "right" }}
+              
             />
           </div>
 

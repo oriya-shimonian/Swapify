@@ -12,13 +12,66 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth(); // 🟢 קבלת המשתמש מהקונטקסט
-  
-  
+
   return (
     <nav className="fixed top-0 right-0 w-full bg-gray-100/15 dark:bg-black/30 shadow-md transition-all duration-300 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        {/* לוגו + שם האפליקציה */}
+        <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3">
+            <span className="lg:text-xl sm:text-md font-bold text-gray-900 dark:text-white">
+              SWAPIFY
+            </span>
+            <motion.img
+              src="/logo-without bg.png"
+              alt="הלוגו של SWAPIFY"
+              className="lg:h-10 md:h-8 sm:h-4 h-5"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+          </Link>
+        </div>
+
+        {/* תפריט ניווט - מוצג במחשב */}
+        <div className="hidden md:flex space-x-6 ">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className="text-black dark:text-gray-300 hover:text-primary transition"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
+
         {/* צד שמאל - מצב אור/חושך + כניסה/תפריט משתמש */}
         <div className="flex items-center space-x-4 relative">
+          {/* כפתור תפריט למובייל */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+          >
+            {isMenuOpen ? (
+              <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            ) : (
+              <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            )}
+          </button>
+
+          {/* כפתור מצב אור/חושך */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+          >
+            {darkMode ? (
+              <Sun className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-yellow-400" />
+            ) : (
+              <Moon className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-gray-500" />
+            )}
+          </button>
+          {/* כפתו�� כני��ה/תפרי�� משתמש */}
           {user ? (
             // 🟢 תפריט למשתמש מחובר
             <div className="relative">
@@ -45,7 +98,8 @@ const Navbar = () => {
                   >
                     פרופיל
                   </Link>
-                  <Link to="/"
+                  <Link
+                    to="/"
                     onClick={() => {
                       logout();
                       setIsProfileMenuOpen(false);
@@ -61,60 +115,6 @@ const Navbar = () => {
             // 🔹 כפתור "כניסה" אם המשתמש לא מחובר
             <ButtonLink to="/login">כניסה</ButtonLink>
           )}
-
-          {/* כפתור מצב אור/חושך */}
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
-          >
-            {darkMode ? (
-              <Sun className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-yellow-400" />
-            ) : (
-              <Moon className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-gray-500" />
-            )}
-          </button>
-
-          {/* כפתור תפריט למובייל */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
-          >
-            {isMenuOpen ? (
-              <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            ) : (
-              <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            )}
-          </button>
-        </div>
-
-        {/* תפריט ניווט - מוצג במחשב */}
-        <div className="hidden md:flex space-x-6">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="text-black dark:text-gray-300 hover:text-primary transition"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-
-        {/* לוגו + שם האפליקציה */}
-        <div className="flex items-center space-x-3">
-          <Link to="/" className="flex items-center space-x-3">
-            <span className="lg:text-xl sm:text-md font-bold text-gray-900 dark:text-white">
-              SWAPIFY
-            </span>
-            <motion.img
-              src="/logo-without bg.png"
-              alt="הלוגו של SWAPIFY"
-              className="lg:h-10 md:h-8 sm:h-4 h-5"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            />
-          </Link>
         </div>
       </div>
 
