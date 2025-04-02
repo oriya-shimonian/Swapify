@@ -1,12 +1,21 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { IProduct, ProductCategory, ProductCondition } from "@/types/products";
+import {
+  getProductCategoryLabel,
+  getProductConditionLabel,
+  getSubcategoryLabel,
+  IProduct,
+  ProductCategory,
+  ProductCondition,
+} from "@/types/products";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { productRoutes } from "@/settings";
 import LocationPicker from "@/components/LocationPicker";
+import toast from "react-hot-toast";
+import AppDialog from "@/components/AppDialog";
 
 export default function ProductDetailPage() {
   const conditionOptions = Object.values(ProductCondition);
@@ -16,7 +25,9 @@ export default function ProductDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState<IProduct>({} as IProduct);
   const { user } = useAuth();
-
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate(); 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -35,6 +46,22 @@ export default function ProductDetailPage() {
   if (!product) return <p className="text-center mt-20">Loading...</p>;
 
   const isOwner = user?.user_id === product.user_id;
+
+  const handleDeleteProduct = async () => {
+    try {
+      setIsDeleting(true);
+      await axios.delete(productRoutes.deleteProduct(product.product_id));
+      toast.success("המוצר נמחק בהצלחה");
+      // נאווט אחורה או לעמוד ראשי
+      navigate("/all-products");
+    } catch (err) {
+      toast.error("אירעה שגיאה בעת המחיקה");
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto mt-24 p-6 shadow rounded bg-white dark:bg-gray-800">
@@ -113,7 +140,9 @@ export default function ProductDetailPage() {
           />
 
           <LocationPicker
-            selectedLocations={editedProduct.location ? [editedProduct.location] : []}
+            selectedLocations={
+              editedProduct.location ? [editedProduct.location] : []
+            }
             onChange={(newLocations) =>
               setEditedProduct((prev) => ({
                 ...prev!,
@@ -127,14 +156,16 @@ export default function ProductDetailPage() {
           <h2 className="text-2xl font-bold">{product.title}</h2>
           <p className="text-gray-600 mt-2">{product.description}</p>
           <p className="mt-2">
-            <strong>מצב:</strong> {product.condition}
+            <strong>מצב:</strong> {getProductConditionLabel(product.condition)}
           </p>
           <p>
-            <strong>קטגוריה:</strong> {product.category}
+            <strong>קטגוריה:</strong>{" "}
+            {getProductCategoryLabel(product.category)}
           </p>
           {product.subcategory && (
             <p>
-              <strong>תת קטגוריה:</strong> {product.subcategory}
+              <strong>תת קטגוריה:</strong>{" "}
+              {getSubcategoryLabel(product.category, product.subcategory)}
             </p>
           )}
           <p>
@@ -159,9 +190,11 @@ export default function ProductDetailPage() {
             >
               ערוך
             </Button>
-            <Button variant="destructive">מחק</Button>
+            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>מחק</Button>
+
           </>
         )}
+        
         {isEditing && (
           <Button
             onClick={() => setIsEditing(false)}
@@ -171,6 +204,17 @@ export default function ProductDetailPage() {
           </Button>
         )}
       </div>
+      <AppDialog
+        open={showDeleteDialog}
+        title="האם למחוק את המוצר?"
+        description={`המוצר "${product.title}" יימחק לצמיתות. לא ניתן לשחזר.`}
+        confirmText="מחק"
+        cancelText="ביטול"
+        confirmVariant="destructive"
+        onConfirm={handleDeleteProduct}
+        onCancel={() => setShowDeleteDialog(false)}
+        loading={isDeleting}
+      />
     </div>
   );
 }

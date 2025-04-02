@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 import {
   ProductCategory,
   ProductCondition,
-  PuzzleSubcategory,
-  BookSubcategory,
-  BoardGameSubcategory,
-  subcategoryMaps
+  subcategoryMaps,
+  getProductCategoryLabel,
+  getProductConditionLabel,
+  getSubcategoryValueFromLabel,
 } from "@/types/products";
 import LocationPicker from "@/components/LocationPicker";
 import useProducts from "@/hooks/useProducts";
@@ -24,9 +24,13 @@ import CategoryFields from "./CategoryFields";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import FormField from "./FormField";
 
 export default function AddProductPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addProduct } = useProducts();
+
   const [category, setCategory] = useState<ProductCategory | "">("");
   const [subcategory, setSubcategory] = useState<string | "">("");
   const [condition, setCondition] = useState<ProductCondition | "">("");
@@ -36,8 +40,8 @@ export default function AddProductPage() {
   const [description, setDescription] = useState("");
   const [extraFields, setExtraFields] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const { addProduct } = useProducts();
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
     if (!imageUrl) newErrors.image = "שדה חובה";
@@ -50,200 +54,149 @@ export default function AddProductPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const mapSubcategory = (): string => {
-    if (!category || !subcategory) return "";
-    const map = subcategoryMaps[category]?.fromLabel;
-    return map && subcategory in map ? map[subcategory as keyof typeof map] : "";
-  };
+  const subcategoryOptions = useMemo(() => {
+    if (!category) return [];
+    const toLabel = subcategoryMaps[category]?.toLabel;
+    return toLabel ? Object.values(toLabel) : [];
+  }, [category]);
   
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
 
+    setLoading(true);
     try {
-      // TODO: Submit logic here
-    addProduct({
-      category: category as ProductCategory,
-      data: {
-        userId: user?.user_id,
-        imageUrl,
-        title,
-        description,
-        category,
-        subcategory: mapSubcategory(),
-        condition,
-        locations,
-        ...extraFields,
-      },
-    });
-  
+      await addProduct({
+        category: category as ProductCategory,
+        data: {
+          userId: user?.user_id,
+          imageUrl,
+          title,
+          description,
+          category,
+          subcategory: getSubcategoryValueFromLabel(category as ProductCategory, subcategory),
+          condition,
+          locations,
+          ...extraFields,
+        },
+      });
       toast.success("המוצר נוסף בהצלחה!");
       navigate("/all-products");
     } catch (err) {
       toast.error("אירעה שגיאה בעת הוספת המוצר");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const renderSubcategory = () => {
-    if (!category) return null;
-  
-    const labels = Object.keys(subcategoryMaps[category]?.fromLabel || {});
-    return labels.map((label) => (
-      <SelectItem key={label} value={label}>
-        {label}
-      </SelectItem>
-    ));
-  };
-  
 
   return (
     <div className="container mx-auto px-4 py-8 mt-14 max-w-2xl">
       <h2 className="text-2xl font-bold mb-6 text-center">הוספת מוצר חדש</h2>
 
-      {/* תמונה */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">
-          תמונה <span className="text-red-500">*</span>
-        </label>
+      <FormField label="תמונה" required error={errors.image}>
         <Input
           type="file"
           accept="image/*"
           onChange={(e) => setImageUrl(e.target.files?.[0] || null)}
           className={errors.image ? "border-red-500" : ""}
         />
-        {errors.image && (
-          <p className="text-red-500 text-sm mt-1">{errors.image}</p>
-        )}
         <p className="text-sm text-muted-foreground mt-1">
           בעתיד: ניתוח אוטומטי של התמונה למילוי שדות
         </p>
-      </div>
+      </FormField>
 
-      {/* שם המוצר */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">
-          שם המוצר <span className="text-red-500">*</span>
-        </label>
+      <FormField label="שם המוצר" required error={errors.title}>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="לדוגמה: פאזל 1000 חלקים"
-          className={errors.title ? "border-red-500" : ""}
         />
-        {errors.title && (
-          <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-        )}
-      </div>
+      </FormField>
 
-      {/* תיאור */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">
-          תיאור <span className="text-red-500">*</span>
-        </label>
+      <FormField label="תיאור" required error={errors.description}>
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="כתוב תיאור מפורט על המוצר..."
           rows={4}
-          className={errors.description ? "border-red-500" : ""}
         />
-        {errors.description && (
-          <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-        )}
-      </div>
+      </FormField>
 
-      {/* קטגוריה */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">
-          קטגוריה <span className="text-red-500">*</span>
-        </label>
+      <FormField label="קטגוריה" required error={errors.category}>
         <Select onValueChange={(val) => setCategory(val as ProductCategory)}>
-          <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+          <SelectTrigger style={{ direction: "rtl", textAlign: "right" }}>
             <SelectValue placeholder="בחר קטגוריה" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent style={{ direction: "rtl", textAlign: "right" }}>
             <SelectGroup>
               {Object.values(ProductCategory).map((val) => (
                 <SelectItem key={val} value={val}>
-                  {val}
+                  {getProductCategoryLabel(val)}
                 </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
         </Select>
-        {errors.category && (
-          <p className="text-red-500 text-sm mt-1">{errors.category}</p>
-        )}
-      </div>
+      </FormField>
 
-      {/* תת-קטגוריה */}
       {category && (
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">תת-קטגוריה</label>
+        <FormField label="תת-קטגוריה">
           <Select onValueChange={setSubcategory}>
-            <SelectTrigger>
+            <SelectTrigger style={{ direction: "rtl", textAlign: "right" }}>
               <SelectValue placeholder="בחר תת-קטגוריה" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>{renderSubcategory()}</SelectGroup>
+            <SelectContent style={{ direction: "rtl", textAlign: "right" }}>
+              <SelectGroup>
+                {subcategoryOptions.map((label) => (
+                  <SelectItem key={label} value={label}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
-        </div>
+        </FormField>
       )}
 
-      {/* שדות נוספים לפי קטגוריה */}
       {category && (
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">שדות נוספים</label>
+        <FormField label="שדות נוספים">
           <CategoryFields
             category={category}
             extraFields={extraFields}
             setExtraFields={setExtraFields}
           />
-        </div>
+        </FormField>
       )}
 
-      {/* מצב המוצר */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">
-          מצב המוצר <span className="text-red-500">*</span>
-        </label>
+      <FormField label="מצב המוצר" required error={errors.condition}>
         <Select onValueChange={(val) => setCondition(val as ProductCondition)}>
-          <SelectTrigger className={errors.condition ? "border-red-500" : ""}>
+          <SelectTrigger style={{ direction: "rtl", textAlign: "right" }}>
             <SelectValue placeholder="בחר מצב" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent style={{ direction: "rtl", textAlign: "right" }}>
             <SelectGroup>
               {Object.values(ProductCondition).map((val) => (
                 <SelectItem key={val} value={val}>
-                  {val}
+                  {getProductConditionLabel(val)}
                 </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
         </Select>
-        {errors.condition && (
-          <p className="text-red-500 text-sm mt-1">{errors.condition}</p>
-        )}
-      </div>
+      </FormField>
 
-      {/* מיקום */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">
-          מיקום <span className="text-red-500">*</span>
-        </label>
+      <FormField label="מיקום" required error={errors.locations}>
         <LocationPicker
           selectedLocations={locations}
           onChange={setLocations}
           error={errors.locations}
         />
-      </div>
+      </FormField>
 
-      {/* כפתור שליחה */}
       <div className="flex justify-end">
-        <Button className="bg-green-600 text-white" onClick={handleSubmit}>
-          הוסף מוצר
+        <Button disabled={loading} className="bg-green-600 text-white" onClick={handleSubmit}>
+          {loading ? "שולח..." : "הוסף מוצר"}
         </Button>
       </div>
     </div>
