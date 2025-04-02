@@ -2,14 +2,14 @@ const db = require('../config/db');
 
 // יצירת פאזל חדש
 exports.createPuzzle = async (req, res) => {
-    const { userId, title, description, condition, location, imageUrl, manufacturer, piecesCount, subcategory } = req.body;
+    const { userId, title, description, condition, locations, imageUrl, manufacturer, piecesCount, subcategory } = req.body;
 
     try {
         // 1️⃣ קודם כל נכניס את הפריט לטבלת Products
         const productResult = await db.query(
             `INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url) 
              VALUES ($1, $2, $3, 'Puzzle', $4, $5, $6, $7) RETURNING product_id`,
-            [userId, title, description, subcategory, condition, location, imageUrl]
+            [userId, title, description, subcategory, condition, locations, imageUrl]
         );
 
         const productId = productResult.rows[0].product_id;
