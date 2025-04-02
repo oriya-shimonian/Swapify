@@ -5,11 +5,9 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { MdImageNotSupported } from "react-icons/md";
 import { useUserActions } from "@/hooks/useUserActions";
-import toast from "react-hot-toast";
 import { TiArrowBackOutline } from "react-icons/ti";
 import { FaEdit } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import LocationPicker from "@/components/LocationPicker";
 import LocationBubbles from "@/components/LocationBubbles";
 

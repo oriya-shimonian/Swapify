@@ -8,6 +8,8 @@ import {
   ProductCategory,
   ProductCondition,
 } from "@/types/products";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -16,6 +18,7 @@ import { productRoutes } from "@/settings";
 import LocationPicker from "@/components/LocationPicker";
 import toast from "react-hot-toast";
 import AppDialog from "@/components/AppDialog";
+import LocationBubbles from "@/components/LocationBubbles";
 
 export default function ProductDetailPage() {
   const conditionOptions = Object.values(ProductCondition);
@@ -63,6 +66,9 @@ export default function ProductDetailPage() {
     }
   };
 
+  console.log(product.location, "Product location", user?.location);
+  
+  
   return (
     <div className="max-w-3xl mx-auto mt-24 p-6 shadow rounded bg-white dark:bg-gray-800">
       <img
@@ -138,18 +144,6 @@ export default function ProductDetailPage() {
             placeholder="תת קטגוריה"
             className="mb-3"
           />
-
-          <LocationPicker
-            selectedLocations={
-              editedProduct.location ? [editedProduct.location] : []
-            }
-            onChange={(newLocations) =>
-              setEditedProduct((prev) => ({
-                ...prev!,
-                location: newLocations[0] || "",
-              }))
-            }
-          />
         </>
       ) : (
         <>
@@ -168,12 +162,25 @@ export default function ProductDetailPage() {
               {getSubcategoryLabel(product.category, product.subcategory)}
             </p>
           )}
-          <p>
-            <strong>מיקום:</strong> {product.location}
-          </p>
         </>
       )}
+      <div className="mt-2 flex items-center gap-2">
+            <strong>מיקום:</strong>
 
+        <LocationBubbles locations={product.location ? product.location
+          .replace(/[{}"]/g, "") // מסיר תווים מיותרים
+          .split(",")
+          .map((s) => s.trim()) // מסיר רווחים עודפים
+          : []} />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Info size={16} className="text-muted-foreground cursor-pointer" />
+          </TooltipTrigger>
+          <TooltipContent>
+            ניתן לשנות מיקומים רק דרך עמוד הפרופיל
+          </TooltipContent>
+        </Tooltip>
+      </div>
       <div className="mt-4 space-x-2">
         {!isOwner && (
           <>
