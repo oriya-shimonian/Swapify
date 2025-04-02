@@ -15,22 +15,34 @@ export enum ProductCondition {
     BOARD_GAME = "Board Game",
   }
   
-  // Enum for subcategories (extend as needed)
   export enum PuzzleSubcategory {
-    JIGSAW = "Jigsaw",
-    LOGIC = "Logic",
+    NATURE = "Nature",
+    ART = "Art",
+    KIDS = "Kids",
+    THREE_D = "3 D", // כן, יש רווח וזה חוקי אם זה תואם ל־DB
   }
   
   export enum BookSubcategory {
-    FICTION = "Fiction",
+    ROMANCE = "Romance",
+    THRILLER = "Thriller",
+    FANTASY = "Fantasy",
+    SCIFI = "Sci-Fi",
+    CHILDREN = "Children",
     NON_FICTION = "Non-fiction",
-    SCIENCE_FICTION = "Science Fiction",
+    BIOGRAPHY = "Biography",
+    TEXTBOOK = "Textbook",
   }
   
   export enum BoardGameSubcategory {
     STRATEGY = "Strategy",
+    KIDS = "Kids",
+    PARTY = "Party",
+    PUZZLE = "Puzzle",
+    TWO_PLAYER = "Two-player",
+    GROUP = "Group",
     FAMILY = "Family",
   }
+  
   
   // Base product interface
   export interface IProductBase {
@@ -73,42 +85,65 @@ export enum ProductCondition {
     duration?: number; // Duration in minutes
   }
 
-
-// Unified mapping object for Hebrew label -> enum value and reverse
-export const subcategoryMaps = {
-  [ProductCategory.BOOK]: {
-    fromLabel: {
-      "סיפורת": BookSubcategory.FICTION,
-      "עיון": BookSubcategory.NON_FICTION,
-      "מדע בדיוני": BookSubcategory.SCIENCE_FICTION,
+  export const subcategoryMaps = {
+    [ProductCategory.BOOK]: {
+      fromLabel: {
+        "רומן": BookSubcategory.ROMANCE,
+        "מותחן": BookSubcategory.THRILLER,
+        "פנטזיה": BookSubcategory.FANTASY,
+        "מדע בדיוני": BookSubcategory.SCIFI,
+        "ילדים": BookSubcategory.CHILDREN,
+        "עיון": BookSubcategory.NON_FICTION,
+        "ביוגרפיה": BookSubcategory.BIOGRAPHY,
+        "ספר לימוד": BookSubcategory.TEXTBOOK,
+      },
+      toLabel: {
+        [BookSubcategory.ROMANCE]: "רומן",
+        [BookSubcategory.THRILLER]: "מותחן",
+        [BookSubcategory.FANTASY]: "פנטזיה",
+        [BookSubcategory.SCIFI]: "מדע בדיוני",
+        [BookSubcategory.CHILDREN]: "ילדים",
+        [BookSubcategory.NON_FICTION]: "עיון",
+        [BookSubcategory.BIOGRAPHY]: "ביוגרפיה",
+        [BookSubcategory.TEXTBOOK]: "ספר לימוד",
+      },
     },
-    toLabel: {
-      [BookSubcategory.FICTION]: "סיפורת",
-      [BookSubcategory.NON_FICTION]: "עיון",
-      [BookSubcategory.SCIENCE_FICTION]: "מדע בדיוני",
+    [ProductCategory.PUZZLE]: {
+      fromLabel: {
+        "טבע": PuzzleSubcategory.NATURE,
+        "אמנות": PuzzleSubcategory.ART,
+        "ילדים": PuzzleSubcategory.KIDS,
+        "תלת מימד": PuzzleSubcategory.THREE_D,
+      },
+      toLabel: {
+        [PuzzleSubcategory.NATURE]: "טבע",
+        [PuzzleSubcategory.ART]: "אמנות",
+        [PuzzleSubcategory.KIDS]: "ילדים",
+        [PuzzleSubcategory.THREE_D]: "תלת מימד",
+      },
     },
-  },
-  [ProductCategory.PUZZLE]: {
-    fromLabel: {
-      "פאזל תמונה": PuzzleSubcategory.JIGSAW,
-      "לוגיקה": PuzzleSubcategory.LOGIC,
+    [ProductCategory.BOARD_GAME]: {
+      fromLabel: {
+        "אסטרטגיה": BoardGameSubcategory.STRATEGY,
+        "ילדים": BoardGameSubcategory.KIDS,
+        "מסיבה": BoardGameSubcategory.PARTY,
+        "חידות": BoardGameSubcategory.PUZZLE,
+        "שני שחקנים": BoardGameSubcategory.TWO_PLAYER,
+        "קבוצתי": BoardGameSubcategory.GROUP,
+        "משפחתי": BoardGameSubcategory.FAMILY,
+      },
+      toLabel: {
+        [BoardGameSubcategory.STRATEGY]: "אסטרטגיה",
+        [BoardGameSubcategory.KIDS]: "ילדים",
+        [BoardGameSubcategory.PARTY]: "מסיבה",
+        [BoardGameSubcategory.PUZZLE]: "חידות",
+        [BoardGameSubcategory.TWO_PLAYER]: "שני שחקנים",
+        [BoardGameSubcategory.GROUP]: "קבוצתי",
+        [BoardGameSubcategory.FAMILY]: "משפחתי",
+      },
     },
-    toLabel: {
-      [PuzzleSubcategory.JIGSAW]: "פאזל תמונה",
-      [PuzzleSubcategory.LOGIC]: "לוגיקה",
-    },
-  },
-  [ProductCategory.BOARD_GAME]: {
-    fromLabel: {
-      "אסטרטגיה": BoardGameSubcategory.STRATEGY,
-      "משפחתי": BoardGameSubcategory.FAMILY,
-    },
-    toLabel: {
-      [BoardGameSubcategory.STRATEGY]: "אסטרטגיה",
-      [BoardGameSubcategory.FAMILY]: "משפחתי",
-    },
-  },
-};
+  };
+  
 
   
   // General product type (union of all specific products)
