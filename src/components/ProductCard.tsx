@@ -2,17 +2,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProductCategoryLabel, getProductConditionLabel, IProduct } from "@/types/products";
 import { useNavigate } from "react-router-dom";
 
-
-export default function ProductCard({ product }: {product: IProduct;}) {
+export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
 
   return (
     <Card
-      className="shadow-md hover:shadow-xl transition cursor-pointer"
+      className="shadow-md hover:shadow-xl transition cursor-pointer bg-white dark:bg-gray-800 dark:border-gray-700"
       onClick={() => navigate(`/product/${product.product_id}`)}
       key={product.product_id}
     >
-      <CardHeader>
+      <CardHeader className="p-0">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -20,17 +19,25 @@ export default function ProductCard({ product }: {product: IProduct;}) {
             className="w-full h-40 object-cover rounded-t-md"
           />
         ) : (
-          <div className="w-full h-40 bg-gray-300 flex items-center justify-center rounded-t-md">
-            <span className="text-gray-600">No Image</span>
+          <div className="w-full h-40 bg-gray-300 dark:bg-gray-700 flex items-center justify-center rounded-t-md">
+            <span className="text-gray-600 dark:text-gray-400">No Image</span>
           </div>
         )}
       </CardHeader>
       <CardContent className="p-4">
-        <CardTitle className="text-lg font-semibold">{product.title}</CardTitle>
-        <p className="text-sm text-gray-600">{product.description}</p>
+        <CardTitle className="text-lg font-semibold dark:text-white">
+          {product.title}
+        </CardTitle>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {product.description}
+        </p>
         <div className="mt-3 flex gap-2">
-          <span className="bg-blue-500 text-white px-2 py-1 text-xs rounded">{getProductCategoryLabel(product.category)}</span>
-          <span className="bg-gray-200 text-gray-800 px-2 py-1 text-xs rounded">{getProductConditionLabel(product.condition)}</span>
+          <span className="bg-blue-500 text-white px-2 py-1 text-xs rounded">
+            {getProductCategoryLabel(product.category)}
+          </span>
+          <span className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 px-2 py-1 text-xs rounded">
+            {getProductConditionLabel(product.condition)}
+          </span>
         </div>
       </CardContent>
     </Card>

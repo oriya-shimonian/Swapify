@@ -4,21 +4,21 @@ import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import ButtonLink from "@/components/ButtonLink";
-import { NAV_LINKS } from "@/constants/navigationLinks";
+import { ADMIN_LINKS, NAV_LINKS } from "@/constants/navigationLinks";
 import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { user, logout } = useAuth(); // 🟢 קבלת המשתמש מהקונטקסט
+  const { user, logout } = useAuth();
 
   return (
     <nav className="fixed top-0 right-0 w-full bg-gray-100/15 dark:bg-black/30 shadow-md transition-all duration-300 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* לוגו + שם האפליקציה */}
-        <div className="flex items-center space-x-3">
-          <Link to="/" className="flex items-center space-x-3">
+        <div className="flex items-center space-x-reverse space-x-3">
+          <Link to={`${user ? '/all-products' : '/explore'}`} className="flex items-center space-x-reverse space-x-3">
             <span className="lg:text-xl sm:text-md font-bold text-gray-900 dark:text-white">
               SWAPIFY
             </span>
@@ -34,7 +34,7 @@ const Navbar = () => {
         </div>
 
         {/* תפריט ניווט - מוצג במחשב */}
-        <div className="hidden md:flex space-x-6 ">
+        <div className="hidden md:flex space-x-reverse space-x-6 ">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.path}
@@ -44,6 +44,18 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {user &&
+            user.role_name === "Admin" &&
+            ADMIN_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-black dark:text-gray-300 hover:text-primary transition"
+              >
+                {link.name}
+              </Link>
+            ))}
         </div>
 
         {/* צד שמאל - מצב אור/חושך + כניסה/תפריט משתמש */}

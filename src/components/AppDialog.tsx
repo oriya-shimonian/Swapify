@@ -19,6 +19,7 @@ type AppDialogProps = {
   confirmVariant?: "default" | "destructive" | "outline";
   cancelVariant?: "ghost" | "outline" | "secondary";
   loading?: boolean;
+  children?: React.ReactNode; // ✨ הוספה
 };
 
 export default function AppDialog({
@@ -32,16 +33,21 @@ export default function AppDialog({
   confirmVariant = "default",
   cancelVariant = "ghost",
   loading = false,
+  children, // ✨ קלט חדש
 }: AppDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 dark:text-white">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && (
             <DialogDescription>{description}</DialogDescription>
           )}
         </DialogHeader>
+
+        {/* ✨ כאן אפשר להכניס טופס */}
+        {children && <div className="py-2">{children}</div>}
+
         <DialogFooter className="flex justify-end gap-2">
           <Button variant={cancelVariant} onClick={onCancel} disabled={loading}>
             {cancelText}

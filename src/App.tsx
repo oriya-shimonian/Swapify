@@ -16,6 +16,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProfilePage from "./pages/ProfilePage";
 import ProductDetailPage from "./pages/Products/ProductDetailPage";
 import AddProductPage from "./pages/Products/AddProductPage";
+import AboutPage from "./pages/AboutPage";
 // import Home from "@/pages/Home";
 // import About from "@/pages/About";
 // import Contact from "@/pages/Contact";
@@ -36,9 +37,9 @@ function App() {
         <main className={!hideFooter ? `min-h-[84vh]` : ""}>
           <Routes>
             <Route path="/" element={!user ? <HeroPage /> : <HomePage />} />
-            {/*<Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/explore" element={<Explore />} /> */}
+            <Route path="/about" element={<AboutPage />} />
+              {/* <Route path="/contact" element={<Contact />} />*/}
+              <Route path="/explore" element={<HeroPage />} /> 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/all-products" element={<HomePage />} />

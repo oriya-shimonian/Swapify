@@ -85,6 +85,15 @@ const uploadRoutes = {
   uploadImage: `${baseBackendAddress}/uploads/upload`,
 };
 
+// About
+const aboutRoutes = {
+  getAllSections: `${baseBackendAddress}/about`,
+  createSection: `${baseBackendAddress}/about`,
+  updateSection: (id: number) => `${baseBackendAddress}/about/${id}`,
+  deleteSection: (id: number) => `${baseBackendAddress}/about/${id}`,
+};
+
+
 export {
   authRoutes,
   userRoutes,
@@ -96,4 +105,5 @@ export {
   notificationRoutes,
   roleRoutes,
   uploadRoutes,
+  aboutRoutes,
 };
