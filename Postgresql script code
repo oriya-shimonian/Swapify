@@ -159,6 +159,17 @@ CREATE TABLE IF NOT EXISTS Audit_Logs (
     Details TEXT
 );
 
+CREATE TABLE IF NOT EXISTS About_Sections (
+    Section_id SERIAL PRIMARY KEY,
+    Title TEXT,
+    Content TEXT,
+    Updated_by TEXT, -- שמירת שם המשתמש שביצע את הפעולה
+    CHECK (
+        Title IS NOT NULL OR Content IS NOT NULL
+    )
+);
+
+
 -- הכנסת משתמשים לדוגמה
 INSERT INTO Users (name, email, password_hash, role_id)
 VALUES
