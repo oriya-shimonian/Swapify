@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import ButtonLink from "@/components/ButtonLink";
-import { ADMIN_LINKS, NAV_LINKS } from "@/constants/navigationLinks";
+import {
+  ADMIN_LINKS,
+  NAV_LINKS,
+  NOT_ADMIN_LINKS,
+} from "@/constants/navigationLinks";
 import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
@@ -18,7 +22,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* לוגו + שם האפליקציה */}
         <div className="flex items-center space-x-reverse space-x-3">
-          <Link to={`${user ? '/all-products' : '/explore'}`} className="flex items-center space-x-reverse space-x-3">
+          <Link
+            to={`${user ? "/all-products" : "/explore"}`}
+            className="flex items-center space-x-reverse space-x-3"
+          >
             <span className="lg:text-xl sm:text-md font-bold text-gray-900 dark:text-white">
               SWAPIFY
             </span>
@@ -44,6 +51,18 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {user &&
+            user.role_name !== "Admin" &&
+            NOT_ADMIN_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-black dark:text-gray-300 hover:text-primary transition"
+              >
+                {link.name}
+              </Link>
+            ))}
 
           {user &&
             user.role_name === "Admin" &&
@@ -148,6 +167,29 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+          {user &&
+            user.role_name !== "Admin" &&
+            NOT_ADMIN_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="block text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-3 text-center rounded-lg transition"
+              >
+                {link.name}
+              </Link>
+            ))}
+
+          {user &&
+            user.role_name === "Admin" &&
+            ADMIN_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="block text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-3 text-center rounded-lg transition"
+              >
+                {link.name}
+              </Link>
+            ))}
         </motion.div>
       )}
     </nav>

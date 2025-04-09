@@ -23,7 +23,7 @@ export default function AboutPage() {
   const [deleteDialog, setDeleteDialog] = useState<null | number>(null);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 mt-14">
+    <div className="max-w-3xl mx-auto p-6 space-y-6 mt-[4.5rem]">
       <h1 className="text-3xl font-bold text-center dark:text-white">על Swapify</h1> {/* 🔄 */}
 
       {isAdmin && (

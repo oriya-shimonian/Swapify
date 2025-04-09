@@ -17,6 +17,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ProductDetailPage from "./pages/Products/ProductDetailPage";
 import AddProductPage from "./pages/Products/AddProductPage";
 import AboutPage from "./pages/AboutPage";
+import AuditLogsPage from "./pages/AuditLogsPage";
 // import Home from "@/pages/Home";
 // import About from "@/pages/About";
 // import Contact from "@/pages/Contact";
@@ -38,6 +39,8 @@ function App() {
           <Routes>
             <Route path="/" element={!user ? <HeroPage /> : <HomePage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/admin/audits" element={<AuditLogsPage />} />
+
               {/* <Route path="/contact" element={<Contact />} />*/}
               <Route path="/explore" element={<HeroPage />} /> 
             <Route path="/login" element={<LoginPage />} />

@@ -93,6 +93,10 @@ const aboutRoutes = {
   deleteSection: (id: number) => `${baseBackendAddress}/about/${id}`,
 };
 
+// Audit Logs
+const auditLogRoutes = {
+  getAuditLogs: `${baseBackendAddress}/audit-logs`,
+};
 
 export {
   authRoutes,
@@ -106,4 +110,5 @@ export {
   roleRoutes,
   uploadRoutes,
   aboutRoutes,
+  auditLogRoutes,
 };
