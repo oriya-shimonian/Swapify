@@ -39,7 +39,7 @@
 // // //   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
 // // //   return (
-// // //     <div className="container mx-auto px-4 py-6 mt-14">
+// // //     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
 // // //       <h1 className="text-3xl font-bold text-center mb-6">Discover & Swap Items</h1>
 
 // // //       {/* Search Bar */}
@@ -362,7 +362,7 @@
 //   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
 
 //   return (
-//     <div className="container mx-auto px-4 py-6 mt-14">
+//     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
 //       <h1 className="text-3xl font-bold text-center mb-6">Discover & Swap Items</h1>
 
 //       {/* Search & Filters */}
@@ -544,7 +544,7 @@ export default function HomePage() {
   }, [searchTerm, category, condition, location, subcategory, sortBy, products]);
 
   return (
-    <div className="container mx-auto px-4 py-6 mt-14">
+    <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
       <h1 className="text-3xl font-bold text-center mb-6">Discover & Swap Items</h1>
 
       {/* כפתור הוספת מוצר */}

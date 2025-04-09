@@ -138,7 +138,7 @@ export default function SignupPage() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl p-6 mt-14"
+        className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl p-6 mt-[4.5rem]"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">

@@ -91,7 +91,7 @@
 //   };
 
 //   return (
-//     <div className="container mx-auto px-4 py-8 mt-14 max-w-2xl">
+//     <div className="container mx-auto px-4 py-8 mt-[4.5rem] max-w-2xl">
 //       <h2 className="text-2xl font-bold mb-6 text-center">הוספת מוצר חדש</h2>
 
 //       <FormField label="תמונה" required error={errors.image}>
@@ -336,7 +336,7 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-14 max-w-2xl">
+    <div className="container mx-auto px-4 py-8 mt-[4.5rem] max-w-2xl">
       <h2 className="text-2xl font-bold mb-6 text-center">הוספת מוצר חדש</h2>
 
       <FormField label="תמונה" required error={state.errors.image}>
