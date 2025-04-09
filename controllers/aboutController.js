@@ -24,9 +24,9 @@ exports.createSection = async (req, res) => {
   );
 
   await db.query(
-    `INSERT INTO Audit_Logs (action, user_id, details)
-     VALUES ($1, $2, $3)`,
-    ['Insert About Section', userId, `Title: ${title || '[empty]'}`]
+    `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+     VALUES ($1, $2, $3, $4)`,
+    ['הוספת חלק חדש בעמוד קצת עלינו', userId, userName, `כותרת: ${title || '[empty]'} תוכן: ${content || '[empty]'}`]
   );
 
   res.status(201).json(insert.rows[0]);
@@ -45,9 +45,9 @@ exports.updateSection = async (req, res) => {
   );
 
   await db.query(
-    `INSERT INTO Audit_Logs (action, user_id, details)
-     VALUES ($1, $2, $3)`,
-    ['Update About Section', userId, `ID: ${id}, New Title: ${title || '[empty]'}`]
+    `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+     VALUES ($1, $2, $3, $4)`,
+    ['עדכון חלק בעמוד קצת עלינו', userId, userName, `מזהה החלק: ${id}, כותרת: ${title || '[empty]'}, תוכן: ${content || '[empty]'}`]
   );
 
   res.status(204).json(update.rows[0]);
@@ -63,9 +63,9 @@ exports.deleteSection = async (req, res) => {
   );
 
   await db.query(
-    `INSERT INTO Audit_Logs (action, user_id, details)
-     VALUES ($1, $2, $3)`,
-    ['Delete About Section', userId, `ID: ${id}, Deleted by: ${userName}`]
+    `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+     VALUES ($1, $2, $3, $4)`,
+    ['מחיקת חלק בעמוד קצת עלינו', userId, userName, `נמחק על ידי: ${userName} `]
   );
 
   res.status(204).end();
