@@ -32,6 +32,7 @@ const notificationsRoutes = require('./routes/notificationsRoutes');
 const rolesRoutes = require('./routes/rolesRoutes');
 const uploadRoutes = require('./routes/uplaodRoutes');
 const aboutRoutes = require('./routes/aboutRoutes');
+const auditLogsRoutes = require('./routes/auditLogsRoutes');
 const { notFoundHandler } = require('./middlewares/404Midlleware');
 
 // חיבור הנתיבים ל-API
@@ -79,6 +80,7 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/about', aboutRoutes);
+app.use('/api/audit-logs', auditLogsRoutes);
 // Middleware לטיפול בנתיבים שלא קיימים (404)
 app.use(notFoundHandler);
 
