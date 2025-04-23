@@ -1,19 +1,20 @@
+
 -- קביעת אזור הזמן של ה-DB לזמן ישראל
 ALTER DATABASE swapify SET timezone TO 'Asia/Jerusalem';
 
 -- הוספת הרחבה להצפנה
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- יצירת ENUMs לסטטוסים
+-- יצירת ENUMs
 CREATE TYPE request_status AS ENUM ('Pending', 'Approved', 'Rejected');
 CREATE TYPE notification_status AS ENUM ('Unread', 'Read');
 CREATE TYPE user_report_status AS ENUM ('Open', 'Under Review', 'Closed');
 CREATE TYPE exchange_status AS ENUM ('Completed', 'Pending', 'Rejected');
 CREATE TYPE subcategory_puzzle AS ENUM ('Nature', 'Art', 'Kids', '3 D');
 CREATE TYPE subcategory_book AS ENUM ('Romance', 'Thriller', 'Fantasy', 'Sci-Fi', 'Children', 'Non-fiction', 'Biography', 'Textbook');
-CREATE TYPE subcategory_board_game AS ENUM ('Strategy', 'Kids', 'Party', 'Puzzle', 'Two-player', 'Group');
-ALTER TYPE subcategory_board_game ADD VALUE 'Family' AFTER 'Group';
+CREATE TYPE subcategory_board_game AS ENUM ('Strategy', 'Kids', 'Party', 'Puzzle', 'Two-player', 'Group', 'Family');
 CREATE TYPE role_names AS ENUM ('Admin', 'Guest', 'User');
+CREATE TYPE availability_status AS ENUM ('Available','Interested', 'Pending', 'Exchanged');
 
 -- טבלת Roles
 CREATE TABLE IF NOT EXISTS Roles (
@@ -52,11 +53,12 @@ CREATE TABLE IF NOT EXISTS Products (
     Condition VARCHAR (50) CHECK (condition IN ('New', 'Used', 'Good Condition')),
     Location VARCHAR (255),
     Image_url VARCHAR (255),
+    Availability availability_status DEFAULT 'Available',
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- יצירת טבלאות נלוות ל-Products
+-- טבלאות מוצרי משנה
 CREATE TABLE IF NOT EXISTS Puzzles (
     Product_id INT PRIMARY KEY REFERENCES Products (product_id) ON DELETE CASCADE,
     Manufacturer VARCHAR (255),
@@ -84,19 +86,27 @@ CREATE TABLE IF NOT EXISTS Board_Games (
     Subcategory subcategory_board_game
 );
 
--- יצירת טבלת Exchange_Requests
+-- בקשות החלפה
 CREATE TABLE IF NOT EXISTS Exchange_Requests (
     Request_id SERIAL PRIMARY KEY,
     User_id INT REFERENCES Users (user_id),
     Product_id INT REFERENCES Products (product_id),
     Exchange_product_id INT REFERENCES Products (product_id),
+    Chosen_product_id INT REFERENCES Products (product_id),
     Status request_status,
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Chat_id INT
 );
 
--- יצירת טבלת Product_Information_Requests
+-- הצעות החלפה (ריבוי מוצרים)
+CREATE TABLE IF NOT EXISTS Exchange_Proposal_Options (
+    Option_id SERIAL PRIMARY KEY,
+    Request_id INT REFERENCES Exchange_Requests (Request_id) ON DELETE CASCADE,
+    Offered_product_id INT REFERENCES Products (product_id) ON DELETE CASCADE
+);
+
+-- בקשות מידע
 CREATE TABLE IF NOT EXISTS Product_Information_Requests (
     Request_id SERIAL PRIMARY KEY,
     User_id INT REFERENCES Users (user_id),
@@ -106,7 +116,7 @@ CREATE TABLE IF NOT EXISTS Product_Information_Requests (
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- יצירת טבלת Notifications
+-- טבלת התראות
 CREATE TABLE IF NOT EXISTS Notifications (
     Notification_id SERIAL PRIMARY KEY,
     User_id INT REFERENCES Users (user_id),
@@ -116,7 +126,7 @@ CREATE TABLE IF NOT EXISTS Notifications (
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- יצירת טבלת Chats
+-- טבלת צ'אטים
 CREATE TABLE IF NOT EXISTS Chats (
     Chat_id SERIAL PRIMARY KEY,
     Exchange_request_id INT REFERENCES Exchange_Requests (request_id),
@@ -127,7 +137,7 @@ CREATE TABLE IF NOT EXISTS Chats (
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- יצירת טבלת User_Reports
+-- דיווחי משתמשים
 CREATE TABLE IF NOT EXISTS User_Reports (
     Report_id SERIAL PRIMARY KEY,
     Reported_user_id INT REFERENCES Users (user_id),
@@ -138,7 +148,7 @@ CREATE TABLE IF NOT EXISTS User_Reports (
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- יצירת טבלת Exchange_History
+-- היסטוריית החלפות
 CREATE TABLE IF NOT EXISTS Exchange_History (
     Exchange_id SERIAL PRIMARY KEY,
     User_id INT REFERENCES Users (user_id),
@@ -150,25 +160,24 @@ CREATE TABLE IF NOT EXISTS Exchange_History (
     Status exchange_status
 );
 
--- יצירת טבלת Audit_Logs (של פעולות כלליות במערכת)
+-- לוג פעולות
 CREATE TABLE IF NOT EXISTS Audit_Logs (
     Log_id SERIAL PRIMARY KEY,
     Action VARCHAR (255),
     User_id INT REFERENCES Users (user_id),
+    User_name VARCHAR (100),
     Timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Details TEXT
 );
 
+-- עמוד אודות
 CREATE TABLE IF NOT EXISTS About_Sections (
     Section_id SERIAL PRIMARY KEY,
     Title TEXT,
     Content TEXT,
-    Updated_by TEXT, -- שמירת שם המשתמש שביצע את הפעולה
-    CHECK (
-        Title IS NOT NULL OR Content IS NOT NULL
-    )
+    Updated_by TEXT,
+    CHECK (Title IS NOT NULL OR Content IS NOT NULL)
 );
-
 
 -- הכנסת משתמשים לדוגמה
 INSERT INTO Users (name, email, password_hash, role_id)
@@ -178,7 +187,19 @@ VALUES
   ('Charlie Davis', 'charlie@outlook.com', crypt('hash789', gen_salt('bf')), 2)
 ON CONFLICT DO NOTHING;
 
--- TRUNCATE TABLE Products RESTART IDENTITY CASCADE;
+TRUNCATE TABLE Products RESTART IDENTITY CASCADE;
+
+-- מחיקה בטוחה של טבלאות המוצרים והטבלאות הנלוות, בלי לאפס ID
+-- DELETE FROM Puzzles;
+-- DELETE FROM Books;
+-- DELETE FROM Board_Games;
+-- DELETE FROM Products;
+
+-- אם תרצי לאפס ID בעתיד, אפשר ככה:
+-- ALTER SEQUENCE products_product_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE puzzles_product_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE books_product_id_seq RESTART WITH 1;
+-- ALTER SEQUENCE board_games_product_id_seq RESTART WITH 1;
 
 INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url)
 VALUES
