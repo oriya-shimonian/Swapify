@@ -20,7 +20,7 @@ exports.canManageItem = (tableName, idColumn) => async (req, res, next) => {
 
         // רק בעל הפריט או Admin יכולים לעדכן/למחוק
         if (userId !== itemOwner && userRole !== 1) {
-            return res.status(403).json({ error: 'Access denied' });
+            return res.status(403).json({ error: 'אין לך השראה לבצע פעולה זו' });
         }
 
         next();
