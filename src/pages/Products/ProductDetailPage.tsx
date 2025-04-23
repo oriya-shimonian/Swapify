@@ -19,6 +19,8 @@ import LocationPicker from "@/components/LocationPicker";
 import toast from "react-hot-toast";
 import AppDialog from "@/components/AppDialog";
 import LocationBubbles from "@/components/LocationBubbles";
+import { useExchangeRequestDialog } from "@/hooks/useExchangeRequestDialog";
+import ExchangeRequestDialog from "@/components/dialogs/ExchangeRequestDialog";
 
 export default function ProductDetailPage() {
   const conditionOptions = Object.values(ProductCondition);
@@ -30,6 +32,7 @@ export default function ProductDetailPage() {
   const { user } = useAuth();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { openDialog, dialogProps } = useExchangeRequestDialog();
   const navigate = useNavigate(); 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -66,7 +69,7 @@ export default function ProductDetailPage() {
     }
   };
 
-  console.log(product.location, "Product location", user?.location);
+  // console.log(product.location, "Product location", user?.location);
   
   
   return (
@@ -184,7 +187,7 @@ export default function ProductDetailPage() {
       <div className="mt-4 space-x-2">
         {!isOwner && (
           <>
-            <Button variant="default">שלח בקשת החלפה</Button>
+            <Button onClick={() => openDialog(product.product_id)}>שלח בקשת החלפה</Button>
             <Button variant="secondary">פתח צ׳אט</Button>
           </>
         )}
@@ -222,6 +225,8 @@ export default function ProductDetailPage() {
         onCancel={() => setShowDeleteDialog(false)}
         loading={isDeleting}
       />
+
+      <ExchangeRequestDialog dialogProps={dialogProps} />
     </div>
   );
 }

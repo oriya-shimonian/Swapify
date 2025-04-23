@@ -20,12 +20,15 @@ const userRoutes = {
 
 // Products
 const productRoutes = {
-  getAllProducts: `${baseBackendAddress}/products`,
-  getProductById: (id: number) => `${baseBackendAddress}/products/${id}`,
-  createProduct: `${baseBackendAddress}/products`,
-  updateProduct: (id: number) => `${baseBackendAddress}/products/${id}`,
-  deleteProduct: (id: number) => `${baseBackendAddress}/products/${id}`,
+  getAllProducts: `${baseBackendAddress}/products`, // פומבי - כל המוצרים
+  getProductById: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות
+  getProductsByUser: (userId: number) => `${baseBackendAddress}/products/user/${userId}`, // דורש התחברות
+  getOfferableProducts: (userId: number) => `${baseBackendAddress}/products/offerable/${userId}`, // דורש התחברות
+  createProduct: `${baseBackendAddress}/products`, // דורש התחברות + בדיקת חסימה
+  updateProduct: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות + הרשאה לעריכה
+  deleteProduct: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות + הרשאה למחיקה
 };
+
 
 // Board Games
 const boardGameRoutes = {
@@ -59,12 +62,16 @@ const puzzleRoutes = {
 
 // Exchange Requests
 const exchangeRequestRoutes = {
-  getAllExchangeRequests: `${baseBackendAddress}/exchange-requests`,
-  getExchangeRequestById: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`,
-  getAllUserExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/user/${userId}`,
-  createExchangeRequest: `${baseBackendAddress}/exchange-requests`,
-  updateExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`,
+  getAllUserExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/user/${userId}`, // כל הבקשות שהמשתמש שלח (דורש התחברות)
+  getIncomingExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/incoming/${userId}`, // כל הבקשות על מוצרים של המשתמש (דורש התחברות)
+  getExchangeRequestById: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // בקשה בודדת לפי ID (דורש התחברות)
+  createExchangeRequest: `${baseBackendAddress}/exchange-requests`, // יצירה (דורש התחברות + בדיקת חסימה)
+  approveExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/approve`, // אישור בקשה (דורש התחברות + בדיקת חסימה)
+  completeExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/complete`, // השלמה (דורש התחברות + הרשאה)
+  updateExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
+  cancelExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // מחיקה/ביטול בקשה (דורש הרשאה)
 };
+
 
 // Notifications
 const notificationRoutes = {

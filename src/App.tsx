@@ -18,6 +18,7 @@ import ProductDetailPage from "./pages/Products/ProductDetailPage";
 import AddProductPage from "./pages/Products/AddProductPage";
 import AboutPage from "./pages/AboutPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
+import UserDashboardWrapper from "./components/UserDashboard/UserDashboardWrapper";
 // import Home from "@/pages/Home";
 // import About from "@/pages/About";
 // import Contact from "@/pages/Contact";
@@ -28,7 +29,9 @@ function App() {
   const { user } = useAuth();
   const location = useLocation();
   const hideFooter =
-    location.pathname === "/login" || location.pathname === "/signup" || location.pathname === "/profile";
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/profile";
   const addDesignToFooter = location.pathname !== "/";
 
   return (
@@ -40,9 +43,14 @@ function App() {
             <Route path="/" element={!user ? <HeroPage /> : <HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/admin/audits" element={<AuditLogsPage />} />
+            {/* <Route path="/dashboard" element={<UserDashboardWrapper />}>
+              <Route path="products" element={<MyProducts />} />
+              <Route path="requests/sent" element={<RequestsSent />} />
+              <Route path="requests/received" element={<RequestsReceived />} />
+            </Route> */}
 
-              {/* <Route path="/contact" element={<Contact />} />*/}
-              <Route path="/explore" element={<HeroPage />} /> 
+            {/* <Route path="/contact" element={<Contact />} />*/}
+            <Route path="/explore" element={<HeroPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/all-products" element={<HomePage />} />
@@ -52,9 +60,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
-        {!hideFooter && (
-          <Footer design="" />
-        )}
+        {!hideFooter && <Footer design="" />}
       </div>
     </>
   );
