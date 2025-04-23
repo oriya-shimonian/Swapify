@@ -1,46 +1,93 @@
-import AppDialog from "@/components/AppDialog";
+import { useEffect, useState } from "react";
 import { IProduct, ProductCategory } from "@/types/products";
-import { useState } from "react";
+import { useExchangeRequest } from "@/hooks/useExchangeRequest";
+import { useAuth } from "@/context/AuthContext";
+import AppDialog from "@/components/AppDialog";
+import useProducts from "@/hooks/useProducts"; // ← כאן את מביאה את הפונקציה מתוך useProducts
+import toast from "react-hot-toast";
 
+interface Props {
+  open: boolean;
+  productId: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
 
-type Props = {
-  dialogProps: {
-    open: boolean;
-    loading: boolean;
-    filteredProducts: IProduct[];
-    selectedIds: number[];
-    categoryFilter: string;
-    subcategoryFilter: string;
-    setCategoryFilter: (val: string) => void;
-    setSubcategoryFilter: (val: string) => void;
-    toggleSelect: (id: number) => void;
-    setOpen: (val: boolean) => void;
-    setSelectedIds: (ids: number[]) => void;
-    handleSubmit: () => void;
-  };
-};
+export default function ExchangeRequestDialog({
+  open,
+  productId,
+  onClose,
+  onSuccess,
+}: Props) {
+  const { user } = useAuth();
+  const { fetchOfferableProducts } = useProducts();
 
-export default function ExchangeRequestDialog({ dialogProps }: Props) {
-  const {
-    open,
-    loading,
-    filteredProducts,
-    selectedIds,
-    categoryFilter,
-    subcategoryFilter,
-    setCategoryFilter,
-    setSubcategoryFilter,
-    toggleSelect,
-    setOpen,
-    setSelectedIds,
-    handleSubmit,
-  } = dialogProps;
+  const [offerableProducts, setOfferableProducts] = useState<IProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
+  const { createRequest, loading } = useExchangeRequest();
+
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [subcategoryFilter, setSubcategoryFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const searchFiltered = filteredProducts.filter((p) =>
-    p.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const loadOfferable = async () => {
+      if (!user?.user_id) return;
+      setLoadingProducts(true);
+      try {
+        const products = await fetchOfferableProducts(user.user_id);
+        setOfferableProducts(products);
+      } catch {
+        toast.error("שגיאה בטעינת מוצרים להצעה");
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    if (open) loadOfferable();
+  }, [open, user?.user_id]);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id].slice(0, 4)
+    );
+  };
+
+  const handleSubmit = async () => {
+    if (!user || selectedIds.length === 0 || selectedIds.length > 4) return;
+
+    try {
+      await createRequest({
+        userId: user.user_id,
+        userName: user.name,
+        productId,
+        offeredProductIds: selectedIds,
+      });
+      onSuccess();
+      handleClose();
+    } catch {
+      // שגיאה כבר מנוהלת ב־hook
+    }
+  };
+
+  const handleClose = () => {
+    onClose();
+    setSelectedIds([]);
+    setCategoryFilter("");
+    setSubcategoryFilter("");
+    setSearchTerm("");
+  };
+
+  const filtered = offerableProducts.filter((p) => {
+
+    return (
+      (!categoryFilter || p.category === categoryFilter) &&
+      (!subcategoryFilter || p.subcategory?.toLowerCase().includes(subcategoryFilter.toLowerCase())) &&
+      p.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   return (
     <AppDialog
@@ -49,15 +96,13 @@ export default function ExchangeRequestDialog({ dialogProps }: Props) {
       confirmText="שלח בקשה"
       cancelText="ביטול"
       confirmVariant="default"
-      onCancel={() => {
-        setOpen(false);
-        setSelectedIds([]);
-      }}
+      onCancel={handleClose}
       onConfirm={handleSubmit}
-      loading={loading}
+      loading={loading || loadingProducts}
     >
       <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-        ניתן לבחור עד <strong>4 מוצרים</strong> להחלפה.<br />
+        ניתן לבחור עד <strong>4 מוצרים</strong> להחלפה.
+        <br />
         נבחרו כרגע: <strong>{selectedIds.length}</strong> מתוך 4
       </div>
 
@@ -96,7 +141,7 @@ export default function ExchangeRequestDialog({ dialogProps }: Props) {
       </div>
 
       <div className="max-h-64 overflow-y-auto space-y-2 mt-3">
-        {searchFiltered.map((p) => {
+        {filtered.map((p) => {
           const isSelected = selectedIds.includes(p.product_id);
           const canSelectMore = selectedIds.length < 4 || isSelected;
 
@@ -120,7 +165,7 @@ export default function ExchangeRequestDialog({ dialogProps }: Props) {
           );
         })}
 
-        {searchFiltered.length === 0 && (
+        {filtered.length === 0 && !loadingProducts && (
           <p className="text-sm text-gray-500">אין מוצרים מתאימים להצגה</p>
         )}
       </div>

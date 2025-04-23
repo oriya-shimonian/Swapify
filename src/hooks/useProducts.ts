@@ -116,7 +116,21 @@ const useProducts = () => {
     }
   };
 
-  return { products, loading, error, addProduct, updateProduct, deleteProduct };
+  const fetchOfferableProducts = async (userId: number): Promise<IProduct[]> => {
+    try {
+      const res = await axios.get(productRoutes.getOfferableProducts(userId), {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      return res.data;
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err?.response?.data?.error || "שגיאה בטעינת מוצרים להצעה");
+    }
+  };
+  
+
+  return { products, loading, error, addProduct, updateProduct, deleteProduct, fetchOfferableProducts };
 };
 
 export default useProducts;

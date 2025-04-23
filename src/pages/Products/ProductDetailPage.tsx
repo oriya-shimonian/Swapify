@@ -19,7 +19,6 @@ import LocationPicker from "@/components/LocationPicker";
 import toast from "react-hot-toast";
 import AppDialog from "@/components/AppDialog";
 import LocationBubbles from "@/components/LocationBubbles";
-import { useExchangeRequestDialog } from "@/hooks/useExchangeRequestDialog";
 import ExchangeRequestDialog from "@/components/dialogs/ExchangeRequestDialog";
 
 export default function ProductDetailPage() {
@@ -32,8 +31,10 @@ export default function ProductDetailPage() {
   const { user } = useAuth();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { openDialog, dialogProps } = useExchangeRequestDialog();
-  const navigate = useNavigate(); 
+  const [showExchangeDialog, setShowExchangeDialog] = useState(false);
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -58,7 +59,6 @@ export default function ProductDetailPage() {
       setIsDeleting(true);
       await axios.delete(productRoutes.deleteProduct(product.product_id));
       toast.success("המוצר נמחק בהצלחה");
-      // נאווט אחורה או לעמוד ראשי
       navigate("/all-products");
     } catch (err) {
       toast.error("אירעה שגיאה בעת המחיקה");
@@ -69,9 +69,6 @@ export default function ProductDetailPage() {
     }
   };
 
-  // console.log(product.location, "Product location", user?.location);
-  
-  
   return (
     <div className="max-w-3xl mx-auto mt-24 p-6 shadow rounded bg-white dark:bg-gray-800">
       <img
@@ -119,13 +116,10 @@ export default function ProductDetailPage() {
           <select
             value={editedProduct?.category || ""}
             onChange={(e) =>
-              setEditedProduct((prev: any) => {
-                if (!prev) return prev;
-                return {
-                  ...prev,
-                  category: e.target.value as ProductCategory,
-                };
-              })
+              setEditedProduct((prev: any) => ({
+                ...prev,
+                category: e.target.value as ProductCategory,
+              }))
             }
             className="mb-3 w-full border rounded p-2"
           >
@@ -167,14 +161,16 @@ export default function ProductDetailPage() {
           )}
         </>
       )}
-      <div className="mt-2 flex items-center gap-2">
-            <strong>מיקום:</strong>
 
-        <LocationBubbles locations={product.location ? product.location
-          .replace(/[{}"]/g, "") // מסיר תווים מיותרים
-          .split(",")
-          .map((s) => s.trim()) // מסיר רווחים עודפים
-          : []} />
+      <div className="mt-2 flex items-center gap-2">
+        <strong>מיקום:</strong>
+        <LocationBubbles
+          locations={
+            product.location
+              ? product.location.replace(/[{}"]/g, "").split(",").map((s) => s.trim())
+              : []
+          }
+        />
         <Tooltip>
           <TooltipTrigger asChild>
             <Info size={16} className="text-muted-foreground cursor-pointer" />
@@ -184,10 +180,11 @@ export default function ProductDetailPage() {
           </TooltipContent>
         </Tooltip>
       </div>
+
       <div className="mt-4 space-x-2">
         {!isOwner && (
           <>
-            <Button onClick={() => openDialog(product.product_id)}>שלח בקשת החלפה</Button>
+            <Button onClick={() => setShowExchangeDialog(true)}>שלח בקשת החלפה</Button>
             <Button variant="secondary">פתח צ׳אט</Button>
           </>
         )}
@@ -201,10 +198,9 @@ export default function ProductDetailPage() {
               ערוך
             </Button>
             <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>מחק</Button>
-
           </>
         )}
-        
+
         {isEditing && (
           <Button
             onClick={() => setIsEditing(false)}
@@ -214,6 +210,7 @@ export default function ProductDetailPage() {
           </Button>
         )}
       </div>
+
       <AppDialog
         open={showDeleteDialog}
         title="האם למחוק את המוצר?"
@@ -226,7 +223,12 @@ export default function ProductDetailPage() {
         loading={isDeleting}
       />
 
-      <ExchangeRequestDialog dialogProps={dialogProps} />
+      <ExchangeRequestDialog
+        open={showExchangeDialog}
+        productId={product.product_id}
+        onClose={() => setShowExchangeDialog(false)}
+        onSuccess={() => toast.success("הבקשה נשלחה בהצלחה!")}
+      />
     </div>
   );
 }
