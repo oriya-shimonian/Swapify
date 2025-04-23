@@ -36,11 +36,13 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("useEffect running for productId:", productId);
     const fetchProduct = async () => {
       try {
         const res = await axios.get(
           productRoutes.getProductById(Number(productId))
         );
+        console.log("Fetched product:", res.data);
         setProduct(res.data);
         setEditedProduct(res.data);
       } catch (err) {
@@ -50,9 +52,11 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
-  if (!product) return <p className="text-center mt-20">Loading...</p>;
+  if (!product.product_id) return <p className="text-center mt-20">Loading...</p>;
 
-  const isOwner = user?.user_id === product.user_id;
+  console.log("Product data:",product.product_id , product.user_id, user?.user_id);
+  
+  const isOwner = !!product.product_id && user?.user_id === product.user_id;
 
   const handleDeleteProduct = async () => {
     try {

@@ -1,6 +1,6 @@
 export const NAV_LINKS = [
   { name: "הפריטים שלנו", path: "/all-products" },
-  { name: "איזור אישי", path: "/UserDashboard" },
+  { name: "איזור אישי", path: "/dashboard" },
   { name: "עמוד כניסה", path: "/explore" },
   { name: "קצת עלינו", path: "/about" },
 ];

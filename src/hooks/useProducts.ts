@@ -128,9 +128,22 @@ const useProducts = () => {
       throw new Error(err?.response?.data?.error || "שגיאה בטעינת מוצרים להצעה");
     }
   };
+
+  const fetchUserProducts = async (userId: number): Promise<IProduct[]> => {
+    try {
+      const res = await axios.get(productRoutes.getProductsByUser(userId), {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      return res.data;
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err?.response?.data?.error || "שגיאה בטעינת מוצרים של המשתמש");
+    }
+  };
+  
   
 
-  return { products, loading, error, addProduct, updateProduct, deleteProduct, fetchOfferableProducts };
+  return { products, loading, error, addProduct, updateProduct, deleteProduct, fetchOfferableProducts, fetchUserProducts };
 };
 
 export default useProducts;

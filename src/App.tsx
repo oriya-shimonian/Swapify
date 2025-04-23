@@ -12,18 +12,14 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignUpPage";
 import Footer from "./components/footer";
 import HomePage from "./pages/HomePage";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import ProfilePage from "./pages/ProfilePage";
 import ProductDetailPage from "./pages/Products/ProductDetailPage";
 import AddProductPage from "./pages/Products/AddProductPage";
 import AboutPage from "./pages/AboutPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
-import UserDashboardWrapper from "./components/UserDashboard/UserDashboardWrapper";
-// import Home from "@/pages/Home";
-// import About from "@/pages/About";
-// import Contact from "@/pages/Contact";
-// import Explore from "@/pages/Explore";
-// import Login from "@/pages/Login";
+import UserDashboardWrapper from "./pages/UserDashboardPage";
+import MyProductsTab from "./components/UserDashboard/MyProductsTab";
 
 function App() {
   const { user } = useAuth();
@@ -43,11 +39,11 @@ function App() {
             <Route path="/" element={!user ? <HeroPage /> : <HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/admin/audits" element={<AuditLogsPage />} />
-            {/* <Route path="/dashboard" element={<UserDashboardWrapper />}>
-              <Route path="products" element={<MyProducts />} />
-              <Route path="requests/sent" element={<RequestsSent />} />
+             <Route path="/dashboard" element={<UserDashboardWrapper />}>
+              <Route path="my-products" element={<MyProductsTab />} />
+              {/*<Route path="requests/sent" element={<RequestsSent />} />
               <Route path="requests/received" element={<RequestsReceived />} />
-            </Route> */}
+            */}</Route> 
 
             {/* <Route path="/contact" element={<Contact />} />*/}
             <Route path="/explore" element={<HeroPage />} />
