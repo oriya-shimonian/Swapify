@@ -14,7 +14,6 @@ export default function MyProductsTab() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const {
-    products,
     loading,
     deleteProduct,
     fetchUserProducts, // ← נוסיף את הפונקציה הזו אם אין עדיין

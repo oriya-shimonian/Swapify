@@ -29,7 +29,6 @@ const productRoutes = {
   deleteProduct: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות + הרשאה למחיקה
 };
 
-
 // Board Games
 const boardGameRoutes = {
   getAllBoardGames: `${baseBackendAddress}/board-games`,

@@ -17,6 +17,7 @@ import { IProduct } from "@/types/products";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { AddProductButton } from "@/components/Buttons/AddProductButton";
 
 export default function HomePage() {
   const { products, loading, error } = useProducts();
@@ -66,11 +67,7 @@ export default function HomePage() {
       <h1 className="text-3xl font-bold text-center mb-6">Discover & Swap Items</h1>
 
       {/* כפתור הוספת מוצר */}
-      {user && <div className="flex justify-end mb-4">
-        <Button onClick={() => navigate("/add-product")} className="bg-green-500 text-white">
-          הוספת מוצר + 
-        </Button>
-      </div>}
+      <AddProductButton />
 
       {/* Search & Filters */}
       <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-6">

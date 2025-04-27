@@ -20,6 +20,7 @@ import AboutPage from "./pages/AboutPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import UserDashboardWrapper from "./pages/UserDashboardPage";
 import MyProductsTab from "./components/UserDashboard/MyProductsTab";
+import MySentRequestsTab from "./components/UserDashboard/SentRequestsTab/MySentRequestsTab";
 
 function App() {
   const { user } = useAuth();
@@ -41,8 +42,8 @@ function App() {
             <Route path="/admin/audits" element={<AuditLogsPage />} />
              <Route path="/dashboard" element={<UserDashboardWrapper />}>
               <Route path="my-products" element={<MyProductsTab />} />
-              {/*<Route path="requests/sent" element={<RequestsSent />} />
-              <Route path="requests/received" element={<RequestsReceived />} />
+              <Route path="requests/sent" element={<MySentRequestsTab />} />
+              {/*<Route path="requests/received" element={<RequestsReceived />} />
             */}</Route> 
 
             {/* <Route path="/contact" element={<Contact />} />*/}

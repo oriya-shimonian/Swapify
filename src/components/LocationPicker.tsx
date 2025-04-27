@@ -77,7 +77,7 @@
 // }
 
 
-import React, { useState, ChangeEvent, useEffect } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { FaTimes } from "react-icons/fa";
 

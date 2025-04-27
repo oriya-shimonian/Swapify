@@ -1,13 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { exchangeRequestRoutes } from "@/settings"; 
+import { ExchangeRequestData } from "@/types/exchangeRequest";
 
-interface ExchangeRequestData {
-  userId: number;
-  productId: number;
-  offeredProductIds: number[];
-  userName: string;
-}
 
 export function useExchangeRequest() {
   const [loading, setLoading] = useState(false);
@@ -17,7 +12,9 @@ export function useExchangeRequest() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(exchangeRequestRoutes.createExchangeRequest, data);
+      const response = await axios.post(exchangeRequestRoutes.createExchangeRequest, data, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       return response.data;
     } catch (err: any) {
       console.error(err);
@@ -69,7 +66,9 @@ export function useExchangeRequest() {
 
   const getUserRequests = async (userId: number) => {
     try {
-      const res = await axios.get(exchangeRequestRoutes.getAllUserExchangeRequests(userId));
+      const res = await axios.get(exchangeRequestRoutes.getAllUserExchangeRequests(userId), {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       return res.data;
     } catch (err) {
       console.error(err);
