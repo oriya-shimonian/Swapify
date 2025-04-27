@@ -263,51 +263,6 @@ exports.getAllUserExchangeRequests = async (req, res) => {
     res.status(500).json({ error: "שגיאה בטעינת הבקשות" });  }
 };
 
-
-
-// exports.getAllUserExchangeRequests = async (req, res) => {
-//     const { userId } = req.params;
-//     try {
-//         const result = await db.query('SELECT * FROM Exchange_Requests WHERE user_id = $1', [userId]);
-//         res.status(200).json(result.rows);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Failed to fetch user\'s exchange requests' });
-//     }
-// };
-
-// קבלת כל הבקשות של משתמש (כולל הצעות ושמות המוצרים + פרטי המוצר שאליו הוגשה הבקשה)
-// exports.getAllUserExchangeRequests = async (req, res) => {
-//   const { userId } = req.params;
-
-//   try {
-//     const { rows } = await db.query(
-//       `SELECT er.*, 
-//                 json_agg(json_build_object(
-//                   'product_id', p.product_id,
-//                   'title', p.title
-//                 )) AS offered_products,
-//                 json_build_object(
-//                   'product_id', target.product_id,
-//                   'title', target.title,
-//                   'image_url', target.image_url
-//                 ) AS requested_product
-//          FROM Exchange_Requests er
-//          LEFT JOIN Exchange_Proposal_Options epo ON er.request_id = epo.request_id
-//          LEFT JOIN Products p ON epo.offered_product_id = p.product_id
-//          LEFT JOIN Products target ON er.product_id = target.product_id
-//          WHERE er.user_id = $1
-//          GROUP BY er.request_id, target.product_id
-//          ORDER BY er.created_at DESC`,
-//       [userId]
-//     );
-//     res.status(200).json(rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "שגיאה בקבלת הבקשות של המשתמש" });
-//   }
-// };
-
 // קבלת בקשות שהוגשו על מוצרים של המשתמש
 exports.getIncomingExchangeRequests = async (req, res) => {
   const { userId } = req.params;
