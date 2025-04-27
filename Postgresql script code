@@ -91,9 +91,8 @@ CREATE TABLE IF NOT EXISTS Exchange_Requests (
     Request_id SERIAL PRIMARY KEY,
     User_id INT REFERENCES Users (user_id),
     Product_id INT REFERENCES Products (product_id),
-    Exchange_product_id INT REFERENCES Products (product_id),
-    Chosen_product_id INT REFERENCES Products (product_id),
     Status request_status,
+    chosen_product_id INT REFERENCES Products(product_id),
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Chat_id INT
