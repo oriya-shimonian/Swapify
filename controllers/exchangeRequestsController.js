@@ -61,10 +61,12 @@ exports.approveExchangeRequest = async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    const result = await client.query(
-      `SELECT availability FROM Products WHERE product_id = $1 FOR UPDATE`,
-      [chosenProductId]
-    );
+    const result = await client.query(`
+      UPDATE Exchange_Requests
+      SET status = 'Approved', chosen_product_id = $1, updated_at = CURRENT_TIMESTAMP
+      WHERE request_id = $2
+    `, [chosenProductId, requestId]);
+    
 
     if (!result.rows.length) {
       await client.query("ROLLBACK");
@@ -184,6 +186,85 @@ exports.getAllExchangeRequests = async (req, res) => {
 };
 
 // // קבלת בקשת החלפה של משתמש לפי ID
+exports.getAllUserExchangeRequests = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // שליפת כל הבקשות שהמשתמש שלח
+    const { rows } = await db.query(
+      `SELECT 
+        r.request_id, 
+        r.user_id, 
+        r.product_id, 
+        r.status, 
+        r.created_at, 
+        r.updated_at,
+        p.title AS requested_title,
+        p.image_url AS requested_image_url,
+        p.category AS requested_category,
+        p.subcategory AS requested_subcategory,
+        p.location AS requested_location,
+        p.condition AS requested_condition,
+        p.availability AS requested_availability
+      FROM Exchange_Requests r
+      JOIN Products p ON r.product_id = p.product_id
+      WHERE r.user_id = $1
+      ORDER BY r.created_at DESC`,
+      [userId]
+    );
+
+    const enrichedRequests = [];
+
+    for (const row of rows) {
+      // שליפת המוצרים שהוצעו בבקשה
+      const { rows: offeredProducts } = await db.query(
+        `SELECT 
+          p.product_id,
+          p.title,
+          p.category,
+          p.subcategory,
+          p.availability
+        FROM Exchange_Proposal_Options op
+        JOIN Products p ON op.offered_product_id = p.product_id
+        WHERE op.request_id = $1`,
+        [row.request_id]
+      );
+
+      enrichedRequests.push({
+        request_id: row.request_id,
+        user_id: row.user_id,
+        product_id: row.product_id,
+        status: row.status,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        offered_products: offeredProducts.map(p => ({
+          product_id: p.product_id,
+          title: p.title,
+          category: p.category,
+          subcategory: p.subcategory,
+          availability: p.availability,
+        })),
+        requested_product: {
+          product_id: row.product_id,
+          title: row.requested_title,
+          image_url: row.requested_image_url,
+          category: row.requested_category,
+          subcategory: row.requested_subcategory,
+          location: row.requested_location,
+          condition: row.requested_condition,
+          availability: row.requested_availability,
+        }
+      });
+    }
+
+    res.status(200).json(enrichedRequests);
+  } catch (error) {
+    console.error("שגיאה בשרת getAllUserExchangeRequests:", error.message);
+    res.status(500).json({ error: "שגיאה בטעינת הבקשות" });  }
+};
+
+
+
 // exports.getAllUserExchangeRequests = async (req, res) => {
 //     const { userId } = req.params;
 //     try {
@@ -196,36 +277,36 @@ exports.getAllExchangeRequests = async (req, res) => {
 // };
 
 // קבלת כל הבקשות של משתמש (כולל הצעות ושמות המוצרים + פרטי המוצר שאליו הוגשה הבקשה)
-exports.getAllUserExchangeRequests = async (req, res) => {
-  const { userId } = req.params;
+// exports.getAllUserExchangeRequests = async (req, res) => {
+//   const { userId } = req.params;
 
-  try {
-    const { rows } = await db.query(
-      `SELECT er.*, 
-                json_agg(json_build_object(
-                  'product_id', p.product_id,
-                  'title', p.title
-                )) AS offered_products,
-                json_build_object(
-                  'product_id', target.product_id,
-                  'title', target.title,
-                  'image_url', target.image_url
-                ) AS requested_product
-         FROM Exchange_Requests er
-         LEFT JOIN Exchange_Proposal_Options epo ON er.request_id = epo.request_id
-         LEFT JOIN Products p ON epo.offered_product_id = p.product_id
-         LEFT JOIN Products target ON er.product_id = target.product_id
-         WHERE er.user_id = $1
-         GROUP BY er.request_id, target.product_id
-         ORDER BY er.created_at DESC`,
-      [userId]
-    );
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "שגיאה בקבלת הבקשות של המשתמש" });
-  }
-};
+//   try {
+//     const { rows } = await db.query(
+//       `SELECT er.*, 
+//                 json_agg(json_build_object(
+//                   'product_id', p.product_id,
+//                   'title', p.title
+//                 )) AS offered_products,
+//                 json_build_object(
+//                   'product_id', target.product_id,
+//                   'title', target.title,
+//                   'image_url', target.image_url
+//                 ) AS requested_product
+//          FROM Exchange_Requests er
+//          LEFT JOIN Exchange_Proposal_Options epo ON er.request_id = epo.request_id
+//          LEFT JOIN Products p ON epo.offered_product_id = p.product_id
+//          LEFT JOIN Products target ON er.product_id = target.product_id
+//          WHERE er.user_id = $1
+//          GROUP BY er.request_id, target.product_id
+//          ORDER BY er.created_at DESC`,
+//       [userId]
+//     );
+//     res.status(200).json(rows);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "שגיאה בקבלת הבקשות של המשתמש" });
+//   }
+// };
 
 // קבלת בקשות שהוגשו על מוצרים של המשתמש
 exports.getIncomingExchangeRequests = async (req, res) => {
