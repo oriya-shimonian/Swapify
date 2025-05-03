@@ -20,7 +20,8 @@ import AboutPage from "./pages/AboutPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import UserDashboardWrapper from "./pages/UserDashboardPage";
 import MyProductsTab from "./components/UserDashboard/MyProductsTab";
-import MySentRequestsTab from "./components/UserDashboard/SentRequestsTab/MySentRequestsTab";
+import MySentRequestsTab from "./components/UserDashboard/MySentRequestsTab";
+import MyReceivedRequestsTab from "./components/UserDashboard/ReceivedRequestsTab";
 
 function App() {
   const { user } = useAuth();
@@ -43,8 +44,8 @@ function App() {
              <Route path="/dashboard" element={<UserDashboardWrapper />}>
               <Route path="my-products" element={<MyProductsTab />} />
               <Route path="requests/sent" element={<MySentRequestsTab />} />
-              {/*<Route path="requests/received" element={<RequestsReceived />} />
-            */}</Route> 
+              <Route path="requests/received" element={<MyReceivedRequestsTab />} />
+            {/**/}</Route> 
 
             {/* <Route path="/contact" element={<Contact />} />*/}
             <Route path="/explore" element={<HeroPage />} />

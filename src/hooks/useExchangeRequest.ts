@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { exchangeRequestRoutes } from "@/settings"; 
-import { ExchangeRequestData } from "@/types/exchangeRequest";
+import { ExchangeRequestData, ReceivedExchangeRequest, SentExchangeRequest } from "@/types/exchangeRequest";
 
 
 export function useExchangeRequest() {
@@ -64,27 +64,44 @@ export function useExchangeRequest() {
     }
   };
 
-  const getUserRequests = async (userId: number) => {
+  const getUserRequests = async (userId: number): Promise<SentExchangeRequest[]> => {
     try {
       const res = await axios.get(exchangeRequestRoutes.getAllUserExchangeRequests(userId), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      return res.data;
+  
+      // מוסיפים לכל בקשה את type = "sent"
+      const requestsWithType: SentExchangeRequest[] = res.data.map((req: any) => ({
+        ...req,
+        type: "sent",
+      }));
+  
+      return requestsWithType;
     } catch (err) {
       console.error(err);
       throw err;
     }
-  };
+  };  
 
-  const getIncomingRequests = async (userId: number) => {
+  const getIncomingRequests = async (userId: number): Promise<ReceivedExchangeRequest[]> => {
     try {
-      const res = await axios.get(exchangeRequestRoutes.getIncomingExchangeRequests(userId));
-      return res.data;
+      const res = await axios.get(exchangeRequestRoutes.getIncomingExchangeRequests(userId), {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+  
+      // מוסיפים לכל בקשה את type = "received"
+      const requestsWithType: ReceivedExchangeRequest[] = res.data.map((req: any) => ({
+        ...req,
+        type: "received",
+      }));
+  
+      return requestsWithType;
     } catch (err) {
       console.error(err);
       throw err;
     }
   };
+  
 
   const getRequestById = async (id: number) => {
     try {

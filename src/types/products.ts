@@ -5,6 +5,22 @@ export enum ProductCondition {
   GOOD_CONDITION = "Good Condition",
 }
 
+// זמינות מוצר
+export enum ProductAvailability {
+  AVAILABLE = "Available",
+  INTERESTED = "Interested",
+  PENDING = "Pending",
+  EXCHANGED = "Exchanged",
+}
+
+// תוויות זמינות
+export const productAvailabilityLabels: Record<ProductAvailability, string> = {
+  [ProductAvailability.AVAILABLE]: "זמין",
+  [ProductAvailability.INTERESTED]: "מעוניינים",
+  [ProductAvailability.PENDING]: "בהמתנה",
+  [ProductAvailability.EXCHANGED]: "הוחלף",
+};
+
 export const productConditionLabels: Record<ProductCondition, string> = {
   [ProductCondition.NEW]: "חדש",
   [ProductCondition.USED]: "משומש",

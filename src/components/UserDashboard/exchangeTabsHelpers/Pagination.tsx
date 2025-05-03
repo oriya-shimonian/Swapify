@@ -7,8 +7,10 @@ interface PaginationProps {
 }
 
 export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  if (totalPages <= 1) return null; // ✅ לא מציגים פאגינציה אם יש עמוד אחד בלבד
+
   return (
-    <div className="flex justify-center gap-2 mt-6">
+    <div className="flex justify-center gap-2 mt-6" role="navigation" aria-label="Pagination Navigation">
       <Button
         variant="outline"
         size="sm"
