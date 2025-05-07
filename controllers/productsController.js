@@ -16,10 +16,21 @@ exports.createProduct = async (req, res) => {
     }
 };
 
-// קבלת כל המוצרים
+// // קבלת כל המוצרים
+// exports.getAllProducts = async (req, res) => {
+//     try {
+//         const result = await db.query('SELECT * FROM Products');
+//         res.status(200).json(result.rows);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Failed to fetch products' });
+//     }
+// };
+
+//  קבלת כל המוצרים הזמינים להחלפה (לא משנה למי הם שייכים)
 exports.getAllProducts = async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM Products');
+        const result = await db.query('SELECT * FROM Products WHERE availability IN (\'Available\', \'Interested\') ORDER BY created_at DESC');
         res.status(200).json(result.rows);
     } catch (error) {
         console.error(error);
@@ -46,7 +57,7 @@ exports.getProductsByUser = async (req, res) => {
 // קבלת מוצרים שניתן להציע (שייכים למשתמש ועדיין לא הוחלפו)
 exports.getAllUsersOfferableProducts = async (req, res) => {
     const { userId } = req.params;
-  console.log(`User ID: ${userId}, res ${res.body}, req ${req.body}`); // הוספת לוג כדי לבדוק את ה- userId
+//   console.log(`User ID: ${userId}, res ${res.body}, req ${req.body}`); // הוספת לוג כדי לבדוק את ה- userId
   
     try {
       const result = await db.query(
