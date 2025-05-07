@@ -7,7 +7,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
 type AppDialogProps = {
   open: boolean;
   title: string;
@@ -19,7 +18,8 @@ type AppDialogProps = {
   confirmVariant?: "default" | "destructive" | "outline";
   cancelVariant?: "ghost" | "outline" | "secondary";
   loading?: boolean;
-  children?: React.ReactNode; // ✨ הוספה
+  confirmDisabled?: boolean; // ✨ חדש
+  children?: React.ReactNode;
 };
 
 export default function AppDialog({
@@ -33,19 +33,17 @@ export default function AppDialog({
   confirmVariant = "default",
   cancelVariant = "ghost",
   loading = false,
-  children, // ✨ קלט חדש
+  confirmDisabled = false, // ✨ חדש
+  children,
 }: AppDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 dark:text-white">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        {/* ✨ כאן אפשר להכניס טופס */}
         {children && <div className="py-2">{children}</div>}
 
         <DialogFooter className="flex justify-end gap-2">
@@ -55,7 +53,7 @@ export default function AppDialog({
           <Button
             variant={confirmVariant}
             onClick={onConfirm}
-            disabled={loading}
+            disabled={loading || confirmDisabled}
           >
             {loading ? "טוען..." : confirmText}
           </Button>

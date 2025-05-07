@@ -11,13 +11,18 @@ import { getStatusBadge, getAvailabilityBadge } from "@/utils/BadgeUtils";
 import { format } from "date-fns";
 import { FaEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
+import { ExchangeOfferCards } from "./ExchangeOfferCards";
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface RequestsTableProps {
   requests: IExchangeRequest[];
   onImageClick: (imageUrl: string) => void;
   onEditClick?: (requestId: number) => void;
   onDeleteClick?: (requestId: number) => void;
-  type: "sent" | "received"; // מציין האם זה בקשות ששלחתי או שהתקבלו
+  onApproveClick?: (request: IExchangeRequest, productId: number) => void;
+  onRejectClick?: (request: IExchangeRequest) => void;
+  type: "sent" | "received";
 }
 
 export function RequestsTable({
@@ -25,73 +30,88 @@ export function RequestsTable({
   onImageClick,
   onEditClick,
   onDeleteClick,
+  onApproveClick,
+  onRejectClick,
   type,
 }: RequestsTableProps) {
   const columns = type === "sent" ? sentColumns : receivedColumns;
+  const [expandedRows, setExpandedRows] = useState<number[]>(requests.map(r => r.request_id));
+
+  const toggleExpand = (id: number) => {
+    setExpandedRows(prev =>
+      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    );
+  };
 
   return (
-    <Table className="text-sm">
+    <Table className="text-sm text-right">
       <TableHeader>
         <TableRow>
           {columns.map((col) => (
             <TableHead key={col.key}>{col.label}</TableHead>
           ))}
-          <TableHead>פעולות</TableHead>
+          {type === "sent" && <TableHead>פעולות</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
         {requests.map((req) => (
-          <TableRow key={req.request_id}>
-            {columns.map((col) => (
-              <TableCell key={col.key}>
-                {renderCell(col.key, req, onImageClick)}
+          <>
+            <TableRow key={req.request_id} className="group">
+              {columns.map((col) => (
+                <TableCell key={col.key}>
+                  {renderCell(col.key, req, onImageClick)}
+                </TableCell>
+              ))}
+              <TableCell className="flex items-center gap-2">
+                {type === "sent" && (
+                  <>
+                    <FaEdit
+                      className="cursor-pointer text-blue-500"
+                      title="ערוך"
+                      size={18}
+                      onClick={() => onEditClick?.(req.request_id)}
+                    />
+                    <GoTrash
+                      className="cursor-pointer text-red-500"
+                      title="בטל בקשה"
+                      size={18}
+                      onClick={() => onDeleteClick?.(req.request_id)}
+                    />
+                  </>
+                )}
+                {type === "received" && (
+                  <button
+                    className="ml-auto"
+                    onClick={() => toggleExpand(req.request_id)}
+                  >
+                    {expandedRows.includes(req.request_id) ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
               </TableCell>
-            ))}
-            <TableCell className="flex gap-2">
-              {type === "sent" ? (
-                <>
-                  <FaEdit
-                    className="cursor-pointer text-blue-500"
-                    title="ערוך"
-                    size={18}
-                    onClick={() => onEditClick?.(req.request_id)}
+            </TableRow>
+
+            {type === "received" && expandedRows.includes(req.request_id) && (
+              <TableRow>
+                <TableCell colSpan={columns.length + 1} className="bg-background">
+                  <ExchangeOfferCards
+                    request={req}
+                    onApprove={onApproveClick!}
+                    onReject={onRejectClick!}
                   />
-                  <GoTrash
-                    className="cursor-pointer text-red-500"
-                    title="בטל בקשה"
-                    size={18}
-                    onClick={() => onDeleteClick?.(req.request_id)}
-                  />
-                </>
-              ) : (
-                <>
-                  <button
-                    className="text-green-600 font-bold"
-                    onClick={() => {
-                      // future: openApproveDialog(req.request_id)
-                    }}
-                  >
-                    אשר
-                  </button>
-                  <button
-                    className="text-red-600 font-bold"
-                    onClick={() => {
-                      // future: rejectRequest(req.request_id)
-                    }}
-                  >
-                    דחה
-                  </button>
-                </>
-              )}
-            </TableCell>
-          </TableRow>
+                </TableCell>
+              </TableRow>
+            )}
+          </>
         ))}
       </TableBody>
     </Table>
   );
 }
 
-// 🔵 בסיס עמודות שחוזר
 const baseColumns = [
   { key: "image", label: "תמונה" },
   { key: "title", label: "שם מוצר" },
@@ -103,27 +123,22 @@ const baseColumns = [
   { key: "createdAt", label: "תאריך" },
 ] as const;
 
-// 🔵 עמודות לבקשות ששלחתי
 const sentColumns = [
   ...baseColumns.slice(0, 2),
   ...baseColumns.slice(2),
-  { key: "offered", label: "מוצרים שהצעתי להחלפה" }, 
+  { key: "offered", label: "מוצרים שהצעתי להחלפה" },
 ] as const;
 
-// 🔵 עמודות לבקשות שהתקבלו
 const receivedColumns = [
   ...baseColumns.slice(0, 2),
-  { key: "requester", label: "שם מבקש" }, 
+  { key: "requester", label: "שם מבקש" },
   ...baseColumns.slice(2),
-  { key: "offered", label: "מוצרים שהוצעו להחלפה" }, 
 ] as const;
 
-// 🔵 פונקציה לפתיחת עמוד מוצר
 function openProductPage(productId: number) {
   window.open(`/product/${productId}`, "_self");
 }
 
-// 🔵 רינדור תא בטבלה
 function renderCell(
   key: string,
   req: IExchangeRequest,
@@ -136,7 +151,7 @@ function renderCell(
     subcategory: product?.subcategory ?? undefined,
     location: product?.location ?? undefined,
     createdAt: format(new Date(req.created_at), "dd/MM/yyyy"),
-    requester: (req as any).requester_name, // מתייחס ל-received
+    requester: (req as any).requester_name,
   };
 
   if (fieldMap[key] !== undefined) {
@@ -160,7 +175,7 @@ function renderCell(
     case "title":
       return (
         <span
-          className="font-semibold cursor-pointer"
+          className="font-semibold cursor-pointer !min-w-max"
           onClick={() => {
             if (product?.product_id) {
               openProductPage(product.product_id);
@@ -179,7 +194,7 @@ function renderCell(
         ? req.offered_products.map((p, idx) => (
             <div
               key={idx}
-              className="text-blue-500 cursor-pointer underline"
+              className="text-blue-500 cursor-pointer underline min-w-max"
               onClick={() => openProductPage(p.product_id)}
             >
               {p.title}

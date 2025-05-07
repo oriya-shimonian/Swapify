@@ -33,19 +33,38 @@ export interface ExchangeRequestData {
   userName: string;
 }
 
+// // יצירת טיפוס חדש
+// export type IOfferedProductPreview = {
+//   product_id: number;
+//   title: string;
+//   category: string;
+//   subcategory?: string | null;
+//   availability?: string;
+// };
+
+export type IOfferedProductPreview = {
+  product_id: number;
+  title: string;
+  category: string;
+  subcategory?: string | null;
+  location?: string | null;
+  availability?: string;
+  image_url?: string | null;
+};
+
+
+
 // בסיס משותף לכל הבקשות
 interface BaseExchangeRequest {
   request_id: number;
   user_id: number;
   product_id: number;
   status: "Pending" | "Approved" | "Completed" | "Rejected";
+  // status: ExchangeRequestStatus;
   chosen_product_id?: number | null;
   created_at: string;
   updated_at: string;
-  offered_products: {
-    product_id: number;
-    title: string;
-  }[];
+  offered_products: IOfferedProductPreview [];
   requested_product: {
     product_id: number;
     title: string;

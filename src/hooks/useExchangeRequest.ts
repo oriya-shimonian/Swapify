@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { exchangeRequestRoutes } from "@/settings"; 
 import { ExchangeRequestData, ReceivedExchangeRequest, SentExchangeRequest } from "@/types/exchangeRequest";
+import toast from "react-hot-toast";
 
 
 export function useExchangeRequest() {
@@ -25,12 +26,14 @@ export function useExchangeRequest() {
     }
   };
 
-  const approveRequest = async (id: number, chosenProductId: number, userId: number, userName: string) => {
+  const approveRequest = async (exchangeRequestID: number, chosenProductId: number, userId: number, userName: string) => {
     try {
-      const res = await axios.put(exchangeRequestRoutes.approveExchangeRequest(id), {
+      const res = await axios.post(exchangeRequestRoutes.approveExchangeRequest(exchangeRequestID), {
         chosenProductId,
         userId,
         userName,
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       return res.data;
     } catch (err) {
@@ -52,11 +55,11 @@ export function useExchangeRequest() {
     }
   };
 
-  const cancelRequest = async (id: number, userId: number, userName: string) => {
+  const cancelMyRequest = async (id: number, userId: number, userName: string) => {
     try {
-      const res = await axios.delete(exchangeRequestRoutes.cancelExchangeRequest(id), {
-        data: { userId, userName },
-      });
+      const res = await axios.delete(exchangeRequestRoutes.cancelExchangeRequest(id),
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+);
       return res.data;
     } catch (err) {
       console.error(err);
@@ -64,6 +67,32 @@ export function useExchangeRequest() {
     }
   };
 
+  const rejectOfferedRequest = async (
+    requestId: number,
+    userId: number,
+    userName: string
+  ) => {
+    try {
+      const res = await axios.put(
+        exchangeRequestRoutes.updateExchangeRequestStatus(requestId),
+        {
+          status: "Rejected",
+          userId,
+          userName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+  
   const getUserRequests = async (userId: number): Promise<SentExchangeRequest[]> => {
     try {
       const res = await axios.get(exchangeRequestRoutes.getAllUserExchangeRequests(userId), {
@@ -101,7 +130,6 @@ export function useExchangeRequest() {
       throw err;
     }
   };
-  
 
   const getRequestById = async (id: number) => {
     try {
@@ -113,15 +141,41 @@ export function useExchangeRequest() {
     }
   };
 
+  const updateExchangeRequestProposalOptions = async (
+    requestId: number,
+    newProductIds: number[],
+    onSuccess?: () => void
+  ) => {
+    setLoading(true);
+    try {
+      await axios.put(
+        exchangeRequestRoutes.updateExchangeRequestProposalOptions(requestId),
+        { offeredProductIds: newProductIds },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+      toast.success("הבקשה עודכנה בהצלחה!");
+      onSuccess?.();
+    } catch (err) {
+      console.error(err);
+      toast.error("שגיאה בעדכון הבקשה");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   return {
     loading,
     error,
     createRequest,
     approveRequest,
     completeRequest,
-    cancelRequest,
+    cancelMyRequest,
+    rejectOfferedRequest,
     getUserRequests,
     getIncomingRequests,
     getRequestById,
+    updateExchangeRequestProposalOptions
   };
 }

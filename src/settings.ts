@@ -67,7 +67,8 @@ const exchangeRequestRoutes = {
   createExchangeRequest: `${baseBackendAddress}/exchange-requests`, // יצירה (דורש התחברות + בדיקת חסימה)
   approveExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/approve`, // אישור בקשה (דורש התחברות + בדיקת חסימה)
   completeExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/complete`, // השלמה (דורש התחברות + הרשאה)
-  updateExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
+  updateExchangeRequestStatus: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
+  updateExchangeRequestProposalOptions: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/options`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
   cancelExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // מחיקה/ביטול בקשה (דורש הרשאה)
 };
 

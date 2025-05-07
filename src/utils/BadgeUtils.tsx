@@ -24,7 +24,7 @@ export function getAvailabilityBadge(availability?: string) {
     case "Interested":
       return <Badge variant="secondary" className={`${baseClasses} bg-yellow-500`}>מעוניינים</Badge>;
     case "Pending":
-      return <Badge variant="secondary" className={`${baseClasses} bg-orange-500`}>בהמתנה</Badge>;
+      return <Badge variant="secondary" className={`${baseClasses} bg-orange-500`}>בתהליך החלפה</Badge>;
     case "Exchanged":
       return <Badge variant="destructive" className={`${baseClasses} bg-red-500`}>הוחלף</Badge>;
     default:

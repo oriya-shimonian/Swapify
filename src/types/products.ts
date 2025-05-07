@@ -17,7 +17,7 @@ export enum ProductAvailability {
 export const productAvailabilityLabels: Record<ProductAvailability, string> = {
   [ProductAvailability.AVAILABLE]: "זמין",
   [ProductAvailability.INTERESTED]: "מעוניינים",
-  [ProductAvailability.PENDING]: "בהמתנה",
+  [ProductAvailability.PENDING]: "בתהליך החלפה",
   [ProductAvailability.EXCHANGED]: "הוחלף",
 };
 
