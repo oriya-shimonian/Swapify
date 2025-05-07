@@ -1,4 +1,4 @@
-import { ProductAvailability, productAvailabilityLabels } from "./products";
+import { ProductAvailability, productAvailabilityLabels, ProductCategory } from "./products";
 
 
 export function getProductAvailabilityLabel(availability: ProductAvailability): string {
@@ -69,7 +69,8 @@ interface BaseExchangeRequest {
     product_id: number;
     title: string;
     image_url?: string | null;
-    category: string;
+    // category: string;
+    category: ProductCategory;
     subcategory?: string | null;
     location?: string | null;
     condition?: string | null;

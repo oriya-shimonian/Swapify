@@ -34,7 +34,7 @@ export default function MySentRequestsTab() {
     availability: null as string | null,
     status: null as string | null,
     offeredProduct: "",
-    ownerName: "",
+    owner_name: "",
   });
 
   useEffect(() => {

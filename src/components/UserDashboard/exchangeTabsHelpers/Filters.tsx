@@ -1,5 +1,12 @@
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ProductCategory, subcategoryMaps } from "@/types/products";
 
 type FilterFieldType = "input" | "select";
 
@@ -17,9 +24,14 @@ interface FiltersProps<T extends Record<string, any>> {
   fields: FilterField[];
 }
 
-export function Filters<T extends Record<string, any>>({ filters, setFilters, resetPage, fields }: FiltersProps<T>) {
+export function Filters<T extends Record<string, any>>({
+  filters,
+  setFilters,
+  resetPage,
+  fields,
+}: FiltersProps<T>) {
   const handleChange = (field: string, value: string | null) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+    setFilters((prev) => ({ ...prev, [field]: value }));
     resetPage();
   };
 
@@ -33,7 +45,7 @@ export function Filters<T extends Record<string, any>>({ filters, setFilters, re
         return "כל הסטטוסים";
       case "subcategory":
         return "כל תתי-הקטגוריות";
-      case "ownerName":
+      case "owner_name":
         return "כל בעלי המוצרים";
       case "requesterName":
         return "כל השולחים";
@@ -41,7 +53,17 @@ export function Filters<T extends Record<string, any>>({ filters, setFilters, re
         return "הצג הכול";
     }
   };
-  
+
+  const selectedCategory = filters.category as ProductCategory | null;
+
+  const subcategoryOptions = selectedCategory
+    ? Object.entries(subcategoryMaps[selectedCategory]?.toLabel || {}).map(
+        ([value, label]) => ({
+          value,
+          label,
+        })
+      )
+    : [];
 
   return (
     <div className="flex flex-wrap gap-4 mb-6">
@@ -61,25 +83,52 @@ export function Filters<T extends Record<string, any>>({ filters, setFilters, re
         }
 
         if (field.type === "select" && field.options) {
-          return (
-            <Select
-              key={field.key}
-              value={filters[field.key] ?? undefined}
-              onValueChange={(val) => handleChange(field.key, val === "all" ? null : val)}
-            >
-              <SelectTrigger className="w-max md:w-1/4">
-                <SelectValue placeholder={field.placeholder} />
-              </SelectTrigger>
-              <SelectContent>
-              <SelectItem value="all">{getAllLabel(field.key)}</SelectItem>
-                {field.options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          );
+          if (field.key === "subcategory") {
+            return (
+              <Select
+                key={field.key}
+                value={filters.subcategory ?? undefined}
+                onValueChange={(val) =>
+                  handleChange(field.key, val === "all" ? null : val)
+                }
+                disabled={!selectedCategory}
+              >
+                <SelectTrigger className="w-max md:w-1/4">
+                  <SelectValue placeholder="בחר תת קטגוריה" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">כל תתי-הקטגוריות</SelectItem>
+                  {subcategoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          } else {
+            return (
+              <Select
+                key={field.key}
+                value={filters[field.key] ?? undefined}
+                onValueChange={(val) =>
+                  handleChange(field.key, val === "all" ? null : val)
+                }
+              >
+                <SelectTrigger className="w-max md:w-1/4">
+                  <SelectValue placeholder={field.placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{getAllLabel(field.key)}</SelectItem>
+                  {field.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          }
         }
 
         return null;

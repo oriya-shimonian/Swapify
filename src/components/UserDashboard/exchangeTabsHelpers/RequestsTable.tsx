@@ -14,6 +14,7 @@ import { GoTrash } from "react-icons/go";
 import { ExchangeOfferCards } from "./ExchangeOfferCards";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { ProductCategory, productCategoryLabels, subcategoryMaps } from "@/types/products";
 
 interface RequestsTableProps {
   requests: IExchangeRequest[];
@@ -22,6 +23,7 @@ interface RequestsTableProps {
   onDeleteClick?: (requestId: number) => void;
   onApproveClick?: (request: IExchangeRequest, productId: number) => void;
   onRejectClick?: (request: IExchangeRequest) => void;
+  AutomaticRejection?: (request: IExchangeRequest) => void;
   type: "sent" | "received";
 }
 
@@ -32,14 +34,17 @@ export function RequestsTable({
   onDeleteClick,
   onApproveClick,
   onRejectClick,
+  AutomaticRejection,
   type,
 }: RequestsTableProps) {
   const columns = type === "sent" ? sentColumns : receivedColumns;
-  const [expandedRows, setExpandedRows] = useState<number[]>(requests.map(r => r.request_id));
+  const [expandedRows, setExpandedRows] = useState<number[]>(
+    requests.map((r) => r.request_id)
+  );
 
   const toggleExpand = (id: number) => {
-    setExpandedRows(prev =>
-      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    setExpandedRows((prev) =>
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
     );
   };
 
@@ -96,11 +101,15 @@ export function RequestsTable({
 
             {type === "received" && expandedRows.includes(req.request_id) && (
               <TableRow>
-                <TableCell colSpan={columns.length + 1} className="bg-background">
+                <TableCell
+                  colSpan={columns.length + 1}
+                  className="bg-background"
+                >
                   <ExchangeOfferCards
                     request={req}
                     onApprove={onApproveClick!}
                     onReject={onRejectClick!}
+                    AutomaticRejection={AutomaticRejection!}
                   />
                 </TableCell>
               </TableRow>
@@ -125,8 +134,10 @@ const baseColumns = [
 
 const sentColumns = [
   ...baseColumns.slice(0, 2),
+  { key: "owner_name", label: "שם בעל המוצר " },
   ...baseColumns.slice(2),
   { key: "offered", label: "מוצרים שהצעתי להחלפה" },
+  
 ] as const;
 
 const receivedColumns = [
@@ -146,9 +157,14 @@ function renderCell(
 ) {
   const product = req.requested_product;
 
+  console.log(subcategoryMaps[product.category]?.toLabel, product.subcategory, "7777");
+  
   const fieldMap: Record<string, string | undefined> = {
-    category: product?.category,
-    subcategory: product?.subcategory ?? undefined,
+    // category: product?.category,
+    categort: productCategoryLabels[(product.category)] ?? "-",
+    // @ts-ignore
+    subcategory: subcategoryMaps[product.category]?.toLabel?.[product.subcategory as string] ?? "-",
+    // subcategory: product?.subcategory ?? undefined,
     location: product?.location ?? undefined,
     createdAt: format(new Date(req.created_at), "dd/MM/yyyy"),
     requester: (req as any).requester_name,
@@ -175,7 +191,7 @@ function renderCell(
     case "title":
       return (
         <span
-          className="font-semibold cursor-pointer !min-w-max"
+          className="font-semibold cursor-pointer !min-w-max underline"
           onClick={() => {
             if (product?.product_id) {
               openProductPage(product.product_id);
@@ -185,6 +201,8 @@ function renderCell(
           {product?.title ?? "ללא שם"}
         </span>
       );
+      case "category":
+        return product?.category ? productCategoryLabels[(product.category) as ProductCategory] : "-";
     case "availability":
       return getAvailabilityBadge(product?.availability);
     case "status":
@@ -201,6 +219,8 @@ function renderCell(
             </div>
           ))
         : "-";
+    case "owner_name":
+      return req.type === "sent" ? <div>{req.owner_name || "-"}</div> : null;
     default:
       return null;
   }

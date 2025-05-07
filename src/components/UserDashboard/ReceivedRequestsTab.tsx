@@ -65,29 +65,38 @@ export default function MyReceivedRequestsTab() {
       toast.error("שגיאה באישור הבקשה");
     }
   };
-
-  const handleReject = (request: IExchangeRequest) => {
-    setConfirmDialog({
-      open: true,
-      title: "האם את/ה בטוח/ה שברצונך לדחות את הבקשה?",
-      description: "לא תוכל/י לאשר אותה שוב לאחר מכן.",
-      onConfirm: async () => {
-        if (!user) return;
+const [isRequestDeleted, setIsRequestDeleted] = useState(false);
+  async function handleDelete(request: IExchangeRequest) {
+    if (!user) return;
         try {
           await rejectOfferedRequest(request.request_id, user.user_id, user.name);
-          toast.success("הבקשה נדחתה");
+          setIsRequestDeleted(true);
+          
           setRequests((prev) =>
             prev.map((r) =>
               r.request_id === request.request_id ? { ...r, status: "Rejected" } : r
             )
           );
         } catch {
-          toast.error("שגיאה בדחיית הבקשה");
+          setIsRequestDeleted(false);
+          
         } finally {
           setConfirmDialog(null);
         }
-      },
+  }
+
+  const handleReject = (request: IExchangeRequest) => {
+    setConfirmDialog({
+      open: true,
+      title: "האם את/ה בטוח/ה שברצונך לדחות את הבקשה?",
+      description: "לא תוכל/י לאשר אותה שוב לאחר מכן.",
+      onConfirm: ()=> handleDelete(request),
     });
+    if (isRequestDeleted) {
+      toast.success("הבקשה נדחתה");
+    } else {
+      toast.error("שגיאה בדחיית הבקשה");
+    }
   };
 
   return (
@@ -111,6 +120,7 @@ export default function MyReceivedRequestsTab() {
           onImageClick={setModalImage}
           onApproveClick={handleApprove}
           onRejectClick={handleReject}
+          AutomaticRejection={handleDelete}
           type="received"
         />
       )}

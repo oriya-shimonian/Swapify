@@ -10,6 +10,8 @@ export function filterRequests(
     availability: string | null;
     status: string | null;
     offeredProduct: string;
+    owner_name?: string; // הוספנו את זה כאן
+    requesterName?: string; // אופציונלי לבקשות שהתקבלו
   }
 ) {
   return requests.filter((req) => {
@@ -19,7 +21,19 @@ export function filterRequests(
     const matchesLocation = filters.location ? req.requested_product?.location?.toLowerCase().includes(filters.location.toLowerCase()) : true;
     const matchesAvailability = filters.availability ? req.requested_product?.availability === filters.availability : true;
     const matchesStatus = filters.status ? req.status === filters.status : true;
-    const matchesOffered = filters.offeredProduct ? req.offered_products.some((p) => p.title.toLowerCase().includes(filters.offeredProduct.toLowerCase())) : true;
+    const matchesOffered = filters.offeredProduct
+      ? req.offered_products.some((p) =>
+          p.title.toLowerCase().includes(filters.offeredProduct.toLowerCase())
+        )
+      : true;
+
+    const matchesOwner = filters.owner_name && req.type === "sent"
+      ? req.owner_name.toLowerCase().includes(filters.owner_name.toLowerCase())
+      : true;
+
+    const matchesRequester = filters.requesterName && req.type === "received"
+      ? (req as any).requester_name?.toLowerCase().includes(filters.requesterName.toLowerCase())
+      : true;
 
     return (
       matchesSearch &&
@@ -28,7 +42,9 @@ export function filterRequests(
       matchesLocation &&
       matchesAvailability &&
       matchesStatus &&
-      matchesOffered
+      matchesOffered &&
+      matchesOwner &&
+      matchesRequester
     );
   });
 }

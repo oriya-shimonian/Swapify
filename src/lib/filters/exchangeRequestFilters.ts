@@ -26,7 +26,7 @@ import { ProductAvailability, productAvailabilityLabels, ProductCategory, produc
     { key: "searchTerm", type: "input", placeholder: "שם מוצר..." },
     { key: "location", type: "input", placeholder: "מיקום..." },
     { key: "category", type: "select", placeholder: "קטגוריה", options: categoryOptions },
-    { key: "subcategory", type: "input", placeholder: "תת קטגוריה..." },
+    { key: "subcategory", type: "select", placeholder: "תת קטגוריה...", options: [{label:"", value:""}] }, // תת קטגוריה לא תמיד נדרשת
     { key: "availability", type: "select", placeholder: "זמינות", options: availabilityOptions },
     { key: "status", type: "select", placeholder: "סטטוס", options: statusOptions },
     { key: "offeredProduct", type: "input", placeholder: "שם מוצר שהוצע..." },
@@ -35,7 +35,7 @@ import { ProductAvailability, productAvailabilityLabels, ProductCategory, produc
   // פילטרים לבקשות ששלחתי
   export const sentRequestFilters: FilterField[] = [
     ...baseFilters,
-    { key: "ownerName", type: "input", placeholder: "שם בעל המוצר..." },
+    { key: "owner_name", type: "input", placeholder: "שם בעל המוצר..." },
   ];
   
   // פילטרים לבקשות שהתקבלו
