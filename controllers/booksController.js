@@ -69,7 +69,7 @@ exports.getBookById = async (req, res) => {
 // עדכון ספר
 exports.updateBook = async (req, res) => {
     const { id } = req.params;
-    const { title, description, condition, location, imageUrl, author, publishYear, publisher, pageCount, subcategory } = req.body;
+    const { title, description, condition, location, image_url, author, publishYear, publisher, pageCount, subcategory } = req.body;
 
     try {
         // 1️⃣ עדכון `Products`
@@ -77,18 +77,30 @@ exports.updateBook = async (req, res) => {
             `UPDATE Products 
             SET title = $1, description = $2, condition = $3, location = $4, image_url = $5, updated_at = CURRENT_TIMESTAMP 
             WHERE product_id = $6 RETURNING *`,
-            [title, description, condition, location, imageUrl, id]
+            [title, description, condition, location, image_url, id]
         );
+
+        if (productResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Book not found in Products' });
+        }
 
         // 2️⃣ עדכון `Books`
-        await db.query(
+        const bookResult =await db.query(
             `UPDATE Books 
-            SET author = $1, publish_year = $2, publisher = $3, page_count = $4, subcategory = $5, updated_at = CURRENT_TIMESTAMP 
-            WHERE product_id = $6 RETURNING *`,
-            [author, publishYear, publisher, pageCount, subcategory, id]
+            SET author = $1, publish_year = $2, publisher = $3, page_count = $4, subcategory = $5, image_url = $6
+            WHERE product_id = $7 RETURNING *`,
+            [author, publishYear, publisher, pageCount, subcategory, image_url, id]
         );
 
-        res.status(200).json({ message: 'Book updated successfully' });
+        if (bookResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Board game not found in Board_Games' });
+        }
+
+        res.status(200).json({ 
+            message: 'Book updated successfully',
+            product: productResult.rows[0],
+            book: bookResult.rows[0]
+         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to update book' });
