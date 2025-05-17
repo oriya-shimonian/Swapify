@@ -9,7 +9,11 @@ import {
   ProductCondition,
 } from "@/types/products";
 import { Info } from "lucide-react";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +24,8 @@ import toast from "react-hot-toast";
 import AppDialog from "@/components/AppDialog";
 import LocationBubbles from "@/components/LocationBubbles";
 import ExchangeRequestDialog from "@/components/dialogs/ExchangeRequestDialog";
+import ImageUploader from "@/components/ImageUploader";
+import useProducts from "@/hooks/useProducts";
 
 export default function ProductDetailPage() {
   const conditionOptions = Object.values(ProductCondition);
@@ -32,7 +38,7 @@ export default function ProductDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showExchangeDialog, setShowExchangeDialog] = useState(false);
-
+  const { updateProduct, deleteProduct } = useProducts();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,34 +58,86 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
-  if (!product.product_id) return <p className="text-center mt-20">Loading...</p>;
+  if (!product.product_id)
+    return <p className="text-center mt-20">Loading...</p>;
 
-  console.log("Product data:",product.product_id , product.user_id, user?.user_id);
-  
+  console.log(
+    "Product data:",
+    product.product_id,
+    product.user_id,
+    user?.user_id
+  );
+
   const isOwner = !!product.product_id && user?.user_id === product.user_id;
 
   const handleDeleteProduct = async () => {
+    // try {
+    //   setIsDeleting(true);
+    //   await axios.delete(productRoutes.deleteProduct(product.product_id));
+    //   toast.success("המוצר נמחק בהצלחה");
+    //   navigate("/all-products");
+    // } catch (err) {
+    //   toast.error("אירעה שגיאה בעת המחיקה");
+    //   console.error(err);
+    // } finally {
+    //   setIsDeleting(false);
+    //   setShowDeleteDialog(false);
+    // }
     try {
       setIsDeleting(true);
-      await axios.delete(productRoutes.deleteProduct(product.product_id));
-      toast.success("המוצר נמחק בהצלחה");
-      navigate("/all-products");
-    } catch (err) {
+      const result = await deleteProduct({
+        category: product.category,
+        id: product.product_id.toString(),
+      });
+      if (result) {
+        toast.success("המוצר נמחק בהצלחה");
+        navigate("/all-products");
+      } else {
+        toast.error("אירעה שגיאה בעת המחיקה");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
       toast.error("אירעה שגיאה בעת המחיקה");
-      console.error(err);
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);
     }
   };
 
+  const handleUpdateProduct = async () => {
+    try {
+      const updated = await updateProduct({
+        category: editedProduct.category,
+        id: String(product.product_id),
+        data: editedProduct,
+      });
+      setProduct(updated.product);
+      setIsEditing(false);
+      toast.success("המוצר עודכן בהצלחה!");
+    } catch (err) {
+      console.error(err);
+      toast.error("אירעה שגיאה בעת עדכון המוצר");
+    } finally {
+      product.product_id = editedProduct.product_id;
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto mt-24 p-6 shadow rounded bg-white dark:bg-gray-800">
-      <img
-        src={product.image_url || ""}
-        alt={product.title}
-        className="w-full h-64 object-cover rounded mb-4"
-      />
+      {isEditing ? (
+        <ImageUploader
+          initialImage={product.image_url!}
+          onSelect={(base64) =>
+            setEditedProduct((prev) => ({ ...prev, image_url: base64 }))
+          }
+        />
+      ) : (
+        <img
+          src={product.image_url!}
+          alt={product.title}
+          className="w-64 h-64 object-cover rounded mb-4"
+        />
+      )}
 
       {isEditing ? (
         <>
@@ -171,7 +229,10 @@ export default function ProductDetailPage() {
         <LocationBubbles
           locations={
             product.location
-              ? product.location.replace(/[{}"]/g, "").split(",").map((s) => s.trim())
+              ? product.location
+                  .replace(/[{}"]/g, "")
+                  .split(",")
+                  .map((s) => s.trim())
               : []
           }
         />
@@ -188,7 +249,9 @@ export default function ProductDetailPage() {
       <div className="mt-4 space-x-2">
         {!isOwner && (
           <>
-            <Button onClick={() => setShowExchangeDialog(true)}>שלח בקשת החלפה</Button>
+            <Button onClick={() => setShowExchangeDialog(true)}>
+              שלח בקשת החלפה
+            </Button>
             <Button variant="secondary">פתח צ׳אט</Button>
           </>
         )}
@@ -201,17 +264,33 @@ export default function ProductDetailPage() {
             >
               ערוך
             </Button>
-            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>מחק</Button>
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              מחק
+            </Button>
           </>
         )}
 
         {isEditing && (
-          <Button
-            onClick={() => setIsEditing(false)}
-            className="bg-blue-500 text-white"
-          >
-            סיום עריכה
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                setEditedProduct(product); // מחזיר לערכים המקוריים
+                setIsEditing(false);
+              }}
+              variant="secondary"
+            >
+              ביטול
+            </Button>
+            <Button
+              onClick={() => handleUpdateProduct()}
+              className="bg-blue-500 text-white"
+            >
+              סיום עריכה
+            </Button>
+          </div>
         )}
       </div>
 

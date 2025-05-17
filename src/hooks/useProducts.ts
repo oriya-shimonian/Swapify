@@ -88,7 +88,7 @@ const useProducts = () => {
     try {
       setLoading(true);
       // @ts-ignore
-      const res = await axios.put(routes[`update${category.replace(/\s/g, '')}`](id), data);
+      const res = await axios.put(routes[`update${category.replace(/\s/g, '')}`](id), data ,{ headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
       setProducts((prev) =>
         prev.map((p) => (p.product_id === Number(id) ? { ...p, ...res.data } : p))
       );
@@ -102,12 +102,16 @@ const useProducts = () => {
   };
 
   const deleteProduct = async ({ category, id }: DeleteProductPayload) => {
+    console.log("deleteProduct", category, id);
+    
     const routes = getRoutesByCategory(category);
+    console.log("deleteProduct", category, id);
     try {
       setLoading(true);
       // @ts-ignore
-      await axios.delete(routes[`delete${category.replace(/\s/g, '')}`](id));
+      const res = await axios.delete(routes[`delete${category.replace(/\s/g, '')}`](id), { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
       setProducts((prev) => prev.filter((p) => p.product_id !== Number(id)));
+      return res.data
     } catch (err: any) {
       setError(err?.response?.data?.error || "Failed to delete product");
       throw err;
