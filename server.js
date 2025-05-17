@@ -18,7 +18,7 @@ const connectDB = async () => {
     }
 };
 
-app.use(express.json());
+app.use(express.json(({ limit: '15mb' })));
 
 // ייבוא הנתיבים
 const authRoutes = require('./routes/authRoutes');
@@ -34,6 +34,7 @@ const uploadRoutes = require('./routes/uplaodRoutes');
 const aboutRoutes = require('./routes/aboutRoutes');
 const auditLogsRoutes = require('./routes/auditLogsRoutes');
 const { notFoundHandler } = require('./middlewares/404Midlleware');
+const { startCrossRequestScheduler } = require('./scripts/crossRequestScheduler');
 
 // חיבור הנתיבים ל-API
 // app.use(cors()); // לאפשר לכל מקור לגשת ל-API
@@ -68,7 +69,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
+startCrossRequestScheduler();
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/products', productsRoutes);

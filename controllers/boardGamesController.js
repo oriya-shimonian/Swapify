@@ -70,7 +70,7 @@ exports.getBoardGameById = async (req, res) => {
 // Update Board Game
 exports.updateBoardGame = async (req, res) => {
     const { id } = req.params;
-    const { title, description, condition, location, imageUrl, minPlayers, maxPlayers, duration, subcategory } = req.body;
+    const { title, description, condition, location, image_url, minPlayers, maxPlayers, duration, subcategory } = req.body;
 
     try {
         // 1️⃣ עדכון הנתונים בטבלה הראשית `Products`
@@ -78,7 +78,7 @@ exports.updateBoardGame = async (req, res) => {
             `UPDATE Products 
             SET title = $1, description = $2, condition = $3, location = $4, image_url = $5, updated_at = CURRENT_TIMESTAMP 
             WHERE product_id = $6 RETURNING *`,
-            [title, description, condition, location, imageUrl, id]
+            [title, description, condition, location, image_url, id]
         );
 
         if (productResult.rows.length === 0) {
@@ -88,9 +88,9 @@ exports.updateBoardGame = async (req, res) => {
         // 2️⃣ עדכון הנתונים בטבלת `Board_Games`
         const boardGameResult = await db.query(
             `UPDATE Board_Games 
-            SET min_players = $1, max_players = $2, duration = $3, subcategory = $4, updated_at = CURRENT_TIMESTAMP 
-            WHERE product_id = $5 RETURNING *`,
-            [minPlayers, maxPlayers, duration, subcategory, id]
+            SET min_players = $1, max_players = $2, duration = $3, subcategory = $4, image_url = $5
+            WHERE product_id = $6 RETURNING *`,
+            [minPlayers, maxPlayers, duration, subcategory, image_url, id]
         );
 
         if (boardGameResult.rows.length === 0) {

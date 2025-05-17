@@ -80,15 +80,14 @@ exports.getPuzzleById = async (req, res) => {
 // עדכון פאזל (גם Products וגם Puzzles)
 exports.updatePuzzle = async (req, res) => {
     const { id } = req.params;
-    const { title, description, condition, location, imageUrl, manufacturer, piecesCount, subcategory } = req.body;
-
+    const { title, description, condition, location, image_url, manufacturer, piecesCount, subcategory } = req.body;
     try {
         // 1️⃣ עדכון הנתונים בטבלה הראשית `Products`
         const productResult = await db.query(
             `UPDATE Products 
             SET title = $1, description = $2, condition = $3, location = $4, image_url = $5, updated_at = CURRENT_TIMESTAMP 
             WHERE product_id = $6 RETURNING *`,
-            [title, description, condition, location, imageUrl, id]
+            [title, description, condition, location, image_url, id]
         );
 
         if (productResult.rows.length === 0) {
@@ -98,9 +97,9 @@ exports.updatePuzzle = async (req, res) => {
         // 2️⃣ עדכון הנתונים הייחודיים בטבלת `Puzzles`
         const puzzleResult = await db.query(
             `UPDATE Puzzles 
-            SET manufacturer = $1, pieces_count = $2, subcategory = $3, updated_at = CURRENT_TIMESTAMP 
-            WHERE product_id = $4 RETURNING *`,
-            [manufacturer, piecesCount, subcategory, id]
+            SET manufacturer = $1, pieces_count = $2, subcategory = $3, image_url = $4
+            WHERE product_id = $5 RETURNING *`,
+            [manufacturer, piecesCount, subcategory, image_url,id]
         );
 
         if (puzzleResult.rows.length === 0) {
