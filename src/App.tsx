@@ -12,23 +12,24 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignUpPage";
 import Footer from "./components/footer";
 import HomePage from "./pages/HomePage";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import ProfilePage from "./pages/ProfilePage";
 import ProductDetailPage from "./pages/Products/ProductDetailPage";
 import AddProductPage from "./pages/Products/AddProductPage";
 import AboutPage from "./pages/AboutPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
-// import Home from "@/pages/Home";
-// import About from "@/pages/About";
-// import Contact from "@/pages/Contact";
-// import Explore from "@/pages/Explore";
-// import Login from "@/pages/Login";
+import UserDashboardWrapper from "./pages/UserDashboardPage";
+import MyProductsTab from "./components/UserDashboard/MyProductsTab";
+import MySentRequestsTab from "./components/UserDashboard/MySentRequestsTab";
+import MyReceivedRequestsTab from "./components/UserDashboard/ReceivedRequestsTab";
 
 function App() {
   const { user } = useAuth();
   const location = useLocation();
   const hideFooter =
-    location.pathname === "/login" || location.pathname === "/signup" || location.pathname === "/profile";
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/profile";
   const addDesignToFooter = location.pathname !== "/";
 
   return (
@@ -40,9 +41,14 @@ function App() {
             <Route path="/" element={!user ? <HeroPage /> : <HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/admin/audits" element={<AuditLogsPage />} />
+             <Route path="/dashboard" element={<UserDashboardWrapper />}>
+              <Route path="my-products" element={<MyProductsTab />} />
+              <Route path="requests/sent" element={<MySentRequestsTab />} />
+              <Route path="requests/received" element={<MyReceivedRequestsTab />} />
+            {/**/}</Route> 
 
-              {/* <Route path="/contact" element={<Contact />} />*/}
-              <Route path="/explore" element={<HeroPage />} /> 
+            {/* <Route path="/contact" element={<Contact />} />*/}
+            <Route path="/explore" element={<HeroPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/all-products" element={<HomePage />} />
@@ -52,9 +58,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
-        {!hideFooter && (
-          <Footer design="" />
-        )}
+        {!hideFooter && <Footer design="" />}
       </div>
     </>
   );

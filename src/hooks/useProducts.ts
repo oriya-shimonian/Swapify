@@ -26,6 +26,8 @@ const useProducts = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      console.log("Fetching products...");
+      
       try {
         const response = await fetch(productRoutes.getAllProducts);
         if (!response.ok) {
@@ -86,7 +88,7 @@ const useProducts = () => {
     try {
       setLoading(true);
       // @ts-ignore
-      const res = await axios.put(routes[`update${category.replace(/\s/g, '')}`](id), data);
+      const res = await axios.put(routes[`update${category.replace(/\s/g, '')}`](id), data ,{ headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
       setProducts((prev) =>
         prev.map((p) => (p.product_id === Number(id) ? { ...p, ...res.data } : p))
       );
@@ -100,12 +102,16 @@ const useProducts = () => {
   };
 
   const deleteProduct = async ({ category, id }: DeleteProductPayload) => {
+    console.log("deleteProduct", category, id);
+    
     const routes = getRoutesByCategory(category);
+    console.log("deleteProduct", category, id);
     try {
       setLoading(true);
       // @ts-ignore
-      await axios.delete(routes[`delete${category.replace(/\s/g, '')}`](id));
+      const res = await axios.delete(routes[`delete${category.replace(/\s/g, '')}`](id), { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
       setProducts((prev) => prev.filter((p) => p.product_id !== Number(id)));
+      return res.data
     } catch (err: any) {
       setError(err?.response?.data?.error || "Failed to delete product");
       throw err;
@@ -114,7 +120,34 @@ const useProducts = () => {
     }
   };
 
-  return { products, loading, error, addProduct, updateProduct, deleteProduct };
+  const fetchOfferableProducts = async (userId: number): Promise<IProduct[]> => {
+    try {
+      const res = await axios.get(productRoutes.getOfferableProducts(userId), {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      return res.data;
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err?.response?.data?.error || "שגיאה בטעינת מוצרים להצעה");
+    }
+  };
+
+  const fetchUserProducts = async (userId: number): Promise<IProduct[]> => {
+    try {
+      const res = await axios.get(productRoutes.getProductsByUser(userId), {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      return res.data;
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err?.response?.data?.error || "שגיאה בטעינת מוצרים של המשתמש");
+    }
+  };
+  
+  
+
+  return { products, loading, error, addProduct, updateProduct, deleteProduct, fetchOfferableProducts, fetchUserProducts };
 };
 
 export default useProducts;

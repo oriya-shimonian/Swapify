@@ -59,7 +59,6 @@
 //     const toLabel = subcategoryMaps[category]?.toLabel;
 //     return toLabel ? Object.values(toLabel) : [];
 //   }, [category]);
-  
 
 //   const handleSubmit = async () => {
 //     if (!validate()) return;
@@ -203,7 +202,6 @@
 //   );
 // }
 
-
 // קובץ: AddProductPage.tsx
 
 import { useEffect, useMemo, useReducer, useState } from "react";
@@ -239,8 +237,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ImageUploader from "@/components/ImageUploader";
 
 const initialState = {
+  productId: "",
   title: "",
   description: "",
   category: "" as ProductCategory | "",
@@ -287,7 +287,11 @@ export default function AddProductPage() {
 
   useEffect(() => {
     if (user?.location) {
-      dispatch({ type: "SET_FIELD", field: "locations", value: user.location.split(", ") });
+      dispatch({
+        type: "SET_FIELD",
+        field: "locations",
+        value: user.location.split(", "),
+      });
     }
   }, [user]);
 
@@ -301,6 +305,47 @@ export default function AddProductPage() {
     dispatch({ type: "SET_ERRORS", errors: newErrors });
     return Object.keys(newErrors).length === 0;
   };
+
+  // const handleSubmit = async () => {
+  //   if (!user) {
+  //     toast.error("יש להתחבר כדי להוסיף מוצר");
+  //     return;
+  //   }
+  //   if (!validate()) return;
+
+  //   dispatch({ type: "SET_LOADING", loading: true });
+  //   try {
+  //     await addProduct({
+  //       category: state.category as ProductCategory,
+  //       data: {
+  //         userId: user.user_id,
+  //         imageUrl: state.imageUrl,
+  //         title: state.title,
+  //         description: state.description,
+  //         category: state.category,
+  //         subcategory: getSubcategoryValueFromLabel(
+  //           state.category as ProductCategory,
+  //           state.subcategory
+  //         ),
+  //         condition: state.condition,
+  //         locations: user.location.split(", "),
+  //         ...state.extraFields,
+  //       },
+  //     });
+  //     dispatch({
+  //       type: "SET_FIELD",
+  //       field: "productId",
+  //       value: newProduct.product_id,
+  //     });
+  //     toast.success("המוצר נוסף בהצלחה!");
+  //     navigate("/all-products");
+  //   } catch (err) {
+  //     toast.error("אירעה שגיאה בעת הוספת המוצר");
+  //     console.error(err);
+  //   } finally {
+  //     dispatch({ type: "SET_LOADING", loading: false });
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (!user) {
@@ -319,12 +364,16 @@ export default function AddProductPage() {
           title: state.title,
           description: state.description,
           category: state.category,
-          subcategory: getSubcategoryValueFromLabel(state.category as ProductCategory, state.subcategory),
+          subcategory: getSubcategoryValueFromLabel(
+            state.category as ProductCategory,
+            state.subcategory
+          ),
           condition: state.condition,
           locations: user.location.split(", "),
           ...state.extraFields,
         },
       });
+
       toast.success("המוצר נוסף בהצלחה!");
       navigate("/all-products");
     } catch (err) {
@@ -340,7 +389,7 @@ export default function AddProductPage() {
       <h2 className="text-2xl font-bold mb-6 text-center">הוספת מוצר חדש</h2>
 
       <FormField label="תמונה" required error={state.errors.image}>
-        <Input
+        {/* <Input
           type="file"
           accept="image/*"
           onChange={(e) =>
@@ -351,7 +400,13 @@ export default function AddProductPage() {
             })
           }
           className={state.errors.image ? "border-red-500" : ""}
+        /> */}
+        <ImageUploader
+          onSelect={(base64) =>
+            dispatch({ type: "SET_FIELD", field: "imageUrl", value: base64 })
+          }
         />
+
         <p className="text-sm text-muted-foreground mt-1">
           בעתיד: ניתוח אוטומטי של התמונה למילוי שדות
         </p>
@@ -361,7 +416,11 @@ export default function AddProductPage() {
         <Input
           value={state.title}
           onChange={(e) =>
-            dispatch({ type: "SET_FIELD", field: "title", value: e.target.value })
+            dispatch({
+              type: "SET_FIELD",
+              field: "title",
+              value: e.target.value,
+            })
           }
           placeholder="לדוגמה: פאזל 1000 חלקים"
         />
@@ -371,7 +430,11 @@ export default function AddProductPage() {
         <Textarea
           value={state.description}
           onChange={(e) =>
-            dispatch({ type: "SET_FIELD", field: "description", value: e.target.value })
+            dispatch({
+              type: "SET_FIELD",
+              field: "description",
+              value: e.target.value,
+            })
           }
           placeholder="כתוב תיאור מפורט על המוצר..."
           rows={4}
@@ -460,7 +523,10 @@ export default function AddProductPage() {
           <LocationBubbles locations={user?.location?.split(", ") || []} />
           <Tooltip>
             <TooltipTrigger asChild>
-              <Info size={16} className="text-muted-foreground cursor-pointer" />
+              <Info
+                size={16}
+                className="text-muted-foreground cursor-pointer"
+              />
             </TooltipTrigger>
             <TooltipContent>
               ניתן לשנות את המיקומים שלך רק דרך עמוד הפרופיל
