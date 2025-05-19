@@ -1,4 +1,4 @@
-const baseBackendAddress = "http://localhost:3000/api";
+export const baseBackendAddress = "http://localhost:3000/api";
 
 // Authentication
 const authRoutes = {
@@ -17,6 +17,16 @@ const userRoutes = {
   banUser: (id: number) => `${baseBackendAddress}/users/${id}/ban`, // חסימת משתמש (Admin)
   deleteUser: (id: number) => `${baseBackendAddress}/users/${id}`, // מחיקת משתמש (Admin)
 };
+
+// Notifications
+const notificationRoutes = {
+  createNotification: `${baseBackendAddress}/notifications`,
+  getUnreadCount: `${baseBackendAddress}/notifications/unread-count`,
+  getEnrichedNotifications: `${baseBackendAddress}/notifications/enriched`,
+  markNotificationAsRead: (id: number) => `${baseBackendAddress}/notifications/${id}/read`,
+  markAllAsRead: `${baseBackendAddress}/notifications/mark-all`,
+};
+
 
 // Products
 const productRoutes = {
@@ -70,14 +80,6 @@ const exchangeRequestRoutes = {
   updateExchangeRequestStatus: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
   updateExchangeRequestProposalOptions: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/options`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
   cancelExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // מחיקה/ביטול בקשה (דורש הרשאה)
-};
-
-
-// Notifications
-const notificationRoutes = {
-  getAllNotifications: `${baseBackendAddress}/notifications`,
-  createNotification: `${baseBackendAddress}/notifications`,
-  markNotificationAsRead: (id: number) => `${baseBackendAddress}/notifications/${id}/read`,
 };
 
 // Roles

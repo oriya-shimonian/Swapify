@@ -26,8 +26,6 @@ const useProducts = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      console.log("Fetching products...");
-      
       try {
         const response = await fetch(productRoutes.getAllProducts);
         if (!response.ok) {
