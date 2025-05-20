@@ -11,13 +11,15 @@ import { Filters } from "./exchangeTabsHelpers/Filters";
 import { SkeletonTable } from "./exchangeTabsHelpers/SkeletonTable";
 import { RequestsTable } from "./exchangeTabsHelpers/RequestsTable";
 import { Pagination } from "./exchangeTabsHelpers/Pagination";
+import { useLocation } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 12;
 
 export default function MyReceivedRequestsTab() {
   const { user } = useAuth();
-  const { getIncomingRequests, approveRequest, rejectOfferedRequest } = useExchangeRequest();
-
+  const { getIncomingRequests, approveRequest, rejectOfferedRequest } =
+    useExchangeRequest();
+  const location = useLocation();
   const [requests, setRequests] = useState<IExchangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,6 +50,26 @@ export default function MyReceivedRequestsTab() {
       .finally(() => setLoading(false));
   }, [user?.user_id]);
 
+  useEffect(() => {
+    const hash = location.hash; // למשל: #request-2
+    if (hash) {
+      const el = document.querySelector(hash);
+      if (el) {
+        // ✨ גלילה חלקה למרכז
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // ✨ הדגשת רקע מורגשת (ולא הבהוב רגעי)
+        el.classList.add("animate-request-focus");
+
+        const timeout = setTimeout(() => {
+          el.classList.remove("animate-request-focus");
+        }, 3000); // נשאר ל־3 שניות
+
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [location.hash]);
+
   const filteredRequests = filterRequests(requests, filters);
   const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
   const paginatedRequests = filteredRequests.slice(
@@ -55,34 +77,41 @@ export default function MyReceivedRequestsTab() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleApprove = async (request: IExchangeRequest, chosen_product_id: number) => {
+  const handleApprove = async (
+    request: IExchangeRequest,
+    chosen_product_id: number
+  ) => {
     if (!user) return;
     try {
-      await approveRequest(request.request_id, chosen_product_id, request.user_id, user.name);
+      await approveRequest(
+        request.request_id,
+        chosen_product_id,
+        request.user_id,
+        user.name
+      );
       toast.success("הבקשה אושרה בהצלחה");
       getIncomingRequests(user.user_id).then(setRequests);
     } catch {
       toast.error("שגיאה באישור הבקשה");
     }
   };
-const [isRequestDeleted, setIsRequestDeleted] = useState(false);
+  const [isRequestDeleted, setIsRequestDeleted] = useState(false);
   async function handleDelete(request: IExchangeRequest) {
     if (!user) return;
-        try {
-          await rejectOfferedRequest(request.request_id, user.user_id, user.name);
-          setIsRequestDeleted(true);
-          
-          setRequests((prev) =>
-            prev.map((r) =>
-              r.request_id === request.request_id ? { ...r, status: "Rejected" } : r
-            )
-          );
-        } catch {
-          setIsRequestDeleted(false);
-          
-        } finally {
-          setConfirmDialog(null);
-        }
+    try {
+      await rejectOfferedRequest(request.request_id, user.user_id, user.name);
+      setIsRequestDeleted(true);
+
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.request_id === request.request_id ? { ...r, status: "Rejected" } : r
+        )
+      );
+    } catch {
+      setIsRequestDeleted(false);
+    } finally {
+      setConfirmDialog(null);
+    }
   }
 
   const handleReject = (request: IExchangeRequest) => {
@@ -90,7 +119,7 @@ const [isRequestDeleted, setIsRequestDeleted] = useState(false);
       open: true,
       title: "האם את/ה בטוח/ה שברצונך לדחות את הבקשה?",
       description: "לא תוכל/י לאשר אותה שוב לאחר מכן.",
-      onConfirm: ()=> handleDelete(request),
+      onConfirm: () => handleDelete(request),
     });
     if (isRequestDeleted) {
       toast.success("הבקשה נדחתה");
@@ -132,7 +161,10 @@ const [isRequestDeleted, setIsRequestDeleted] = useState(false);
       />
 
       {modalImage && (
-        <ImageDialog imageUrl={modalImage} onClose={() => setModalImage(null)} />
+        <ImageDialog
+          imageUrl={modalImage}
+          onClose={() => setModalImage(null)}
+        />
       )}
 
       {confirmDialog?.open && (

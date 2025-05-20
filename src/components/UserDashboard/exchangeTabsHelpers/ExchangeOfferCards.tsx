@@ -49,9 +49,10 @@ console.log(request.status);
                 {(product.availability === "Exchange" || product.availability === "Pending") && (request.status=== "Pending" || request.status === "Rejected") && <p className="text-red-500 text-xs">המוצר הזה מוחלף בבקשה אחרת</p>}
                 {product.image_url && (
                 <img
+                loading="lazy"
                   src={product.image_url}
                   alt={product.title}
-                  className="w-full h-32 object-cover rounded"
+                  className="w-64 h-32 object-cover rounded"
                 />
               )}
               <div className="text-lg font-semibold mb-1">{product.title}</div>

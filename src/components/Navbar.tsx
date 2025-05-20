@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { IoNotifications } from "react-icons/io5";
 import { useNotifications } from "@/hooks/useNotifications";
+import NotificationsDropdown from "./NotificationsDropdown";
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -105,15 +106,16 @@ const Navbar = () => {
               <Moon className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-gray-500" />
             )}
           </button>
-          {/* כפתור התראות */}
+          {/* כפתור התראות 
           {user && <button className="relative">
             <IoNotifications size={26} />
             {unreadCount > 0 && (
               <span className="absolute -top-2.5 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {unreadCount}
               </span>
-            )}
-          </button>}
+            )}ReceivedRequestsTab
+          </button>}*/}
+          {user && <NotificationsDropdown user={user} />}
           {/* כפתו�� כני��ה/תפרי�� משתמש */}
           {user ? (
             // 🟢 תפריט למשתמש מחובר
