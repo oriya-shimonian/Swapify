@@ -1,3 +1,5 @@
+export const NUM_NOTIFICATIONS_IN_PAGE = 3;
+
 export interface Notification {
   notification_id: number;
   type: string;

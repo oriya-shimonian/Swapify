@@ -1,61 +1,9 @@
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import { IUser } from "@/types/type";
-// import { notificationRoutes } from "@/settings";
-// import { getSocket } from "@/lib/socket"; // ✅
-
-// export const useNotifications = (user?: IUser | null) => {
-//   const [unreadCount, setUnreadCount] = useState<number>(0);
-//   const [loading, setLoading] = useState(true);
-
-//   const audio = new Audio("/sounds/swapify-notifications-sound.mp3");
-//   const fetchUnreadCount = async () => {
-//     try {
-//       const res = await axios.get(notificationRoutes.getUnreadCount, {
-//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//       });
-//       setUnreadCount(res.data.count);
-//     } catch (error) {
-//       console.error("שגיאה בשליפת מספר התראות לא נקראו:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (!user) return;
-
-//     fetchUnreadCount();
-
-//     const socket = getSocket(); // 🧠 שימוש ב־getSocket (ולא יצירה מחדש)
-    
-//     if (socket && !socket.hasListeners?.("new_notification")) {
-//       socket.on("new_notification", () => {
-//         fetchUnreadCount();
-//         if (user.notification_enabled) {
-//           audio.currentTime = 0;
-//           audio.play().catch((err) => {
-//             console.warn("🔇 לא ניתן לנגן את הצליל:", err.message);
-//           });
-//         }
-//       });
-//     }
-
-//     return () => {
-//       socket?.off("new_notification");
-//     };
-//   }, [user]);
-
-//   return { unreadCount, loading, refetchUnreadCount: fetchUnreadCount };
-// };
-
-
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { IUser } from "@/types/type";
 import { notificationRoutes } from "@/settings";
 import { getSocket } from "@/lib/socket";
-import { Notification } from "@/types/notifications";
+import { Notification, NUM_NOTIFICATIONS_IN_PAGE } from "@/types/notifications";
 
 export const useNotifications = (user?: IUser | null) => {
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -78,19 +26,24 @@ export const useNotifications = (user?: IUser | null) => {
     }
   }, []);
 
-  const fetchNotifications = useCallback(async (limit = 10) => {
-    setLoadingNotifications(true);
-    try {
-      const res = await axios.get(notificationRoutes.getEnrichedNotifications(limit), {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setNotifications(res.data);
-    } catch (error) {
-      console.error("שגיאה בטעינת התראות:", error);
-    } finally {
-      setLoadingNotifications(false);
-    }
-  }, []);
+  const fetchNotifications = useCallback(async (limit = NUM_NOTIFICATIONS_IN_PAGE, offset = 0) : Promise<Notification[]> => {
+  setLoadingNotifications(true);
+  try {
+    const res = await axios.get(notificationRoutes.getEnrichedNotifications(limit, offset), {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    console.log("🔔 התראות:", res.data);
+    
+    setNotifications((prev) => [...prev, ...res.data]);
+    return res.data;
+  } catch (error) {
+    console.error("שגיאה בטעינת התראות:", error);
+    return []; 
+  } finally {
+    setLoadingNotifications(false);
+  }
+}, []);
+
 
   const markNotificationAsRead = useCallback(async (id: number) => {
     try {

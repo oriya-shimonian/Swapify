@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { IoNotifications } from "react-icons/io5";
 import { useNotifications } from "@/hooks/useNotifications";
-import NotificationsDropdown from "./NotificationsDropdown";
+import NotificationsDropdown from "./notifications/NotificationsDropdown";
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();

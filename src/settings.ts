@@ -22,10 +22,7 @@ const userRoutes = {
 const notificationRoutes = {
   createNotification: `${baseBackendAddress}/notifications`,
   getUnreadCount: `${baseBackendAddress}/notifications/unread-count`,
-  getEnrichedNotifications: (limit?: number) =>
-  limit !== undefined
-    ? `${baseBackendAddress}/notifications/enriched?limit=${limit}`
-    : `${baseBackendAddress}/notifications/enriched`,
+  getEnrichedNotifications: (limit: number, offset: number) => `${baseBackendAddress}/notifications/enriched?limit=${limit}&offset=${offset}`,
   markNotificationAsRead: (id: number) => `${baseBackendAddress}/notifications/${id}/read`,
   markAllAsRead: `${baseBackendAddress}/notifications/mark-all`,
 };
