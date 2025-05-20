@@ -22,6 +22,7 @@ import UserDashboardWrapper from "./pages/UserDashboardPage";
 import MyProductsTab from "./components/UserDashboard/MyProductsTab";
 import MySentRequestsTab from "./components/UserDashboard/MySentRequestsTab";
 import MyReceivedRequestsTab from "./components/UserDashboard/ReceivedRequestsTab";
+import NotificationsPage from "./pages/NotificationsPage";
 
 function App() {
   const { user } = useAuth();
@@ -40,12 +41,13 @@ function App() {
           <Routes>
             <Route path="/" element={!user ? <HeroPage /> : <HomePage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/admin/audits" element={<AuditLogsPage />} />
-             <Route path="/dashboard" element={<UserDashboardWrapper />}>
-              <Route path="my-products" element={<MyProductsTab />} />
-              <Route path="requests/sent" element={<MySentRequestsTab />} />
-              <Route path="requests/received" element={<MyReceivedRequestsTab />} />
-            {/**/}</Route> 
+            <Route path="/admin/audits" element={user && user.role_name === "Admin" ? <AuditLogsPage /> : <HomePage/>} />
+             <Route path="/dashboard" element={user ? <UserDashboardWrapper /> : <HomePage />}>
+              <Route path="my-products" element={user ? <MyProductsTab /> : <HomePage />} />
+              <Route path="requests/sent" element={user ? <MySentRequestsTab />: <HomePage />} />
+              <Route path="requests/received" element={user ? <MyReceivedRequestsTab />: <HomePage />} />
+            </Route> 
+            <Route path="/notifications" element={user ? <NotificationsPage user={user} /> : <HomePage />} />
 
             {/* <Route path="/contact" element={<Contact />} />*/}
             <Route path="/explore" element={<HeroPage />} />

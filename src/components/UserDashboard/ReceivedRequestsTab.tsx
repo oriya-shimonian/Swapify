@@ -59,10 +59,10 @@ export default function MyReceivedRequestsTab() {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
 
         // ✨ הדגשת רקע מורגשת (ולא הבהוב רגעי)
-        el.classList.add("animate-request-focus");
+        el.classList.add("animate-pulse-highlight");
 
         const timeout = setTimeout(() => {
-          el.classList.remove("animate-request-focus");
+          el.classList.remove("animate-pulse-highlight");
         }, 3000); // נשאר ל־3 שניות
 
         return () => clearTimeout(timeout);

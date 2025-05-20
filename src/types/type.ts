@@ -15,7 +15,7 @@ export interface IUser {
   profile_picture: string | null;
   location: string;
   auth_provider: "Regular" | "Facebook" | "Google";
-  role_name: string;
+  role_name: "Guest" | "User" | "Admin";
   notification_enabled: boolean;
   is_banned: boolean;
   created_at: string; // אפשר להשתמש גם ב-Date אם רוצים 

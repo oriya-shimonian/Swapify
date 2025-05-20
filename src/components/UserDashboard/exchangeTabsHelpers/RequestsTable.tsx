@@ -239,7 +239,7 @@ import { format } from "date-fns";
 import { FaEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
 import { ExchangeOfferCards } from "./ExchangeOfferCards";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   ProductCategory,
@@ -273,6 +273,18 @@ export function RequestsTable({
   const [expandedRows, setExpandedRows] = useState<number[]>(
     requests.map((r) => r.request_id)
   );
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith("#request-")) {
+      const el = document.querySelector(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("pulse-highlight");
+        setTimeout(() => el.classList.remove("pulse-highlight"), 2000);
+      }
+    }
+  }, [requests]); // חשוב שירוץ כשבקשות נטענות
 
   const toggleExpand = (id: number) => {
     setExpandedRows((prev) =>
@@ -362,7 +374,7 @@ const RequestRow = React.memo(function RequestRow({
               <TableCell key={key}>
                 {product?.image_url ? (
                   <img
-                   loading="lazy"
+                    loading="lazy"
                     src={product.image_url}
                     alt={product.title || "מוצר"}
                     className="w-14 h-14 object-cover rounded cursor-pointer"
