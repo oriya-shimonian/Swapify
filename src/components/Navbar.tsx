@@ -115,7 +115,7 @@ const Navbar = () => {
               </span>
             )}ReceivedRequestsTab
           </button>}*/}
-          {user && <NotificationsDropdown user={user} />}
+          {user && <NotificationsDropdown />}
           {/* כפתו�� כני��ה/תפרי�� משתמש */}
           {user ? (
             // 🟢 תפריט למשתמש מחובר

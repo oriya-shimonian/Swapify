@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotificationsContext  } from "@/context/NotificationsContext";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import {
   Filters,
@@ -10,14 +10,14 @@ import { Notification, NUM_NOTIFICATIONS_IN_PAGE } from "@/types/notifications";
 import { InfiniteScrollList } from "@/components/InfiniteScrollList";
 import { filterFields } from "@/lib/filters/notifications";
 
-export default function NotificationsPage({ user }: { user: any }) {
+export default function NotificationsPage() {
   const {
     notifications,
     fetchNotifications,
     loadingNotifications,
     markNotificationAsRead,
     markAllNotificationsAsRead,
-  } = useNotifications(user);
+  } = useNotificationsContext();
 
   const [filters, setFilters] = useState({
     type: null,
