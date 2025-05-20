@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { createNotification } = require("../services/notificationsService");
 
 // יצירת בקשת החלפה חדשה עם אפשרות להצעת עד 4 מוצרים
 exports.createExchangeRequest = async (req, res) => {
@@ -52,6 +53,22 @@ exports.createExchangeRequest = async (req, res) => {
         )}`,
       ]
     );
+
+    // שלב 6: יצירת התראה לבעל המוצר
+    const { rows: targetProductOwner } = await client.query(
+      `SELECT user_id FROM Products WHERE product_id = $1`,
+      [productId]
+    );
+
+    const targetUserId = targetProductOwner[0]?.user_id;
+    if (targetUserId && targetUserId !== userId) {
+      await createNotification({
+        userId: targetUserId,
+        type: "new_request",
+        message: `קיבלת בקשת החלפה חדשה על מוצר מספר ${productId} ממשתמש ${userName}`,
+        contextId: requestId,
+      });
+    }
 
     await client.query("COMMIT");
     res.status(201).json({ message: "הבקשה נשלחה בהצלחה", requestId });
@@ -125,8 +142,32 @@ exports.approveExchangeRequest = async (req, res) => {
       ]
     );
 
+    const { rows: rejectedProposers } = await client.query(
+      `SELECT DISTINCT proposer.user_id, proposerProduct.title AS proposer_product_title,
+                    targetUser.name AS target_user_name, targetProduct.title AS target_product_title
+   FROM Exchange_Proposal_Options epo
+   JOIN Products proposerProduct ON epo.offered_product_id = proposerProduct.product_id
+   JOIN Users proposer ON proposerProduct.user_id = proposer.user_id
+   JOIN Exchange_Requests er ON epo.request_id = er.request_id
+   JOIN Products targetProduct ON er.product_id = targetProduct.product_id
+   JOIN Users targetUser ON targetProduct.user_id = targetUser.user_id
+   WHERE epo.request_id = $1 AND proposerProduct.product_id <> $2`,
+      [id, chosenProductId]
+    );
+
+    for (const proposer of rejectedProposers) {
+      await createNotification({
+        userId: proposer.user_id,
+        type: "auto_rejected",
+        message: `ההצעה שלך למוצר "${proposer.target_product_title}" של ${proposer.target_user_name} נדחתה אוטומטית לאחר שנבחרה הצעה אחרת`,
+        contextId: id,
+      });
+    }
+
     await client.query("COMMIT");
-    res.status(200).json({ message: "הבקשה אושרה והמוצרים הועברו לסטטוס Pending" });
+    res
+      .status(200)
+      .json({ message: "הבקשה אושרה והמוצרים הועברו לסטטוס Pending" });
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("שגיאה באישור בקשה:", error);
@@ -412,7 +453,9 @@ exports.updateExchangeRequestProposalOptions = async (req, res) => {
     }
 
     if (rows[0].status !== "Pending") {
-      return res.status(400).json({ error: "ניתן לערוך רק בקשות במצב Pending" });
+      return res
+        .status(400)
+        .json({ error: "ניתן לערוך רק בקשות במצב Pending" });
     }
 
     // מחיקת ההצעות הקודמות
@@ -438,7 +481,6 @@ exports.updateExchangeRequestProposalOptions = async (req, res) => {
     res.status(500).json({ error: "שגיאה בעת עדכון הצעות" });
   }
 };
-
 
 // ביטול בקשה - מותר רק אם היא עדיין Pending
 exports.cancelExchangeRequest = async (req, res) => {
