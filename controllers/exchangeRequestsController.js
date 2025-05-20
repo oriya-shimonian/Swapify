@@ -41,38 +41,35 @@ exports.createExchangeRequest = async (req, res) => {
         [offeredProductId]
       );
     }
+ const { rows: productInfo } = await client.query(
+      `SELECT title FROM Products WHERE product_id = $1`,
+      [productId]
+    );
+    const productTitle = productInfo[0]?.title || `#${productId}`;
 
     await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
        VALUES ('יצירת בקשת החלפה', $1, $2, $3)`,
-      [
-        userId,
-        userName,
-        `נשלחה בקשת החלפה על מוצר ${productId} עם הצעות: ${offeredProductIds.join(
-          ", "
-        )}`,
-      ]
+      [userId, userName, `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(", ")}`]
     );
 
-    // שלב 6: יצירת התראה לבעל המוצר
     const { rows: targetProductOwner } = await client.query(
       `SELECT user_id FROM Products WHERE product_id = $1`,
       [productId]
     );
-
     const targetUserId = targetProductOwner[0]?.user_id;
+
     if (targetUserId && targetUserId !== userId) {
       await createNotification({
         userId: targetUserId,
         type: "new_request",
-        message: `קיבלת בקשת החלפה חדשה על מוצר מספר ${productId} ממשתמש ${userName}`,
+        message: `קיבלת בקשת החלפה חדשה על המוצר "${productTitle}" ממשתמש ${userName}`,
         contextId: requestId,
       });
     }
 
     await client.query("COMMIT");
-    res.status(201).json({ message: "הבקשה נשלחה בהצלחה", requestId });
-  } catch (error) {
+    res.status(201).json({ message: "הבקשה נשלחה בהצלחה", requestId });  } catch (error) {
     await client.query("ROLLBACK");
     console.error(error);
     res.status(500).json({ error: "שגיאה ביצירת בקשת ההחלפה" });
@@ -90,9 +87,9 @@ exports.approveExchangeRequest = async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    // שלב 1: שליפת המוצר שנבחר והבקשה כדי לאמת קיום
+    // בדיקת זמינות המוצר הנבחר
     const chosenResult = await client.query(
-      `SELECT availability FROM Products WHERE product_id = $1`,
+      `SELECT title, availability FROM Products WHERE product_id = $1`,
       [chosenProductId]
     );
 
@@ -101,13 +98,13 @@ exports.approveExchangeRequest = async (req, res) => {
       return res.status(404).json({ error: "המוצר הנבחר לא נמצא" });
     }
 
-    const availability = chosenResult.rows[0].availability;
+    const { title: chosenTitle, availability } = chosenResult.rows[0];
     if (availability !== "Available" && availability !== "Interested") {
       await client.query("ROLLBACK");
       return res.status(400).json({ error: "המוצר הנבחר אינו זמין" });
     }
 
-    // שלב 2: עדכון סטטוס בבקשה והוספת המוצר הנבחר
+    // עדכון הבקשה ל־Approved
     const { rows: requestRows } = await client.query(
       `UPDATE Exchange_Requests
        SET status = 'Approved', chosen_product_id = $1, updated_at = CURRENT_TIMESTAMP
@@ -123,7 +120,15 @@ exports.approveExchangeRequest = async (req, res) => {
 
     const targetProductId = requestRows[0].product_id;
 
-    // שלב 3: עדכון זמינות שני המוצרים
+    // שליפת שם המוצר המקורי
+    const { rows: targetRows } = await client.query(
+      `SELECT title FROM Products WHERE product_id = $1`,
+      [targetProductId]
+    );
+
+    const targetTitle = targetRows[0]?.title || `#${targetProductId}`;
+
+    // עדכון זמינות
     await client.query(
       `UPDATE Products
        SET availability = 'Pending'
@@ -131,27 +136,28 @@ exports.approveExchangeRequest = async (req, res) => {
       [[chosenProductId, targetProductId]]
     );
 
-    // שלב 4: לוג
+    // לוג
     await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
        VALUES ('אישור בקשת החלפה', $1, $2, $3)`,
       [
         userId,
         userName,
-        `אושר מוצר מספר ${chosenProductId} לבקשה ${id}. עודכן גם המוצר המבוקש ${targetProductId}`,
+        `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`,
       ]
     );
 
+    // יצירת התראות עבור ההצעות שלא נבחרו
     const { rows: rejectedProposers } = await client.query(
       `SELECT DISTINCT proposer.user_id, proposerProduct.title AS proposer_product_title,
-                    targetUser.name AS target_user_name, targetProduct.title AS target_product_title
-   FROM Exchange_Proposal_Options epo
-   JOIN Products proposerProduct ON epo.offered_product_id = proposerProduct.product_id
-   JOIN Users proposer ON proposerProduct.user_id = proposer.user_id
-   JOIN Exchange_Requests er ON epo.request_id = er.request_id
-   JOIN Products targetProduct ON er.product_id = targetProduct.product_id
-   JOIN Users targetUser ON targetProduct.user_id = targetUser.user_id
-   WHERE epo.request_id = $1 AND proposerProduct.product_id <> $2`,
+              targetUser.name AS target_user_name, targetProduct.title AS target_product_title
+       FROM Exchange_Proposal_Options epo
+       JOIN Products proposerProduct ON epo.offered_product_id = proposerProduct.product_id
+       JOIN Users proposer ON proposerProduct.user_id = proposer.user_id
+       JOIN Exchange_Requests er ON epo.request_id = er.request_id
+       JOIN Products targetProduct ON er.product_id = targetProduct.product_id
+       JOIN Users targetUser ON targetProduct.user_id = targetUser.user_id
+       WHERE epo.request_id = $1 AND proposerProduct.product_id <> $2`,
       [id, chosenProductId]
     );
 
@@ -165,9 +171,7 @@ exports.approveExchangeRequest = async (req, res) => {
     }
 
     await client.query("COMMIT");
-    res
-      .status(200)
-      .json({ message: "הבקשה אושרה והמוצרים הועברו לסטטוס Pending" });
+    res.status(200).json({ message: "הבקשה אושרה והמוצרים הועברו לסטטוס Pending" });
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("שגיאה באישור בקשה:", error);
@@ -177,7 +181,7 @@ exports.approveExchangeRequest = async (req, res) => {
   }
 };
 
-// השלמת ההחלפה בפועל
+// // השלמת ההחלפה בפועל
 exports.completeExchangeRequest = async (req, res) => {
   const { id } = req.params;
   const { userId, userName } = req.body;
@@ -186,11 +190,9 @@ exports.completeExchangeRequest = async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    // שליפת הבקשה והפרטים
     const { rows } = await client.query(
-      `SELECT chosen_product_id, product_id
-         FROM Exchange_Requests
-         WHERE request_id = $1 AND status = 'Approved' FOR UPDATE`,
+      `SELECT chosen_product_id, product_id FROM Exchange_Requests
+       WHERE request_id = $1 AND status = 'Approved' FOR UPDATE`,
       [id]
     );
 
@@ -202,37 +204,39 @@ exports.completeExchangeRequest = async (req, res) => {
 
     const { chosen_product_id, product_id } = request;
 
-    // עדכון סטטוס המוצר
+    const { rows: titles } = await client.query(
+      `SELECT 
+         (SELECT title FROM Products WHERE product_id = $1) AS chosen_title,
+         (SELECT title FROM Products WHERE product_id = $2) AS target_title`,
+      [chosen_product_id, product_id]
+    );
+
+    const chosenTitle = titles[0]?.chosen_title || `#${chosen_product_id}`;
+    const targetTitle = titles[0]?.target_title || `#${product_id}`;
+
     await client.query(
-      `UPDATE Products
-         SET availability = 'Exchanged'
-         WHERE product_id = $1`,
+      `UPDATE Products SET availability = 'Exchanged' WHERE product_id = $1`,
       [chosen_product_id]
     );
 
-    // יצירת רישום היסטוריה
     await client.query(
       `INSERT INTO Exchange_History (user_id, exchange_product_id, received_product_id, status)
-         VALUES ($1, $2, $3, 'Completed')`,
+       VALUES ($1, $2, $3, 'Completed')`,
       [userId, chosen_product_id, product_id]
     );
 
-    // עדכון סטטוס הבקשה
     await client.query(
-      `UPDATE Exchange_Requests
-         SET status = 'Completed', updated_at = CURRENT_TIMESTAMP
-         WHERE request_id = $1`,
+      `UPDATE Exchange_Requests SET status = 'Completed', updated_at = CURRENT_TIMESTAMP WHERE request_id = $1`,
       [id]
     );
 
-    // לוג ב־Audit
     await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-         VALUES ('השלמת החלפה', $1, $2, $3)`,
+       VALUES ('השלמת החלפה', $1, $2, $3)`,
       [
         userId,
         userName,
-        `הבקשה ${id} הושלמה – מוצר ${chosen_product_id} סומן כהוחלף בפועל`,
+        `הבקשה ${id} הושלמה – המוצר "${chosenTitle}" הוחלף עם "${targetTitle}"`,
       ]
     );
 
@@ -246,6 +250,7 @@ exports.completeExchangeRequest = async (req, res) => {
     client.release();
   }
 };
+// todo clean code!!!
 
 // קבלת כל בקשות ההחלפה
 exports.getAllExchangeRequests = async (req, res) => {
@@ -408,24 +413,36 @@ exports.getExchangeRequestById = async (req, res) => {
 exports.updateExchangeRequestStatus = async (req, res) => {
   const { id } = req.params;
   const { status, userId, userName } = req.body;
+
   try {
-    const result = await db.query(
+    const { rows } = await db.query(
       `UPDATE Exchange_Requests 
-              SET status = $1, updated_at = CURRENT_TIMESTAMP 
-              WHERE request_id = $2 RETURNING *`,
+       SET status = $1, updated_at = CURRENT_TIMESTAMP 
+       WHERE request_id = $2 
+       RETURNING product_id`,
       [status, id]
     );
-    if (result.rows.length === 0) {
+
+    if (rows.length === 0) {
       return res.status(404).json({ error: "Exchange request not found" });
     }
 
-    await db.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-         VALUES ('עדכון סטטוס בקשת החלפה', $1, $2, $3)`,
-      [userId, userName, `עודכן סטטוס לבקשה ${id} ל-${status}`]
+    const productId = rows[0].product_id;
+
+    const { rows: productRows } = await db.query(
+      `SELECT title FROM Products WHERE product_id = $1`,
+      [productId]
     );
 
-    res.status(200).json(result.rows[0]);
+    const productTitle = productRows[0]?.title || `מוצר מספר ${productId}`;
+
+    await db.query(
+      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+       VALUES ('עדכון סטטוס בקשת החלפה', $1, $2, $3)`,
+      [userId, userName, `עודכן סטטוס הבקשה על "${productTitle}" ל-${status}`]
+    );
+
+    res.status(200).json({ message: "הסטטוס עודכן בהצלחה" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to update exchange request" });
@@ -483,6 +500,8 @@ exports.updateExchangeRequestProposalOptions = async (req, res) => {
 };
 
 // ביטול בקשה - מותר רק אם היא עדיין Pending
+
+
 exports.cancelExchangeRequest = async (req, res) => {
   const { id } = req.params;
   const { userId, userName } = req.body;
@@ -492,7 +511,10 @@ exports.cancelExchangeRequest = async (req, res) => {
     await client.query("BEGIN");
 
     const { rows } = await client.query(
-      `SELECT * FROM Exchange_Requests WHERE request_id = $1 FOR UPDATE`,
+      `SELECT er.*, p.title AS product_title
+       FROM Exchange_Requests er
+       JOIN Products p ON er.product_id = p.product_id
+       WHERE er.request_id = $1 FOR UPDATE`,
       [id]
     );
 
@@ -501,6 +523,7 @@ exports.cancelExchangeRequest = async (req, res) => {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "בקשה לא נמצאה" });
     }
+
     if (request.status !== "Pending") {
       await client.query("ROLLBACK");
       return res
@@ -508,18 +531,13 @@ exports.cancelExchangeRequest = async (req, res) => {
         .json({ error: "לא ניתן לבטל בקשה שאושרה או נדחתה" });
     }
 
-    await client.query(
-      `DELETE FROM Exchange_Proposal_Options WHERE request_id = $1`,
-      [id]
-    );
-    await client.query(`DELETE FROM Exchange_Requests WHERE request_id = $1`, [
-      id,
-    ]);
+    await client.query(`DELETE FROM Exchange_Proposal_Options WHERE request_id = $1`, [id]);
+    await client.query(`DELETE FROM Exchange_Requests WHERE request_id = $1`, [id]);
 
     await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-         VALUES ('ביטול בקשת החלפה', $1, $2, $3)`,
-      [userId, userName, `בוטלה בקשה מספר ${id}`]
+       VALUES ('ביטול בקשת החלפה', $1, $2, $3)`,
+      [userId, userName, `בוטלה בקשה על "${request.product_title}" (מספר ${id})`]
     );
 
     await client.query("COMMIT");
@@ -532,18 +550,3 @@ exports.cancelExchangeRequest = async (req, res) => {
     client.release();
   }
 };
-
-// // מחיקת בקשת החלפה
-// exports.deleteExchangeRequest = async (req, res) => {
-//     const { id } = req.params;
-//     try {
-//         const result = await db.query('DELETE FROM Exchange_Requests WHERE request_id = $1 RETURNING *', [id]);
-//         if (result.rows.length === 0) {
-//             return res.status(404).json({ error: 'Exchange request not found' });
-//         }
-//         res.status(200).json({ message: 'Exchange request deleted successfully', request: result.rows[0] });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Failed to delete exchange request' });
-//     }
-// };

@@ -57,7 +57,9 @@ exports.markNotificationAsRead = async (req, res) => {
 
 // סימון כל ההתראות של המשתמש הנוכחי כנקראות
 exports.markAllAsRead = async (req, res) => {
-  const userId = req.user.user_id;
+  console.log("6666", req.user.id, "markAllAsRead");
+  
+  const userId = req.user.id;
   try {
     await db.query(
       `UPDATE Notifications SET status = 'Read'
@@ -74,11 +76,12 @@ exports.markAllAsRead = async (req, res) => {
 // Get latest notifications enriched (limit optional)
 exports.getUserNotificationsEnriched = async (req, res) => {
   const userId = req.user.id;
-  const limit = parseInt(req.query.limit) || 50;
+  const limit = parseInt(req.query.limit) || 30;
+  const offset = parseInt(req.query.offset) || 0;
   try {
     const { rows: notifications } = await db.query(
-      `SELECT * FROM Notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
-      [userId, limit]
+      `SELECT * FROM Notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
     );
 
     const enriched = [];
