@@ -138,8 +138,6 @@ const io = new Server(server, {
 const connectedUsers = new Map();
 
 io.on("connection", (socket) => {
-  console.log("📡 משתמש התחבר:", socket.id);
-
   // רישום מזהה המשתמש המחובר
   socket.on("register", (userId) => {
     connectedUsers.set(userId, socket.id);
@@ -151,7 +149,6 @@ io.on("connection", (socket) => {
     for (const [userId, id] of connectedUsers.entries()) {
       if (id === socket.id) connectedUsers.delete(userId);
     }
-    console.log("🔌 משתמש התנתק:", socket.id);
   });
 });
 
@@ -193,10 +190,6 @@ const aboutRoutes = require("./routes/aboutRoutes");
 const auditLogsRoutes = require("./routes/auditLogsRoutes");
 
 const { notFoundHandler } = require("./middlewares/404Midlleware");
-const { startCrossRequestScheduler } = require("./scripts/crossRequestScheduler");
-
-// תחילת סקריפט רקע (למשל בקשות צולבות)
-startCrossRequestScheduler();
 
 // שימוש בנתיבים
 app.use("/api/auth", authRoutes);

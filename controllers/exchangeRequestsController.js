@@ -15,6 +15,57 @@ exports.createExchangeRequest = async (req, res) => {
       .json({ error: "יש להציע בין מוצר אחד לארבעה מוצרים" });
   }
 
+  // 🛡️ מניעת כפילות: האם כבר קיימת בקשה בדיוק עם אותם מוצרים מוצעים?
+  try {
+    const { rows: existingRequests } = await db.query(
+      `
+      SELECT er.request_id
+      FROM Exchange_Requests er
+      JOIN Exchange_Proposal_Options epo ON er.request_id = epo.request_id
+      WHERE er.user_id = $1
+        AND er.product_id = $2
+        AND er.status = 'Pending'
+      GROUP BY er.request_id
+      HAVING ARRAY_AGG(epo.offered_product_id ORDER BY epo.offered_product_id) = $3::int[]
+      `,
+      [userId, productId, offeredProductIds.slice().sort()]
+    );
+
+    if (existingRequests.length > 0) {
+      return res.status(409).json({
+        error: "כבר הגשת בקשת החלפה על מוצר זה עם אותם מוצרים מוצעים",
+      });
+    }
+  } catch (error) {
+    console.error("שגיאה בבדיקת בקשות כפולות:", error);
+    return res.status(500).json({ error: "שגיאה בבדיקת בקשה קיימת" });
+  }
+
+  // ⚠️ בדיקה שקטה: האם יש חפיפה חלקית עם בקשות קודמות
+  let hasPartialOverlap = false;
+  try {
+    const { rows: overlappingProducts } = await db.query(
+      `
+      SELECT DISTINCT epo.offered_product_id
+      FROM Exchange_Requests er
+      JOIN Exchange_Proposal_Options epo ON er.request_id = epo.request_id
+      WHERE er.user_id = $1
+        AND er.product_id = $2
+        AND er.status = 'Pending'
+        AND epo.offered_product_id = ANY($3::int[])
+      `,
+      [userId, productId, offeredProductIds]
+    );
+
+    if (overlappingProducts.length > 0) {
+      hasPartialOverlap = true;
+    }
+  } catch (error) {
+    console.error("שגיאה בבדיקת חפיפה חלקית:", error);
+    // לא חוסמים, רק מתריעים בפרונט
+  }
+
+  // 👇 יצירת הבקשה בפועל
   const client = await db.connect();
   try {
     await client.query("BEGIN");
@@ -41,7 +92,8 @@ exports.createExchangeRequest = async (req, res) => {
         [offeredProductId]
       );
     }
- const { rows: productInfo } = await client.query(
+
+    const { rows: productInfo } = await client.query(
       `SELECT title FROM Products WHERE product_id = $1`,
       [productId]
     );
@@ -50,7 +102,13 @@ exports.createExchangeRequest = async (req, res) => {
     await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
        VALUES ('יצירת בקשת החלפה', $1, $2, $3)`,
-      [userId, userName, `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(", ")}`]
+      [
+        userId,
+        userName,
+        `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(
+          ", "
+        )}`,
+      ]
     );
 
     const { rows: targetProductOwner } = await client.query(
@@ -69,7 +127,10 @@ exports.createExchangeRequest = async (req, res) => {
     }
 
     await client.query("COMMIT");
-    res.status(201).json({ message: "הבקשה נשלחה בהצלחה", requestId });  } catch (error) {
+    res
+      .status(201)
+      .json({ message: "הבקשה נשלחה בהצלחה", requestId, hasPartialOverlap });
+  } catch (error) {
     await client.query("ROLLBACK");
     console.error(error);
     res.status(500).json({ error: "שגיאה ביצירת בקשת ההחלפה" });
@@ -77,6 +138,7 @@ exports.createExchangeRequest = async (req, res) => {
     client.release();
   }
 };
+
 
 // אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 exports.approveExchangeRequest = async (req, res) => {
