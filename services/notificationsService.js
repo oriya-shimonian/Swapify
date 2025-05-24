@@ -1,5 +1,5 @@
 const db = require("../config/db");
-const { emitNotification } = require("./socketEmitter");
+const { emitNewNotification } = require("./socketEmitter");
 
 async function createNotification({ userId, type, message, contextId = null }) {
   const result = await db.query(
@@ -10,7 +10,7 @@ async function createNotification({ userId, type, message, contextId = null }) {
   );
 
   // ✅ שליחת ההתראה בזמן אמת
-  emitNotification(userId, {
+  emitNewNotification(userId, {
     type,
     message,
     contextId,
