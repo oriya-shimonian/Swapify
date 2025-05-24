@@ -9,14 +9,19 @@ module.exports = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-960px)" },
         },
-		scrollReverse: {
-			"0%": { transform: "translateX(-960px)" },
-			"100%": { transform: "translateX(0)" },
-		  },
+        scrollReverse: {
+          "0%": { transform: "translateX(-960px)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        pulseHighlight: {
+          "0%, 100%": { backgroundColor: "transparent" },
+          "50%": { backgroundColor: "rgba(59,130,246,0.2)" }, // כחול בהיר
+        },
       },
       animation: {
         "scroll-left": "scroll 10s linear infinite",
-		"scroll-right": "scrollReverse 10s linear infinite",
+        "scroll-right": "scrollReverse 10s linear infinite",
+        "pulse-highlight": "pulseHighlight 1.5s ease-in-out 2",
       },
       borderRadius: {
         lg: "var(--radius)",

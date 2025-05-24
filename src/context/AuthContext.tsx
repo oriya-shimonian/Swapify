@@ -1,13 +1,9 @@
-import {
-  createContext,
-  useContext,
-  useReducer,
-  useEffect,
-} from "react";
+import { createContext, useContext, useReducer, useEffect } from "react";
 import axios from "axios";
 import { authRoutes } from "@/settings";
 import { IUser } from "@/types/type";
 import toast from "react-hot-toast";
+import { connectSocket, disconnectSocket } from "@/lib/socket";
 
 // סוגי הפעולות ל-Reducer
 type AuthAction =
@@ -91,8 +87,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       localStorage.setItem("token", token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  
+
       dispatch({ type: "LOGIN", payload: { user, token } });
+      console.log("User logged in:", user);
+      
+      // 🧠 התחברות ל־Socket אחרי login
+      connectSocket(user.user_id);
     } catch (error: any) {
       if (error.response) {
         toast.error(
@@ -103,15 +103,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
   };
-  
 
   // פונקציה להתנתקות
   const logout = () => {
     console.log("Logging out...");
-    
+
     localStorage.removeItem("token");
-    state.user(null);
     delete axios.defaults.headers.common["Authorization"];
+
+    disconnectSocket(); // ❌ ניתוק מה־Socket
 
     dispatch({ type: "LOGOUT" });
   };
@@ -128,7 +128,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       console.log(response.data, "response");
-      
 
       dispatch({
         type: "LOGIN",
@@ -152,7 +151,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: state.user, state, login, logout, checkAuth }}>
+    <AuthContext.Provider
+      value={{ user: state.user, state, login, logout, checkAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,4 @@
-const baseBackendAddress = "http://localhost:3000/api";
+export const baseBackendAddress = "http://localhost:3000/api";
 
 // Authentication
 const authRoutes = {
@@ -18,11 +18,21 @@ const userRoutes = {
   deleteUser: (id: number) => `${baseBackendAddress}/users/${id}`, // מחיקת משתמש (Admin)
 };
 
+// Notifications
+const notificationRoutes = {
+  createNotification: `${baseBackendAddress}/notifications`,
+  getUnreadCount: `${baseBackendAddress}/notifications/unread-count`,
+  getEnrichedNotifications: (limit: number, offset: number) => `${baseBackendAddress}/notifications/enriched?limit=${limit}&offset=${offset}`,
+  markNotificationAsRead: (id: number) => `${baseBackendAddress}/notifications/${id}/read`,
+  markAllAsRead: `${baseBackendAddress}/notifications/mark-all`,
+};
+
+
 // Products
 const productRoutes = {
-  getAllProducts: `${baseBackendAddress}/products`, // פומבי - כל המוצרים
+  getAllProducts: (limit: number, offset?: number) => `${baseBackendAddress}/products?limit=${limit}&offset=${offset}`,
   getProductById: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות
-  getProductsByUser: (userId: number) => `${baseBackendAddress}/products/user/${userId}`, // דורש התחברות
+  getProductsByUser: (userId: number, limit: number, offset?: number) => `${baseBackendAddress}/products/user/${userId}?limit=${limit}&offset=${offset}`, // דורש התחברות
   getOfferableProducts: (userId: number) => `${baseBackendAddress}/products/offerable/${userId}`, // דורש התחברות
   createProduct: `${baseBackendAddress}/products`, // דורש התחברות + בדיקת חסימה
   updateProduct: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות + הרשאה לעריכה
@@ -70,14 +80,6 @@ const exchangeRequestRoutes = {
   updateExchangeRequestStatus: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
   updateExchangeRequestProposalOptions: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/options`, // עדכון סטטוס (למשל דחייה) (דורש הרשאה)
   cancelExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // מחיקה/ביטול בקשה (דורש הרשאה)
-};
-
-
-// Notifications
-const notificationRoutes = {
-  getAllNotifications: `${baseBackendAddress}/notifications`,
-  createNotification: `${baseBackendAddress}/notifications`,
-  markNotificationAsRead: (id: number) => `${baseBackendAddress}/notifications/${id}/read`,
 };
 
 // Roles

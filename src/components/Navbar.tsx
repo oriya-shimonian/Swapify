@@ -10,12 +10,16 @@ import {
   NOT_ADMIN_LINKS,
 } from "@/constants/navigationLinks";
 import { useAuth } from "@/context/AuthContext";
+import { IoNotifications } from "react-icons/io5";
+import { useNotifications } from "@/hooks/useNotifications";
+import NotificationsDropdown from "./notifications/NotificationsDropdown";
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications(user);
 
   return (
     <nav className="fixed top-0 right-0 w-full bg-gray-100/15 dark:bg-black/30 shadow-md transition-all duration-300 z-50">
@@ -82,7 +86,7 @@ const Navbar = () => {
           {/* כפתור תפריט למובייל */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
+            className="md:hidden ml-4 p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
           >
             {isMenuOpen ? (
               <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
@@ -102,6 +106,16 @@ const Navbar = () => {
               <Moon className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-gray-500" />
             )}
           </button>
+          {/* כפתור התראות 
+          {user && <button className="relative">
+            <IoNotifications size={26} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2.5 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}ReceivedRequestsTab
+          </button>}*/}
+          {user && <NotificationsDropdown />}
           {/* כפתו�� כני��ה/תפרי�� משתמש */}
           {user ? (
             // 🟢 תפריט למשתמש מחובר

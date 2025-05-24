@@ -5,6 +5,7 @@ import {
   getProductConditionLabel,
   getSubcategoryLabel,
   IProduct,
+  IProductWithOwnerName,
   ProductCategory,
   ProductCondition,
 } from "@/types/products";
@@ -26,12 +27,15 @@ import LocationBubbles from "@/components/LocationBubbles";
 import ExchangeRequestDialog from "@/components/dialogs/ExchangeRequestDialog";
 import ImageUploader from "@/components/ImageUploader";
 import useProducts from "@/hooks/useProducts";
+import { getFormattedDateWithRelative } from "@/utils/FormatAndRelativeDate";
 
 export default function ProductDetailPage() {
   const conditionOptions = Object.values(ProductCondition);
   const categoryOptions = Object.values(ProductCategory);
   const { productId } = useParams();
-  const [product, setProduct] = useState<IProduct>({} as IProduct);
+  const [product, setProduct] = useState<IProductWithOwnerName>(
+    {} as IProductWithOwnerName
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState<IProduct>({} as IProduct);
   const { user } = useAuth();
@@ -71,18 +75,6 @@ export default function ProductDetailPage() {
   const isOwner = !!product.product_id && user?.user_id === product.user_id;
 
   const handleDeleteProduct = async () => {
-    // try {
-    //   setIsDeleting(true);
-    //   await axios.delete(productRoutes.deleteProduct(product.product_id));
-    //   toast.success("המוצר נמחק בהצלחה");
-    //   navigate("/all-products");
-    // } catch (err) {
-    //   toast.error("אירעה שגיאה בעת המחיקה");
-    //   console.error(err);
-    // } finally {
-    //   setIsDeleting(false);
-    //   setShowDeleteDialog(false);
-    // }
     try {
       setIsDeleting(true);
       const result = await deleteProduct({
@@ -210,6 +202,13 @@ export default function ProductDetailPage() {
           <p className="text-gray-600 mt-2">{product.description}</p>
           <p className="mt-2">
             <strong>מצב:</strong> {getProductConditionLabel(product.condition)}
+          </p>
+          <p>
+            <strong>בעל המוצר:</strong> {product.name}
+          </p>
+          <p>
+            <strong>תאריך יצירת המוצר:</strong>{" "}
+            {getFormattedDateWithRelative(new Date(product.created_at))}
           </p>
           <p>
             <strong>קטגוריה:</strong>{" "}
