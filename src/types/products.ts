@@ -1,3 +1,23 @@
+
+export const NUM_PRODUCTS_IN_PAGE = 2;
+
+export interface CreateProductPayload {
+  category: ProductCategory;
+  data: any;
+}
+
+export interface UpdateProductPayload {
+  category: ProductCategory;
+  id: string;
+  data: any;
+}
+
+export interface DeleteProductPayload {
+  category: ProductCategory;
+  id: string;
+}
+
+
 // Enum for product conditions
 export enum ProductCondition {
   NEW = "New",
@@ -89,6 +109,9 @@ export interface IProductBase {
   image_url?: string | null; // Optional, as some products may not have images
   created_at: string; // ISO date string
   updated_at?: string; // Optional, if tracking updates
+  availability: ProductAvailability;
+  status: string; // Status of the product (e.g., available, pending, exchanged)
+  name?: string; // Owner's name, optional for some operations
 }
 
 // Specific product types
@@ -195,3 +218,5 @@ export const getSubcategoryValueFromLabel = (
 
 // General product type (union of all specific products)
 export type IProduct = IPuzzleProduct | IBookProduct | IBoardGameProduct;
+
+export type IProductWithOwnerName = IProduct & { name: string };

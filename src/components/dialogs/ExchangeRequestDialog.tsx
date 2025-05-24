@@ -27,8 +27,8 @@ export default function ExchangeRequestDialog({
 }: Props) {
   const { user } = useAuth();
   const { fetchOfferableProducts } = useProducts();
-  const { createRequest, loading } = useExchangeRequest();
-
+  const { createRequest, loading, error } = useExchangeRequest();
+  const [hasPartialOverlap, setHasPartialOverlap] = useState(false);
   const [offerableProducts, setOfferableProducts] = useState<IProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>(initialSelectedIds);
@@ -53,7 +53,9 @@ export default function ExchangeRequestDialog({
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id].slice(0, 4)
+      prev.includes(id)
+        ? prev.filter((pid) => pid !== id)
+        : [...prev, id].slice(0, 4)
     );
   };
 
@@ -65,15 +67,26 @@ export default function ExchangeRequestDialog({
     }
 
     if (!user || selectedIds.length === 0 || selectedIds.length > 4) return;
+    if (hasPartialOverlap) {
+      // ניסיון שני – נשלח בכל זאת
+      onSuccess?.();
+      handleClose();
+      return;
+    }
+
     try {
-      await createRequest({
+      const response = await createRequest({
         userId: user.user_id,
         userName: user.name,
         productId,
         offeredProductIds: selectedIds,
       });
-      onSuccess?.();
-      handleClose();
+      if (response.hasPartialOverlap) {
+        setHasPartialOverlap(true);
+      } else {
+        onSuccess?.();
+        handleClose();
+      }
     } catch {
       // Error is already handled in hook
     }
@@ -85,19 +98,27 @@ export default function ExchangeRequestDialog({
     setCategoryFilter("");
     setSubcategoryFilter("");
     setSearchTerm("");
+    setHasPartialOverlap(false);
   };
 
   const filtered = offerableProducts.filter((p) => {
     return (
       (!categoryFilter || p.category === categoryFilter) &&
-      (!subcategoryFilter || p.subcategory?.toLowerCase().includes(subcategoryFilter.toLowerCase())) &&
+      (!subcategoryFilter ||
+        p.subcategory
+          ?.toLowerCase()
+          .includes(subcategoryFilter.toLowerCase())) &&
       p.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
-  const hasChanges = JSON.stringify(initialSelectedIds.sort()) !== JSON.stringify(selectedIds.sort());
+  const hasChanges =
+    JSON.stringify(initialSelectedIds.sort()) !==
+    JSON.stringify(selectedIds.sort());
   const confirmDisabled =
-    (mode === "edit" && !hasChanges) || selectedIds.length === 0 || selectedIds.length > 4;
+    (mode === "edit" && !hasChanges) ||
+    selectedIds.length === 0 ||
+    selectedIds.length > 4;
 
   return (
     <AppDialog
@@ -127,7 +148,9 @@ export default function ExchangeRequestDialog({
         >
           <option value="">הכל</option>
           {Object.values(ProductCategory).map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
           ))}
         </select>
       </div>
@@ -152,7 +175,7 @@ export default function ExchangeRequestDialog({
         />
       </div>
 
-      <div className="max-h-64 overflow-y-auto space-y-2 mt-3">
+      <div className="max-h-32 overflow-y-auto space-y-2 mt-3">
         {filtered.map((p) => {
           const isSelected = selectedIds.includes(p.product_id);
           const canSelectMore = selectedIds.length < 4 || isSelected;
@@ -187,6 +210,16 @@ export default function ExchangeRequestDialog({
           ניתן לבחור עד 4 מוצרים בלבד.
         </div>
       )}
+      {/* הודעה פנימית על חפיפה חלקית, עם מקום קבוע למניעת קפיצות */}
+      <div className="min-h-[48px] mt-4">
+        {hasPartialOverlap && (
+          <div className="rounded border border-yellow-300 dark:border-yellow-700 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100 px-3 py-2 text-sm">
+            ⚠️ שים לב: חלק מהמוצרים שכבר בחרת מופיעים בבקשות קודמות שלך על מוצר
+            זה. מומלץ לבדוק אם כבר הגשת בקשה דומה לפני שליחה נוספת.
+          </div>
+        )}
+        {error && <div className="mt-3 text-sm text-red-500">{error}</div>}
+      </div>
     </AppDialog>
   );
 }

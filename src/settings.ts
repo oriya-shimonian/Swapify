@@ -30,9 +30,9 @@ const notificationRoutes = {
 
 // Products
 const productRoutes = {
-  getAllProducts: `${baseBackendAddress}/products`, // פומבי - כל המוצרים
+  getAllProducts: (limit: number, offset?: number) => `${baseBackendAddress}/products?limit=${limit}&offset=${offset}`,
   getProductById: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות
-  getProductsByUser: (userId: number) => `${baseBackendAddress}/products/user/${userId}`, // דורש התחברות
+  getProductsByUser: (userId: number, limit: number, offset?: number) => `${baseBackendAddress}/products/user/${userId}?limit=${limit}&offset=${offset}`, // דורש התחברות
   getOfferableProducts: (userId: number) => `${baseBackendAddress}/products/offerable/${userId}`, // דורש התחברות
   createProduct: `${baseBackendAddress}/products`, // דורש התחברות + בדיקת חסימה
   updateProduct: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות + הרשאה לעריכה
