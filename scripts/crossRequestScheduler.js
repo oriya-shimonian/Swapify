@@ -19,7 +19,7 @@ async function findMatchesForAllPendingRequests() {
 }
 
 function startCrossRequestScheduler() {
-  console.log("🚀 מנוע התאמות צולבות הופעל");
+  // console.log("🚀 מנוע התאמות צולבות הופעל");
 
   findMatchesForAllPendingRequests(); // הרצה ראשונית
   setInterval(findMatchesForAllPendingRequests, 5 * 60 * 1000); // כל 5 דקות
