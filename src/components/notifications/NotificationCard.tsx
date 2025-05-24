@@ -26,6 +26,7 @@ const getTypeColor = (type: string) => {
     auto_rejected: "from-red-500 to-pink-500",
     completed: "from-teal-500 to-cyan-400",
     cancelled: "from-yellow-500 to-amber-400",
+    match_found: "from-pink-500 to-pink-300",
   };
   return colors[type as keyof typeof colors] || "from-blue-500 to-purple-500";
 };

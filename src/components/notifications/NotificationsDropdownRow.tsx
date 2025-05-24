@@ -22,6 +22,8 @@ export function NotificationsDropdownRow({
         return <CheckCheck className="w-4 h-4 text-purple-500" />;
       case "cancelled":
         return <Bell className="w-4 h-4 text-red-500" />;
+      case "match_found":
+        return <Bell className="w-4 h-4 text-pink-500" />;
       default:
         return <Bell className="w-4 h-4 text-gray-400" />;
     }

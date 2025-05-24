@@ -115,13 +115,25 @@ export const useNotifications = (user?: IUser | null) => {
       }
     };
 
-    // רישום המאזין (רק אם לא רשום כבר – אופציונלי, רק אם את באמת חוששת מכפילויות)
+    const handleCrossMatch = (data: any) => {
+      console.log("🎯 התאמה צולבת בזמן אמת:", data);
+      if (user.notification_enabled) {
+        audio.currentTime = 0;
+        audio.play().catch((err) => {
+          console.warn("🔇 לא ניתן לנגן את הצליל (cross match):", err.message);
+        });
+      }
+    };
+
     socket.off("new_notification"); // מבטיחים שאין כפילויות
     socket.on("new_notification", handleNewNotification);
+    socket.off("cross_request_match");
+    socket.on("cross_request_match", handleCrossMatch);
 
     // ניקוי מאזין בעת unmount
     return () => {
       socket.off("new_notification", handleNewNotification);
+      socket.off("cross_request_match", handleCrossMatch);
     };
   }, [user, fetchUnreadCount]);
   //   if (socket && !socket.hasListeners?.("new_notification")) {
