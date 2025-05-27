@@ -7,7 +7,6 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- יצירת ENUMs
 CREATE TYPE request_status AS ENUM ('Pending', 'Approved', 'Rejected');
-CREATE TYPE notification_status AS ENUM ('Unread', 'Read');
 CREATE TYPE user_report_status AS ENUM ('Open', 'Under Review', 'Closed');
 CREATE TYPE exchange_status AS ENUM ('Completed', 'Pending', 'Rejected');
 CREATE TYPE subcategory_puzzle AS ENUM ('Nature', 'Art', 'Kids', '3 D');
@@ -15,7 +14,15 @@ CREATE TYPE subcategory_book AS ENUM ('Romance', 'Thriller', 'Fantasy', 'Sci-Fi'
 CREATE TYPE subcategory_board_game AS ENUM ('Strategy', 'Kids', 'Party', 'Puzzle', 'Two-player', 'Group', 'Family');
 CREATE TYPE role_names AS ENUM ('Admin', 'Guest', 'User');
 CREATE TYPE availability_status AS ENUM ('Available','Interested', 'Pending', 'Exchanged');
-
+CREATE TYPE notification_status AS ENUM ('Unread', 'Read');
+CREATE TYPE notification_type AS ENUM ('new_request',       -- קיבלת בקשת החלפה
+  'approved',          -- הבקשה שלך אושרה
+  'rejected',          -- הבקשה שלך נדחתה
+  'auto_rejected',     -- הבקשה שלך נדחתה אוטומטית
+  'match_found',       -- נמצאה התאמה בין בקשות
+  'new_message',       -- הודעה חדשה בצ'אט (בעתיד)
+  'info'               -- התראה כללית
+);
 -- טבלת Roles
 CREATE TABLE IF NOT EXISTS Roles (
     Role_id SERIAL PRIMARY KEY,
@@ -52,7 +59,7 @@ CREATE TABLE IF NOT EXISTS Products (
     Subcategory VARCHAR (255),
     Condition VARCHAR (50) CHECK (condition IN ('New', 'Used', 'Good Condition')),
     Location VARCHAR (255),
-    Image_url VARCHAR (255),
+    Image_url TEXT,
     Availability availability_status DEFAULT 'Available',
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -63,7 +70,7 @@ CREATE TABLE IF NOT EXISTS Puzzles (
     Product_id INT PRIMARY KEY REFERENCES Products (product_id) ON DELETE CASCADE,
     Manufacturer VARCHAR (255),
     Pieces_count INT,
-    Image_url VARCHAR (255),
+    Image_url TEXT,
     Subcategory subcategory_puzzle
 );
 
@@ -73,7 +80,7 @@ CREATE TABLE IF NOT EXISTS Books (
     Publish_year INT,
     Publisher VARCHAR (255),
     Page_count INT,
-    Image_url VARCHAR (255),
+    Image_url TEXT,
     Subcategory subcategory_book
 );
 
@@ -82,7 +89,7 @@ CREATE TABLE IF NOT EXISTS Board_Games (
     Min_players INT,
     Max_players INT,
     Duration INT,
-    Image_url VARCHAR (255),
+    Image_url TEXT,
     Subcategory subcategory_board_game
 );
 
@@ -117,12 +124,13 @@ CREATE TABLE IF NOT EXISTS Product_Information_Requests (
 
 -- טבלת התראות
 CREATE TABLE IF NOT EXISTS Notifications (
-    Notification_id SERIAL PRIMARY KEY,
-    User_id INT REFERENCES Users (user_id),
-    Message TEXT,
-    Status notification_status,
-    Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    notification_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES Users (user_id) ON DELETE CASCADE,
+    type notification_type NOT NULL,
+    message TEXT NOT NULL,
+    context_id INT, -- מזהה רלוונטי (בקשה, מוצר, הודעה וכו')
+    status notification_status DEFAULT 'Unread',
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- טבלת צ'אטים
@@ -177,6 +185,16 @@ CREATE TABLE IF NOT EXISTS About_Sections (
     Updated_by TEXT,
     CHECK (Title IS NOT NULL OR Content IS NOT NULL)
 );
+
+CREATE TABLE IF NOT EXISTS Cross_Exchange_Matches (
+    Match_id SERIAL PRIMARY KEY,
+    Request_a_id INT NOT NULL REFERENCES Exchange_Requests(request_id) ON DELETE CASCADE,
+    Request_b_id INT NOT NULL REFERENCES Exchange_Requests(request_id) ON DELETE CASCADE,
+    Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    Is_active BOOLEAN DEFAULT TRUE,
+    UNIQUE (Request_a_id, Request_b_id)
+);
+
 
 -- הכנסת משתמשים לדוגמה
 INSERT INTO Users (name, email, password_hash, role_id)
