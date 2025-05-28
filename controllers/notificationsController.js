@@ -57,8 +57,6 @@ exports.markNotificationAsRead = async (req, res) => {
 
 // סימון כל ההתראות של המשתמש הנוכחי כנקראות
 exports.markAllAsRead = async (req, res) => {
-  console.log("6666", req.user.id, "markAllAsRead");
-  
   const userId = req.user.id;
   try {
     await db.query(

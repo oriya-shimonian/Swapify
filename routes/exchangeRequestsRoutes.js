@@ -46,4 +46,5 @@ router.put("/:id/options", authenticateUser, checkBanStatus, canManageItem('Exch
   
 router.delete('/:id', authenticateUser, checkBanStatus, canManageItem('Exchange_Requests', 'request_id'), exchangeRequestsController.cancelExchangeRequest);
 
+router.post("/:requestId/confirm-meeting", authenticateUser, checkBanStatus, exchangeRequestsController.confirmMeeting);
 module.exports = router;

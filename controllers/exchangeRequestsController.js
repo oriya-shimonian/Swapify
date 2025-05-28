@@ -612,3 +612,64 @@ exports.cancelExchangeRequest = async (req, res) => {
     client.release();
   }
 };
+
+
+// קביעת פגישה בין שני הצדדים אחרי ששניהם הסכימו
+exports.confirmMeeting = async (req, res) => {
+  const { requestId } = req.params;
+  const { meeting_option_id, meeting_date } = req.body;
+  const userId = req.user.userId;
+  const userName = req.user.name;
+
+  try {
+    const result = await db.query(
+      `INSERT INTO Scheduled_Meetings (exchange_request_id, meeting_option_id, meeting_date)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (exchange_request_id) DO UPDATE
+       SET meeting_option_id = EXCLUDED.meeting_option_id,
+           meeting_date = EXCLUDED.meeting_date`,
+      [requestId, meeting_option_id, meeting_date]
+    );
+
+    // שליפת פרטי המפגש עבור הלוג
+    const meetingDetails = await db.query(
+      `SELECT mo.city, mo.location_name, mo.hour
+       FROM MeetingOptions mo
+       WHERE mo.id = $1`,
+      [meeting_option_id]
+    );
+
+    const { city, location_name, hour } = meetingDetails.rows[0];
+
+    // הוספת שורת Audit Log
+    await db.query(
+      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+       VALUES ($1, $2, $3, $4)`,
+      [
+        "Meeting Confirmed",
+        userId,
+        userName,
+        `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`
+      ]
+    );
+
+    res.status(200).json({ message: "Meeting confirmed successfully." });
+  } catch (error) {
+    console.error("Error confirming meeting:", error);
+    res.status(500).json({ error: "Failed to confirm meeting" });
+  }
+};
+
+
+// מוחק פגישות שהזמן שלהן עבר
+exports.cleanupPastMeetings = async () => {
+  try {
+    await db.query(
+      `DELETE FROM Scheduled_Meetings
+       WHERE scheduled_date < CURRENT_DATE`
+    );
+    console.log("🧹 Deleted old meetings");
+  } catch (err) {
+    console.error("❌ Failed to clean old meetings", err);
+  }
+};
