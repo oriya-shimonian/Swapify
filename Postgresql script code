@@ -136,13 +136,40 @@ CREATE TABLE IF NOT EXISTS Notifications (
 -- טבלת צ'אטים
 CREATE TABLE IF NOT EXISTS Chats (
     Chat_id SERIAL PRIMARY KEY,
-    Exchange_request_id INT REFERENCES Exchange_Requests (request_id),
-    User_id_1 INT REFERENCES Users (user_id),
-    User_id_2 INT REFERENCES Users (user_id),
-    Messages TEXT,
-    Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    Exchange_request_id INT NOT NULL REFERENCES Exchange_Requests (Request_id) ON DELETE CASCADE,
+    Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS MeetingOptions (
+  id SERIAL PRIMARY KEY,
+  city TEXT NOT NULL,
+  location_name TEXT NOT NULL,
+  hour TIME NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS Messages (
+    Message_id SERIAL PRIMARY KEY,
+    Chat_id INT NOT NULL REFERENCES Chats(Chat_id) ON DELETE CASCADE,
+    Sender_id INT NOT NULL REFERENCES Users(User_id) ON DELETE CASCADE,
+    Type TEXT NOT NULL CHECK (Type IN ('text', 'location_suggestion', 'meeting_response', 'status_confirmation', 'system')),
+    Content TEXT,
+    Meeting_option_id INT REFERENCES MeetingOptions(id),
+    Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    read_by_recipient BOOLEAN DEFAULT false,
+    read_at TIMESTAMPTZ,
+    is_accepted BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS Scheduled_Meetings (
+  meeting_id SERIAL PRIMARY KEY,
+  exchange_request_id INTEGER REFERENCES Exchange_Requests(request_id) ON DELETE CASCADE,
+  chat_id INTEGER REFERENCES Chats(chat_id) ON DELETE CASCADE,
+  meeting_option_id INTEGER REFERENCES MeetingOptions(id),
+  scheduled_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- דיווחי משתמשים
 CREATE TABLE IF NOT EXISTS User_Reports (
