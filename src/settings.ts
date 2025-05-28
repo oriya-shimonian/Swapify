@@ -107,6 +107,31 @@ const auditLogRoutes = {
   getAuditLogs: `${baseBackendAddress}/audit-logs`,
 };
 
+// todo delete this
+export const meetingOptionsRoutes = {
+  getAll: `${baseBackendAddress}/meeting-options`, // כל המיקומים האקטיביים בלבד
+  getAllAdmin: `${baseBackendAddress}/meeting-options/admin`, // כולל לא פעילים
+  create: `${baseBackendAddress}/meeting-options`,
+  update: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
+  delete: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
+  getById: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
+};
+
+const messageRoutes = {
+  getMessages: (chatId: number, before?: string, limit = 20) =>
+    `${baseBackendAddress}/messages/${chatId}?limit=${limit}${before ? `&before=${before}` : ""}`,
+  sendMessage: `${baseBackendAddress}/messages`,
+  markAsRead: (messageId: number) => `${baseBackendAddress}/messages/${messageId}/read`,
+};
+
+const chatRoutes = {
+  getUserChats: `${baseBackendAddress}/chats`,
+  getOrCreateChat: (productId: number, requestId: number) =>
+    `${baseBackendAddress}/chats/product/${productId}/request/${requestId}`,
+  deleteChat: (chatId: number) => `${baseBackendAddress}/chats/${chatId}`,
+  markChatAsRead: (chatId: number) => `${baseBackendAddress}/chats/${chatId}/mark-read`,
+};
+
 export {
   authRoutes,
   userRoutes,
@@ -120,4 +145,6 @@ export {
   uploadRoutes,
   aboutRoutes,
   auditLogRoutes,
+  chatRoutes,
+  messageRoutes
 };

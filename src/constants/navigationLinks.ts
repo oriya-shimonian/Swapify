@@ -19,4 +19,5 @@ export const ADMIN_LINKS = [
   { name: "סטטיסטיקות", path: "/admin/stats" },
   { name: "לוגים", path: "/admin/audits" },
   { name: "ניהול משתמשים", path: "/admin/users" },
+  // { name: "ניהול מיקומי החלפה", path: "/admin/meeting-options" },
 ];
