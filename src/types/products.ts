@@ -1,5 +1,5 @@
 
-export const NUM_PRODUCTS_IN_PAGE = 2;
+export const NUM_PRODUCTS_IN_PAGE = 30;
 
 export interface CreateProductPayload {
   category: ProductCategory;

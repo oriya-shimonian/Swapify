@@ -31,7 +31,8 @@ export function ExchangeOfferCards({ request, onApprove, onReject, AutomaticReje
 console.log(request.status);
 
   return (
-    <div className="border-t pt-4 mt-2">
+    <div className="mt-2">
+      <h5 className="pb-2">המוצרים שהוצעו לך להחליף בתמורה למוצר שלך:</h5>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {request.offered_products.map((product: IOfferedProductPreview) => {
           const isSelected = selectedId === product.product_id;
@@ -46,7 +47,7 @@ console.log(request.status);
               }`}
               onClick={() => request.status === "Pending" && setSelectedId(product.product_id)}
             >
-                {(product.availability === "Exchange" || product.availability === "Pending") && (request.status=== "Pending" || request.status === "Rejected") && <p className="text-red-500 text-xs">המוצר הזה מוחלף בבקשה אחרת</p>}
+                {((product.availability === "Exchange" || product.availability === "Pending") && request.chosen_product_id != product.product_id) && (product) && <p className="text-red-500 text-xs">המוצר הזה מוחלף בבקשה אחרת</p>}
                 {product.image_url && (
                 <img
                 loading="lazy"
@@ -55,7 +56,7 @@ console.log(request.status);
                   className="w-64 h-32 object-cover rounded"
                 />
               )}
-              <div className="text-lg font-semibold mb-1">{product.title}</div>
+              <a className="text-lg font-semibold mb-1 underline" href={`/product/${product.product_id}`}>{product.title}</a>
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                 {product.category} / {product.subcategory}
               </div>
