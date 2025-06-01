@@ -1,49 +1,81 @@
 const db = require("../config/db");
 
-// 1. יצירת או שליפת צ'אט קיים לפי בקשה מאושרת ומוצר
-exports.getOrCreateChatByProductId = async (req, res) => {
-  const userId = req.user.user_id;
-  const productId = parseInt(req.params.productId);
+// 1. יצירת צ'אט חדש
+exports.createChat = async (req, res) => {
+  const { exchangeRequestId } = req.body;
+
+  if (!exchangeRequestId) {
+    return res.status(400).json({ error: "חסר מזהה בקשת החלפה" });
+  }
 
   try {
+    // בדיקה אם כבר קיים צ'אט לבקשה הזו
+    const existing = await db.query(
+      `SELECT * FROM Chats WHERE exchange_request_id = $1`,
+      [exchangeRequestId]
+    );
+    if (existing.rows.length > 0) {
+      return res.status(200).json(existing.rows[0]);
+    }
+
     const result = await db.query(
-      `SELECT * FROM Exchange_Requests
-       WHERE product_id = $1 AND user_id = $2 AND status = 'Approved'
-       LIMIT 1`,
-      [productId, userId]
+      `INSERT INTO Chats (exchange_request_id)
+       VALUES ($1)
+       RETURNING *`,
+      [exchangeRequestId]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "לא נמצאה בקשה מאושרת בין המשתמשים למוצר זה." });
-    }
-
-    const request = result.rows[0];
-
-    if (request.chat_id) {
-      return res.status(200).json({ chat_id: request.chat_id });
-    }
-
-    // יצירת צ'אט חדש
-    const insertChat = await db.query(
-      `INSERT INTO Chats (exchange_request_id) VALUES ($1) RETURNING chat_id`,
-      [request.request_id]
-    );
-    const newChatId = insertChat.rows[0].chat_id;
-
-    // עדכון בקשה עם ה-chat_id
-    await db.query(
-      `UPDATE Exchange_Requests SET chat_id = $1 WHERE request_id = $2`,
-      [newChatId, request.request_id]
-    );
-
-    return res.status(201).json({ chat_id: newChatId });
+    const newChat = result.rows[0];
+    res.status(201).json(newChat);
   } catch (err) {
-    console.error("❌ Failed to get or create chat:", err);
-    res.status(500).json({ error: "שגיאה בעת פתיחת צ'אט" });
+    console.error("❌ שגיאה ביצירת צ'אט:", err);
+    res.status(500).json({ error: "שגיאה פנימית" });
   }
 };
 
-// 2. שליפת כל הצ'אטים של המשתמש
+// 2. שליפת צ'אט לפי מזהה בקשת החלפה
+exports.getChatByExchangeRequestId = async (req, res) => {
+  const { requestId } = req.params;
+
+  try {
+    const result = await db.query(
+      `SELECT * FROM Chats WHERE exchange_request_id = $1`,
+      [requestId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "צ'אט לא נמצא לבקשה זו" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ שגיאה בשליפת צ'אט לפי בקשה:", err);
+    res.status(500).json({ error: "שגיאה פנימית" });
+  }
+};
+
+// 3. שליפת צ'אט לפי chat_id
+exports.getChatById = async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    const result = await db.query(
+      `SELECT * FROM Chats WHERE chat_id = $1`,
+      [chatId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "צ'אט לא נמצא" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ שגיאה בשליפת צ'אט:", err);
+    res.status(500).json({ error: "שגיאה פנימית" });
+  }
+};
+
+// 4. שליפת כל הצ'אטים של המשתמש
 exports.getUserChats = async (req, res) => {
   const userId = req.user.user_id;
 
@@ -72,37 +104,5 @@ exports.getUserChats = async (req, res) => {
   } catch (err) {
     console.error("❌ Failed to fetch user chats:", err);
     res.status(500).json({ error: "שגיאה בעת טעינת הצ'אטים" });
-  }
-};
-
-// 3. סימון הודעה כנקראה (עבור משתמש ספציפי בצ'אט)
-exports.markMessageAsRead = async (req, res) => {
-  const userId = req.user.user_id;
-  const messageId = parseInt(req.params.messageId);
-
-  try {
-    await db.query(
-      `INSERT INTO Message_Read_Status (message_id, user_id)
-       VALUES ($1, $2)
-       ON CONFLICT DO NOTHING`,
-      [messageId, userId]
-    );
-    res.status(200).json({ message: "ההודעה סומנה כנקראה" });
-  } catch (err) {
-    console.error("❌ Failed to mark message as read:", err);
-    res.status(500).json({ error: "שגיאה בעת סימון כהודעה שנקראה" });
-  }
-};
-
-// 4. מחיקת צ'אט (לשיקולך - עשוי להפריע ללוגים)
-exports.deleteChat = async (req, res) => {
-  const chatId = parseInt(req.params.chatId);
-
-  try {
-    await db.query(`DELETE FROM Chats WHERE chat_id = $1`, [chatId]);
-    res.status(200).json({ message: "הצ'אט נמחק בהצלחה" });
-  } catch (err) {
-    console.error("❌ Failed to delete chat:", err);
-    res.status(500).json({ error: "שגיאה בעת מחיקת צ'אט" });
   }
 };

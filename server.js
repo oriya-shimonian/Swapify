@@ -4,15 +4,15 @@ const pool = require("./config/db");
 const cors = require("cors");
 const http = require("http");
 const cron = require("node-cron");
-const { cleanupPastMeetings } = require("./controllers/exchangeRequestsController");
-
+const {
+  cleanupPastMeetings,
+} = require("./controllers/exchangeRequestsController");
 
 // להריץ כל יום ב־00:00
 cron.schedule("0 0 * * *", async () => {
   console.log("📆 רץ cron job למחיקת פגישות ישנות...");
   await cleanupPastMeetings();
 });
-
 
 const { Server } = require("socket.io");
 
@@ -52,17 +52,18 @@ const io = new Server(server, {
 const connectedUsers = new Map();
 
 io.on("connection", (socket) => {
-  console.log("🔌 New socket connected:", socket.id);
+  // console.log("🔌 New socket connected:", socket.id);
 
   // רישום משתמש מחובר
   socket.on("register", (userId) => {
     connectedUsers.set(userId, socket.id);
-    console.log("🟢 userId registered:", userId);
+    // console.log("🟢 userId registered:", userId);
   });
 
   // הצטרפות לצ’אט מסוים
   socket.on("join_chat", ({ userId, chatId }) => {
-    setUserCurrentChat(userId, chatId);         // ← Map<userId, chatId>
+    console.log(`📥 User ${userId} joined chat_${chatId}`);
+    setUserCurrentChat(userId, chatId); // ← Map<userId, chatId>
     socket.join(`chat_${chatId}`);
     console.log(`👥 user ${userId} joined chat ${chatId}`);
   });
@@ -122,7 +123,6 @@ app.use("/api/about", require("./routes/aboutRoutes"));
 app.use("/api/audit-logs", require("./routes/auditLogsRoutes"));
 app.use("/api/chats", require("./routes/chatsRoutes"));
 app.use("/api/messages", require("./routes/messagesRoutes"));
-app.use("/api/meeting-options", require("./routes/meetingOptionsRoutes"));
 
 // ✅ 404
 const { notFoundHandler } = require("./middlewares/404Midlleware");

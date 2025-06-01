@@ -1,20 +1,22 @@
+// 📁 messagesRoutes.js
 const express = require("express");
 const router = express.Router();
 
 const messagesController = require("../controllers/messagesController");
-const { authenticateUser, isAdmin } = require("../middlewares/authMiddleware");
+const { authenticateUser } = require("../middlewares/authMiddleware");
 const checkBanStatus = require("../middlewares/checkBanStatus");
 
-// יצירת הודעה חדשה בצ'אט
-router.post("/:chatId", authenticateUser, checkBanStatus, messagesController.createMessage);
 
-// שליפת הודעות לפי chatId (כולל limit ו-before)
-router.get("/:chatId", authenticateUser, checkBanStatus, messagesController.getMessagesByChatId);
+// יצירת הודעה בצ'אט
+router.post("/chat/:chatId", authenticateUser, checkBanStatus, messagesController.createMessage);
 
-// סימון הודעה כנקראה (לשימוש בצ'אט זוגי בלבד)
-router.post("/mark-read/:messageId", authenticateUser, checkBanStatus, messagesController.markMessageAsRead);
+// שליפת כל ההודעות בצ'אט
+router.get("/chat/:chatId", authenticateUser, checkBanStatus, messagesController.getMessagesByChatId);
 
-// שליפת הודעה בודדת לפי ID
-router.get("/single/:messageId", isAdmin, checkBanStatus, messagesController.getMessageById);
+// שליפת הודעה בודדת
+router.get("/:messageId", authenticateUser, checkBanStatus, messagesController.getMessageById);
+
+// סימון הודעה כנקראה
+router.patch("/:messageId/read", authenticateUser, checkBanStatus, messagesController.markMessageAsRead);
 
 module.exports = router;
