@@ -181,7 +181,7 @@ export function useExchangeRequest() {
   const getRequestById = async (id: number) => {
     try {
       const res = await axios.get(
-        exchangeRequestRoutes.getExchangeRequestById(id)
+        exchangeRequestRoutes.getExchangeRequestById(+id)
       );
       return res.data;
     } catch (err) {
@@ -215,6 +215,19 @@ export function useExchangeRequest() {
     }
   };
 
+  const getExistingRequest = async (userId: number, productId: number) => {
+  try {
+    const res = await axios.get(
+      exchangeRequestRoutes.getExistingRequest(userId, productId),
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    return res.data; // אמור להחזיר את exchange_request_id
+  } catch (err) {
+    return null;
+  }
+};
+
+
   return {
     loading,
     error,
@@ -227,5 +240,6 @@ export function useExchangeRequest() {
     getIncomingRequests,
     getRequestById,
     updateExchangeRequestProposalOptions,
+    getExistingRequest
   };
 }

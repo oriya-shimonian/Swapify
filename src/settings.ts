@@ -74,6 +74,7 @@ const exchangeRequestRoutes = {
   getAllUserExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/user/${userId}`, // כל הבקשות שהמשתמש שלח (דורש התחברות)
   getIncomingExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/incoming/${userId}`, // כל הבקשות על מוצרים של המשתמש (דורש התחברות)
   getExchangeRequestById: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // בקשה בודדת לפי ID (דורש התחברות)
+  getExistingRequest: (userId: number, productId: number ) => `${baseBackendAddress}/exchange-requests/existing?product_id=${productId}&user_id=${userId}`, // בדיקת בקשה קיימת (דורש התחברות)
   createExchangeRequest: `${baseBackendAddress}/exchange-requests`, // יצירה (דורש התחברות + בדיקת חסימה)
   approveExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/approve`, // אישור בקשה (דורש התחברות + בדיקת חסימה)
   completeExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/complete`, // השלמה (דורש התחברות + הרשאה)
@@ -117,19 +118,20 @@ export const meetingOptionsRoutes = {
   getById: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
 };
 
-const messageRoutes = {
-  getMessages: (chatId: number, before?: string, limit = 20) =>
-    `${baseBackendAddress}/messages/${chatId}?limit=${limit}${before ? `&before=${before}` : ""}`,
-  sendMessage: `${baseBackendAddress}/messages`,
-  markAsRead: (messageId: number) => `${baseBackendAddress}/messages/${messageId}/read`,
+const chatRoutes = {
+  createChat: `${baseBackendAddress}/chats`,
+  getChatByExchangeRequestId: (requestId: number) =>
+    `${baseBackendAddress}/chats/by-request/${requestId}`,
+  getChatById: (chatId: number) =>
+    `${baseBackendAddress}/chats/${chatId}`,
+  getUserChats: `${baseBackendAddress}/chats/my/all`,
 };
 
-const chatRoutes = {
-  getUserChats: `${baseBackendAddress}/chats`,
-  getOrCreateChat: (productId: number, requestId: number) =>
-    `${baseBackendAddress}/chats/product/${productId}/request/${requestId}`,
-  deleteChat: (chatId: number) => `${baseBackendAddress}/chats/${chatId}`,
-  markChatAsRead: (chatId: number) => `${baseBackendAddress}/chats/${chatId}/mark-read`,
+const messageRoutes = {
+  getMessages: (chatId: number) => `${baseBackendAddress}/messages/chat/${chatId}`,
+  sendMessage: (chatId: number) => `${baseBackendAddress}/messages/chat/${chatId}`,
+  getMessageById: (messageId: number) => `${baseBackendAddress}/messages/${messageId}`,
+  markMessageAsRead: (messageId: number) => `${baseBackendAddress}/messages/mark-read/${messageId}`,
 };
 
 export {

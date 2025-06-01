@@ -28,6 +28,9 @@ import ExchangeRequestDialog from "@/components/dialogs/ExchangeRequestDialog";
 import ImageUploader from "@/components/ImageUploader";
 import useProducts from "@/hooks/useProducts";
 import { getFormattedDateWithRelative } from "@/utils/FormatAndRelativeDate";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useStartChat } from "@/hooks/useStartChat";
+import { useExchangeRequest } from "@/hooks/useExchangeRequest";
 
 export default function ProductDetailPage() {
   const conditionOptions = Object.values(ProductCondition);
@@ -44,6 +47,8 @@ export default function ProductDetailPage() {
   const [showExchangeDialog, setShowExchangeDialog] = useState(false);
   const { updateProduct, deleteProduct } = useProducts();
   const navigate = useNavigate();
+  const { startChat } = useStartChat();
+  const { getExistingRequest } = useExchangeRequest();
 
   useEffect(() => {
     console.log("useEffect running for productId:", productId);
@@ -73,6 +78,36 @@ export default function ProductDetailPage() {
   );
 
   const isOwner = !!product.product_id && user?.user_id === product.user_id;
+
+  const handleOpenChat = async () => {
+    if (!user || !product.product_id) return;
+
+    try {
+      const existing = await getExistingRequest(
+        user.user_id,
+        product.product_id
+      );
+
+      console.log("Existing exchange request:", existing);
+      if (!existing?.request_id) {
+        toast.error("אין בקשת החלפה קיימת מול מוצר זה");
+        return;
+      }
+      console.log(666666);
+      
+      // const result = await startChat(existing.request_id);
+      // console.log(result, "result of startChat");
+      
+      // if (result) {
+        navigate(`/chat?exchangeRequestId=${existing.request_id}`);
+      // } else {
+      //   toast.error("שגיאה בפתיחת הצ'אט");
+      // }
+    } catch (err) {
+      console.error("שגיאה בפתיחת הצ'אט:", err);
+      toast.error("לא ניתן לפתוח צ'אט");
+    }
+  };
 
   const handleDeleteProduct = async () => {
     try {
@@ -251,7 +286,9 @@ export default function ProductDetailPage() {
             <Button onClick={() => setShowExchangeDialog(true)}>
               שלח בקשת החלפה
             </Button>
-            <Button variant="secondary">פתח צ׳אט</Button>
+            <Button variant="secondary" onClick={handleOpenChat}>
+              פתח צ׳אט
+            </Button>
           </>
         )}
 
