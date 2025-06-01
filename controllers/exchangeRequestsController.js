@@ -2,6 +2,7 @@ const db = require("../config/db");
 const { createNotification } = require("../services/notificationsService");
 
 // יצירת בקשת החלפה חדשה עם אפשרות להצעת עד 4 מוצרים
+
 exports.createExchangeRequest = async (req, res) => {
   const { userId, productId, offeredProductIds, userName } = req.body;
 
@@ -15,7 +16,7 @@ exports.createExchangeRequest = async (req, res) => {
       .json({ error: "יש להציע בין מוצר אחד לארבעה מוצרים" });
   }
 
-  // 🛡️ מניעת כפילות: האם כבר קיימת בקשה בדיוק עם אותם מוצרים מוצעים?
+  // 🛡️ מניעת כפילות
   try {
     const { rows: existingRequests } = await db.query(
       `
@@ -41,7 +42,7 @@ exports.createExchangeRequest = async (req, res) => {
     return res.status(500).json({ error: "שגיאה בבדיקת בקשה קיימת" });
   }
 
-  // ⚠️ בדיקה שקטה: האם יש חפיפה חלקית עם בקשות קודמות
+  // ⚠️ בדיקה לחפיפה חלקית
   let hasPartialOverlap = false;
   try {
     const { rows: overlappingProducts } = await db.query(
@@ -62,10 +63,9 @@ exports.createExchangeRequest = async (req, res) => {
     }
   } catch (error) {
     console.error("שגיאה בבדיקת חפיפה חלקית:", error);
-    // לא חוסמים, רק מתריעים בפרונט
+    // לא חוסם, רק מתריע
   }
 
-  // 👇 יצירת הבקשה בפועל
   const client = await db.connect();
   try {
     await client.query("BEGIN");
@@ -84,14 +84,15 @@ exports.createExchangeRequest = async (req, res) => {
          VALUES ($1, $2)`,
         [requestId, offeredProductId]
       );
-
-      await client.query(
-        `UPDATE Products
-         SET availability = 'Interested'
-         WHERE product_id = $1 AND availability = 'Available'`,
-        [offeredProductId]
-      );
     }
+
+    // 👇 השינוי החשוב – עדכון זמינות של המוצר שעליו הוגשה הבקשה
+    await client.query(
+      `UPDATE Products
+       SET availability = 'Interested'
+       WHERE product_id = $1 AND availability = 'Available'`,
+      [productId]
+    );
 
     const { rows: productInfo } = await client.query(
       `SELECT title FROM Products WHERE product_id = $1`,
@@ -138,7 +139,6 @@ exports.createExchangeRequest = async (req, res) => {
     client.release();
   }
 };
-
 
 // אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 exports.approveExchangeRequest = async (req, res) => {
@@ -233,7 +233,9 @@ exports.approveExchangeRequest = async (req, res) => {
     }
 
     await client.query("COMMIT");
-    res.status(200).json({ message: "הבקשה אושרה והמוצרים הועברו לסטטוס Pending" });
+    res
+      .status(200)
+      .json({ message: "הבקשה אושרה והמוצרים הועברו לסטטוס Pending" });
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("שגיאה באישור בקשה:", error);
@@ -563,7 +565,6 @@ exports.updateExchangeRequestProposalOptions = async (req, res) => {
 
 // ביטול בקשה - מותר רק אם היא עדיין Pending
 
-
 exports.cancelExchangeRequest = async (req, res) => {
   const { id } = req.params;
   const { userId, userName } = req.body;
@@ -572,6 +573,7 @@ exports.cancelExchangeRequest = async (req, res) => {
   try {
     await client.query("BEGIN");
 
+    // שליפת פרטי הבקשה והמוצר
     const { rows } = await client.query(
       `SELECT er.*, p.title AS product_title
        FROM Exchange_Requests er
@@ -593,13 +595,40 @@ exports.cancelExchangeRequest = async (req, res) => {
         .json({ error: "לא ניתן לבטל בקשה שאושרה או נדחתה" });
     }
 
-    await client.query(`DELETE FROM Exchange_Proposal_Options WHERE request_id = $1`, [id]);
-    await client.query(`DELETE FROM Exchange_Requests WHERE request_id = $1`, [id]);
+    // מחיקת ההצעות והבקשה
+    await client.query(
+      `DELETE FROM Exchange_Proposal_Options WHERE request_id = $1`,
+      [id]
+    );
+    await client.query(`DELETE FROM Exchange_Requests WHERE request_id = $1`, [
+      id,
+    ]);
 
+    // 🔁 החזרת זמינות המוצר אם אין עליו בקשות פעילות נוספות
+    const { rows: otherRequests } = await client.query(
+      `SELECT 1 FROM Exchange_Requests
+       WHERE product_id = $1 AND status = 'Pending'`,
+      [request.product_id]
+    );
+
+    if (otherRequests.length === 0) {
+      await client.query(
+        `UPDATE Products
+         SET availability = 'Available'
+         WHERE product_id = $1 AND availability = 'Interested'`,
+        [request.product_id]
+      );
+    }
+
+    // לוג
     await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
        VALUES ('ביטול בקשת החלפה', $1, $2, $3)`,
-      [userId, userName, `בוטלה בקשה על "${request.product_title}" (מספר ${id})`]
+      [
+        userId,
+        userName,
+        `בוטלה בקשה על "${request.product_title}" (מספר ${id})`,
+      ]
     );
 
     await client.query("COMMIT");
@@ -612,7 +641,6 @@ exports.cancelExchangeRequest = async (req, res) => {
     client.release();
   }
 };
-
 
 // קביעת פגישה בין שני הצדדים אחרי ששניהם הסכימו
 exports.confirmMeeting = async (req, res) => {
@@ -649,7 +677,7 @@ exports.confirmMeeting = async (req, res) => {
         "Meeting Confirmed",
         userId,
         userName,
-        `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`
+        `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`,
       ]
     );
 
@@ -659,7 +687,6 @@ exports.confirmMeeting = async (req, res) => {
     res.status(500).json({ error: "Failed to confirm meeting" });
   }
 };
-
 
 // מוחק פגישות שהזמן שלהן עבר
 exports.cleanupPastMeetings = async () => {
@@ -671,5 +698,69 @@ exports.cleanupPastMeetings = async () => {
     console.log("🧹 Deleted old meetings");
   } catch (err) {
     console.error("❌ Failed to clean old meetings", err);
+  }
+};
+
+exports.getExistingExchangeRequest = async (req, res) => {
+  const product_id = Number(req.query.product_id);
+  const user_id = Number(req.query.user_id);
+  console.log(req.query);
+
+  if (!product_id || !user_id) {
+    return res.status(400).json({ error: "חסרים פרמטרים נדרשים" });
+  }
+
+  // 🔹 בדיקה: כל הבקשות על המוצר הזה
+  const allRequests = await db.query(
+    "SELECT * FROM Exchange_Requests WHERE chosen_product_id = $1",
+    [product_id]
+  );
+
+  // 🔹 בדיקה: בקשות מאושרות
+  const approvedRequests = await db.query(
+    "SELECT * FROM Exchange_Requests WHERE chosen_product_id = $1 AND status = 'Approved'",
+    [product_id]
+  );
+
+  // 🔹 בדיקה: האם המשתמש הוא אחד הצדדים
+  const userMatch = await db.query(
+    `SELECT er.request_id, er.user_id AS sender, p.user_id AS owner
+   FROM Exchange_Requests er
+   JOIN Products p ON er.product_id = p.product_id
+   WHERE er.product_id = $1`,
+    [product_id]
+  );
+
+  try {
+    const result = await db.query(
+      `
+      SELECT er.request_id, er.status
+      FROM Exchange_Requests er
+      JOIN Products p1 ON er.product_id = p1.product_id
+      JOIN Products p2 ON er.chosen_product_id = p2.product_id
+      WHERE er.status = 'Approved'
+        AND (
+          er.user_id = $1       -- המשתמש ששלח את הבקשה
+          OR p1.user_id = $1    -- המשתמש הוא הבעלים של המוצר שקיבל את הבקשה
+          OR p2.user_id = $1    -- המשתמש הוא הבעלים של המוצר שהוצע (chosen_product_id)
+        )
+        AND (
+          er.product_id = $2 OR er.chosen_product_id = $2
+        )
+      LIMIT 1
+      `,
+      [user_id, product_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "לא נמצאה בקשה מאושרת למוצר זה עם המשתמש הנתון" });
+    }
+
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error("שגיאה בחיפוש בקשה קיימת:", err);
+    return res.status(500).json({ error: "שגיאה בשרת" });
   }
 };

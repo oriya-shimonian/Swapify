@@ -23,8 +23,13 @@ router.get('/user/:userId', authenticateUser, exchangeRequestsController.getAllU
 // קבלת כל הבקשות שהוגשו על מוצרים של המשתמש
 router.get('/incoming/:userId', authenticateUser, exchangeRequestsController.getIncomingExchangeRequests);
 
+// בדיקה אם קיימת כבר בקשת החלפה מהמשתמש הנוכחי למוצר
+router.get('/existing', authenticateUser, exchangeRequestsController.getExistingExchangeRequest);
+
 // קריאת בקשה בודדת לפי ID
 router.get('/:id', authenticateUser, exchangeRequestsController.getExchangeRequestById);
+
+
 
 // // עדכון סטטוס (למשל rejection)
 // router.put('/:id', authenticateUser, checkBanStatus, canManageItem('Exchange_Requests', 'request_id'), exchangeRequestsController.updateExchangeRequestStatus);
