@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { getNotificationLink } = require("../utils/notificationLinkBuilder");
 
 // יצירת התראה חדשה
 exports.createNotification = async (req, res) => {
@@ -155,12 +156,7 @@ exports.getUserNotificationsEnriched = async (req, res) => {
         context_id,
         message,
         ...extra,
-        link:
-          type === "new_request"
-            ? `/dashboard/requests/received#request-${context_id}`
-            : type === "approved"
-            ? `/dashboard/requests/sent#request-${context_id}`
-            : `/exchange-requests/${context_id}`, // ברירת מחדל
+        link: getNotificationLink(type, context_id)
       });
     }
 
