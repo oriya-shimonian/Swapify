@@ -1,4 +1,3 @@
-// 📁 components/Chat/ChatMessageBubble.tsx
 import { IMessage } from "@/types/chat";
 
 export default function ChatMessageBubble({

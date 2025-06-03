@@ -2,15 +2,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import React from "react";
-
-export type Notification = {
-  notification_id: number;
-  type: string;
-  status: string;
-  message: string;
-  created_at: string;
-  link: string;
-};
+import { Notification } from "@/types/notifications";
 
 type Props = {
   notification: Notification;
@@ -27,6 +19,7 @@ const getTypeColor = (type: string) => {
     completed: "from-teal-500 to-cyan-400",
     cancelled: "from-yellow-500 to-amber-400",
     match_found: "from-pink-500 to-pink-300",
+    new_message: "from-teal-500 to-cyan-500",
   };
   return colors[type as keyof typeof colors] || "from-blue-500 to-purple-500";
 };
