@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ChatRoom from "@/components/chat/ChatRoom";
-import { useStartChat } from "@/hooks/useStartChat";
+import { useChat } from "@/hooks/useChat";
 
 export default function ChatPage() {
   const [params] = useSearchParams();
@@ -11,7 +11,7 @@ export default function ChatPage() {
   const [chatId, setChatId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { startChat } = useStartChat();
+  const { startChat } = useChat();
 
   useEffect(() => {
     if (!exchangeRequestId || chatId) return;

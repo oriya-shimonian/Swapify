@@ -43,6 +43,8 @@ export default function ExchangeRequestDialog({
       .then(setOfferableProducts)
       .catch(() => toast.error("שגיאה בטעינת מוצרים להצעה"))
       .finally(() => setLoadingProducts(false));
+      console.log("Offerable products fetched:", offerableProducts);
+      
   }, [user?.user_id, open]);
 
   useEffect(() => {

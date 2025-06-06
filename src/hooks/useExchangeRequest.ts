@@ -67,11 +67,14 @@ export function useExchangeRequest() {
     userName: string
   ) => {
     try {
-      const res = await axios.put(
+      const res = await axios.post(
         exchangeRequestRoutes.completeExchangeRequest(id),
         {
           userId,
           userName,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       return res.data;
@@ -181,8 +184,9 @@ export function useExchangeRequest() {
   const getRequestById = async (id: number) => {
     try {
       const res = await axios.get(
-        exchangeRequestRoutes.getExchangeRequestById(+id)
-      );
+        exchangeRequestRoutes.getExchangeRequestById(+id), {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
       return res.data;
     } catch (err) {
       console.error(err);

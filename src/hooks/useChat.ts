@@ -1,10 +1,9 @@
-// 📁 hooks/useStartChat.ts
 import { useState } from "react";
 import axios from "axios";
 import { chatRoutes } from "@/settings";
 import { IChat } from "@/types/chat";
 
-export function useStartChat() {
+export function useChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,5 +42,12 @@ export function useStartChat() {
     }
   };
 
-  return { startChat, loading, error };
+    const getChatById = async (chatId: number) => {
+    const res = await axios.get(chatRoutes.getChatById(chatId), {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    return res.data;
+  };
+
+  return { startChat, loading, error, getChatById };
 }

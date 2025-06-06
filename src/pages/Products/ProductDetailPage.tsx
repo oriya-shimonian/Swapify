@@ -29,7 +29,7 @@ import ImageUploader from "@/components/ImageUploader";
 import useProducts from "@/hooks/useProducts";
 import { getFormattedDateWithRelative } from "@/utils/FormatAndRelativeDate";
 import { useChatMessages } from "@/hooks/useChatMessages";
-import { useStartChat } from "@/hooks/useStartChat";
+import { useChat } from "@/hooks/useChat";
 import { useExchangeRequest } from "@/hooks/useExchangeRequest";
 
 export default function ProductDetailPage() {
@@ -47,7 +47,6 @@ export default function ProductDetailPage() {
   const [showExchangeDialog, setShowExchangeDialog] = useState(false);
   const { updateProduct, deleteProduct } = useProducts();
   const navigate = useNavigate();
-  const { startChat } = useStartChat();
   const { getExistingRequest } = useExchangeRequest();
 
   useEffect(() => {
