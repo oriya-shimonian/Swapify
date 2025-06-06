@@ -15,7 +15,7 @@ router.post('/', authenticateUser, checkBanStatus, exchangeRequestsController.cr
 router.post('/:id/approve', authenticateUser, checkBanStatus, exchangeRequestsController.approveExchangeRequest);
 
 // השלמת בקשה (למשל, אם הבקשה הושלמה בהצלחה)
-router.post('/:id/complete', authenticateUser, checkBanStatus, canManageItem('Exchange_Requests', 'request_id'), exchangeRequestsController.completeExchangeRequest);
+router.post('/:id/complete', authenticateUser, checkBanStatus, exchangeRequestsController.completeExchangeRequest);
 
 // קבלת כל הבקשות שנשלח משתמש מסוים (כולל המוצרים שהציע)
 router.get('/user/:userId', authenticateUser, exchangeRequestsController.getAllUserExchangeRequests);

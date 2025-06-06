@@ -284,6 +284,11 @@ exports.completeExchangeRequest = async (req, res) => {
     );
 
     await client.query(
+      `UPDATE Products SET availability = 'Exchanged' WHERE product_id = $1`,
+      [product_id]
+    );
+
+    await client.query(
       `INSERT INTO Exchange_History (user_id, exchange_product_id, received_product_id, status)
        VALUES ($1, $2, $3, 'Completed')`,
       [userId, chosen_product_id, product_id]
@@ -456,20 +461,59 @@ exports.getIncomingExchangeRequests = async (req, res) => {
 };
 
 // קבלת בקשת החלפה לפי ID
+// קבלת בקשת החלפה לפי ID כולל מידע נלווה לשימוש בצ'אט
 exports.getExchangeRequestById = async (req, res) => {
   const { id } = req.params;
+
   try {
-    const result = await db.query(
-      "SELECT * FROM Exchange_Requests WHERE request_id = $1",
+    const { rows } = await db.query(
+      `
+      SELECT 
+        er.request_id,
+        er.status,
+        er.user_id AS requester_id,
+        er.product_id AS requested_product_id,
+        er.chosen_product_id,
+        p1.title AS requested_product_title,
+        p2.title AS chosen_product_title,
+        u_requester.name AS requester_name,
+        p1.user_id AS requested_product_owner_id,
+        u_owner.name AS requested_product_owner_name
+      FROM Exchange_Requests er
+      JOIN Products p1 ON er.product_id = p1.product_id
+      JOIN Products p2 ON er.chosen_product_id = p2.product_id
+      JOIN Users u_requester ON er.user_id = u_requester.user_id
+      JOIN Users u_owner ON p1.user_id = u_owner.user_id
+      WHERE er.request_id = $1
+      `,
       [id]
     );
-    if (result.rows.length === 0) {
+
+    if (rows.length === 0) {
       return res.status(404).json({ error: "Exchange request not found" });
     }
-    res.status(200).json(result.rows[0]);
+
+    const data = rows[0];
+
+    res.status(200).json({
+      request_id: data.request_id,
+      status: data.status,
+      requester_id: data.requester_id,
+      requested_product_id: data.requested_product_id,
+      chosen_product_id: data.chosen_product_id,
+      requester_name: data.requester_name,
+      requested_product_owner_id: data.requested_product_owner_id,
+      requested_product_owner_name: data.requested_product_owner_name,
+      requested_product: {
+        title: data.requested_product_title,
+      },
+      offered_product: {
+        title: data.chosen_product_title,
+      },
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch exchange request" });
+    console.error("שגיאה בשליפת בקשת החלפה:", error);
+    res.status(500).json({ error: "שגיאה בשרת" });
   }
 };
 
@@ -478,38 +522,92 @@ exports.updateExchangeRequestStatus = async (req, res) => {
   const { id } = req.params;
   const { status, userId, userName } = req.body;
 
+  const client = await db.connect();
   try {
-    const { rows } = await db.query(
-      `UPDATE Exchange_Requests 
-       SET status = $1, updated_at = CURRENT_TIMESTAMP 
-       WHERE request_id = $2 
-       RETURNING product_id`,
-      [status, id]
+    await client.query("BEGIN");
+
+    const { rows } = await client.query(
+      `SELECT request_id, product_id, chosen_product_id
+       FROM Exchange_Requests 
+       WHERE request_id = $1 FOR UPDATE`,
+      [id]
     );
 
     if (rows.length === 0) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Exchange request not found" });
     }
 
-    const productId = rows[0].product_id;
+    const { product_id, chosen_product_id } = rows[0];
 
-    const { rows: productRows } = await db.query(
-      `SELECT title FROM Products WHERE product_id = $1`,
-      [productId]
+    await client.query(
+      `UPDATE Exchange_Requests 
+       SET status = $1, updated_at = CURRENT_TIMESTAMP 
+       WHERE request_id = $2`,
+      [status, id]
     );
 
-    const productTitle = productRows[0]?.title || `מוצר מספר ${productId}`;
+    // ⚠️ אם דחינו – נעדכן זמינות של המוצרים
+    if (status === "Rejected") {
+      // ➤ המוצר שקיבל את הבקשה
+      const { rows: otherRequestsOnProduct } = await client.query(
+        `SELECT 1 FROM Exchange_Requests
+         WHERE product_id = $1 AND status = 'Pending' AND request_id != $2`,
+        [product_id, id]
+      );
 
-    await db.query(
+      const newAvailabilityForProduct =
+        otherRequestsOnProduct.length === 0 ? "Available" : "Interested";
+
+      await client.query(
+        `UPDATE Products
+         SET availability = $1
+         WHERE product_id = $2`,
+        [newAvailabilityForProduct, product_id]
+      );
+
+      // ➤ המוצר שהוצע (אם יש כזה)
+      if (chosen_product_id) {
+        const { rows: otherRequestsOnOffered } = await client.query(
+          `SELECT 1
+           FROM Exchange_Requests
+           WHERE chosen_product_id = $1 AND status = 'Pending' AND request_id != $2`,
+          [chosen_product_id, id]
+        );
+
+        const newAvailabilityForOffered =
+          otherRequestsOnOffered.length === 0 ? "Available" : "Interested";
+
+        await client.query(
+          `UPDATE Products
+           SET availability = $1
+           WHERE product_id = $2`,
+          [newAvailabilityForOffered, chosen_product_id]
+        );
+      }
+    }
+
+    const { rows: productRows } = await client.query(
+      `SELECT title FROM Products WHERE product_id = $1`,
+      [product_id]
+    );
+
+    const productTitle = productRows[0]?.title || `מוצר מספר ${product_id}`;
+
+    await client.query(
       `INSERT INTO Audit_Logs (action, user_id, user_name, details)
        VALUES ('עדכון סטטוס בקשת החלפה', $1, $2, $3)`,
       [userId, userName, `עודכן סטטוס הבקשה על "${productTitle}" ל-${status}`]
     );
 
+    await client.query("COMMIT");
     res.status(200).json({ message: "הסטטוס עודכן בהצלחה" });
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error(error);
     res.status(500).json({ error: "Failed to update exchange request" });
+  } finally {
+    client.release();
   }
 };
 
@@ -718,7 +816,7 @@ exports.getExistingExchangeRequest = async (req, res) => {
 
   // 🔹 בדיקה: בקשות מאושרות
   const approvedRequests = await db.query(
-    "SELECT * FROM Exchange_Requests WHERE chosen_product_id = $1 AND status = 'Approved'",
+    "SELECT * FROM Exchange_Requests WHERE chosen_product_id = $1 AND status != 'Pending'",
     [product_id]
   );
 
@@ -738,7 +836,7 @@ exports.getExistingExchangeRequest = async (req, res) => {
       FROM Exchange_Requests er
       JOIN Products p1 ON er.product_id = p1.product_id
       JOIN Products p2 ON er.chosen_product_id = p2.product_id
-      WHERE er.status = 'Approved'
+      WHERE er.status != 'Pending'
         AND (
           er.user_id = $1       -- המשתמש ששלח את הבקשה
           OR p1.user_id = $1    -- המשתמש הוא הבעלים של המוצר שקיבל את הבקשה
