@@ -15,7 +15,7 @@ router.post('/', authenticateUser, checkBanStatus, exchangeRequestsController.cr
 router.post('/:id/approve', authenticateUser, checkBanStatus, exchangeRequestsController.approveExchangeRequest);
 
 // השלמת בקשה (למשל, אם הבקשה הושלמה בהצלחה)
-router.post('/:id/complete', authenticateUser, checkBanStatus, canManageItem('Exchange_Requests', 'request_id'), exchangeRequestsController.completeExchangeRequest);
+router.post('/:id/complete', authenticateUser, checkBanStatus, exchangeRequestsController.completeExchangeRequest);
 
 // קבלת כל הבקשות שנשלח משתמש מסוים (כולל המוצרים שהציע)
 router.get('/user/:userId', authenticateUser, exchangeRequestsController.getAllUserExchangeRequests);
@@ -23,8 +23,13 @@ router.get('/user/:userId', authenticateUser, exchangeRequestsController.getAllU
 // קבלת כל הבקשות שהוגשו על מוצרים של המשתמש
 router.get('/incoming/:userId', authenticateUser, exchangeRequestsController.getIncomingExchangeRequests);
 
+// בדיקה אם קיימת כבר בקשת החלפה מהמשתמש הנוכחי למוצר
+router.get('/existing', authenticateUser, exchangeRequestsController.getExistingExchangeRequest);
+
 // קריאת בקשה בודדת לפי ID
 router.get('/:id', authenticateUser, exchangeRequestsController.getExchangeRequestById);
+
+
 
 // // עדכון סטטוס (למשל rejection)
 // router.put('/:id', authenticateUser, checkBanStatus, canManageItem('Exchange_Requests', 'request_id'), exchangeRequestsController.updateExchangeRequestStatus);
@@ -46,4 +51,5 @@ router.put("/:id/options", authenticateUser, checkBanStatus, canManageItem('Exch
   
 router.delete('/:id', authenticateUser, checkBanStatus, canManageItem('Exchange_Requests', 'request_id'), exchangeRequestsController.cancelExchangeRequest);
 
+router.post("/:requestId/confirm-meeting", authenticateUser, checkBanStatus, exchangeRequestsController.confirmMeeting);
 module.exports = router;

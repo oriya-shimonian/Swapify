@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { getNotificationLink } = require("../utils/notificationLinkBuilder");
 
 // יצירת התראה חדשה
 exports.createNotification = async (req, res) => {
@@ -57,8 +58,6 @@ exports.markNotificationAsRead = async (req, res) => {
 
 // סימון כל ההתראות של המשתמש הנוכחי כנקראות
 exports.markAllAsRead = async (req, res) => {
-  console.log("6666", req.user.id, "markAllAsRead");
-  
   const userId = req.user.id;
   try {
     await db.query(
@@ -157,12 +156,7 @@ exports.getUserNotificationsEnriched = async (req, res) => {
         context_id,
         message,
         ...extra,
-        link:
-          type === "new_request"
-            ? `/dashboard/requests/received#request-${context_id}`
-            : type === "approved"
-            ? `/dashboard/requests/sent#request-${context_id}`
-            : `/exchange-requests/${context_id}`, // ברירת מחדל
+        link: getNotificationLink(type, context_id)
       });
     }
 
