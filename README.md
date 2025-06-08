@@ -31,9 +31,12 @@ Run both frontend and backend using:
 npm run dev
 (the command `npm i` is required both frontend and backend)
 
+---
 
-🤖 About AI Usage
+## 🤖 About AI Usage
 Swapify leverages AI-based image recognition (via the ClipDrop API) to help users fill in product details automatically based on uploaded images. This feature enhances the onboarding process and reduces friction in creating listings.
 
-📄 License
+---
+
+## 📄 License
 MIT © 2025 Oriya
