@@ -1,214 +1,487 @@
+// // // import { useState, useEffect } from "react";
+// // // import { FaEdit } from "react-icons/fa";
+// // // import { GoTrash } from "react-icons/go";
+
+// // // import { Input } from "@/components/ui/input";
+// // // import {
+// // //   Select,
+// // //   SelectContent,
+// // //   SelectGroup,
+// // //   SelectItem,
+// // //   SelectTrigger,
+// // //   SelectValue,
+// // // } from "@/components/ui/select";
+// // // import ProductCard from "@/components/ProductCard";
+// // // import useProducts from "@/hooks/useProducts";
+// // // import { IProduct } from "@/types/products";
+// // // import { useNavigate } from "react-router-dom";
+// // // import { Button } from "@/components/ui/button";
+// // // import { useAuth } from "@/context/AuthContext";
+// // // import { AddProductButton } from "@/components/Buttons/AddProductButton";
+
+// // // export default function HomePage() {
+// // //   const { products, loading, error } = useProducts();
+// // //   const { user } = useAuth();
+// // //   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
+// // //   const [searchTerm, setSearchTerm] = useState("");
+// // //   const [category, setCategory] = useState<string>("all");
+// // //   const [condition, setCondition] = useState<string | null>(null);
+// // //   const [location, setLocation] = useState<string | null>(null);
+// // //   const [subcategory, setSubcategory] = useState<string | null>(null);
+// // //   const [sortBy, setSortBy] = useState<string>("newest");
+// // //   const navigate = useNavigate();
+
+// // //   useEffect(() => {
+// // //     let filtered = products;
+
+// // //     if (searchTerm) {
+// // //       filtered = filtered.filter((p) => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
+// // //     }
+// // //     if (category !== "all") {
+// // //       filtered = filtered.filter((p) => p.category === category);
+// // //     }
+// // //     if (condition) {
+// // //       filtered = filtered.filter((p) => p.condition === condition);
+// // //     }
+// // //     if (location) {
+// // //       filtered = filtered.filter((p) => p.location.toLowerCase() === location.toLowerCase());
+// // //     }
+// // //     if (subcategory) {
+// // //       filtered = filtered.filter((p) => p.subcategory === subcategory);
+// // //     }
+
+// // //     // Sorting
+// // //     if (sortBy === "newest") {
+// // //       filtered = filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+// // //     } else if (sortBy === "oldest") {
+// // //       filtered = filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+// // //     } else if (sortBy === "title") {
+// // //       filtered = filtered.sort((a, b) => a.title.localeCompare(b.title));
+// // //     }
+
+// // //     setFilteredProducts(filtered);
+// // //   }, [searchTerm, category, condition, location, subcategory, sortBy, products]);
+
+// // //   return (
+// // //     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
+// // //       <h1 className="text-3xl font-bold text-center mb-6">Discover & Swap Items</h1>
+
+// // //       {/* כפתור הוספת מוצר */}
+// // //       <AddProductButton />
+
+// // //       {/* Search & Filters */}
+// // //       <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-6">
+// // //         <Input
+// // //           placeholder="Search products..."
+// // //           value={searchTerm}
+// // //           onChange={(e) => setSearchTerm(e.target.value)}
+// // //           className="w-full md:w-1/3"
+// // //         />
+
+// // //         <Select onValueChange={setCategory}>
+// // //           <SelectTrigger className="w-full md:w-1/4">
+// // //             <SelectValue placeholder="Category" />
+// // //           </SelectTrigger>
+// // //           <SelectContent>
+// // //             <SelectGroup>
+// // //               <SelectItem value="all">All Categories</SelectItem>
+// // //               <SelectItem value="Puzzle">Puzzle</SelectItem>
+// // //               <SelectItem value="Book">Book</SelectItem>
+// // //               <SelectItem value="Board Game">Board Game</SelectItem>
+// // //             </SelectGroup>
+// // //           </SelectContent>
+// // //         </Select>
+
+// // //         <Select onValueChange={setCondition}>
+// // //           <SelectTrigger className="w-full md:w-1/4">
+// // //             <SelectValue placeholder="Condition" />
+// // //           </SelectTrigger>
+// // //           <SelectContent>
+// // //             <SelectGroup>
+// // //               <SelectItem value="New">New</SelectItem>
+// // //               <SelectItem value="Used">Used</SelectItem>
+// // //               <SelectItem value="Good Condition">Good Condition</SelectItem>
+// // //             </SelectGroup>
+// // //           </SelectContent>
+// // //         </Select>
+
+// // //         <Select onValueChange={setLocation}>
+// // //           <SelectTrigger className="w-full md:w-1/4">
+// // //             <SelectValue placeholder="Location" />
+// // //           </SelectTrigger>
+// // //           <SelectContent>
+// // //             <SelectGroup>
+// // //               <SelectItem value="Tel Aviv">Tel Aviv</SelectItem>
+// // //               <SelectItem value="Jerusalem">Jerusalem</SelectItem>
+// // //               <SelectItem value="Haifa">Haifa</SelectItem>
+// // //               <SelectItem value="New York">New York</SelectItem>
+// // //               <SelectItem value="Los Angeles">Los Angeles</SelectItem>
+// // //               <SelectItem value="Chicago">Chicago</SelectItem>
+// // //             </SelectGroup>
+// // //           </SelectContent>
+// // //         </Select>
+// // //       </div>
+
+// // //  {/* TODO: get all the products except yours? */}
+// // //       {/* Products Grid */}
+// // //       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+// // //         {filteredProducts.length > 0 ? (
+// // //          filteredProducts.map((product) => {
+// // //           const isOwner = user?.user_id === product.user_id;
+
+// // //           return (
+// // //             <ProductCard
+// // //               key={product.product_id}
+// // //               product={product}
+// // //               actionButtons={
+// // //                 isOwner ? (
+// // //                   <>
+// // //                     <FaEdit
+// // //                       onClick={() => navigate(`/edit-product/${product.product_id}`)}
+// // //                       className="text-blue-600 cursor-pointer"
+// // //                       title="ערוך"
+// // //                     />
+// // //                     <GoTrash
+// // //                       onClick={() => console.log("TODO: מחיקת מוצר")}
+// // //                       className="text-red-600 cursor-pointer"
+// // //                       title="מחק"
+// // //                     />
+// // //                   </>
+// // //                 ) : (
+// // //                   <>
+// // //                     <Button
+// // //                       size="sm"
+// // //                       onClick={() => navigate(`/product/${product.product_id}`)}
+// // //                       variant="secondary"
+// // //                     >
+// // //                       צפה בפרטים
+// // //                     </Button>
+// // //                     <Button
+// // //                       size="sm"
+// // //                       className="bg-blue-600 text-white"
+// // //                       onClick={() => console.log("TODO: פתיחת דיאלוג החלפה")}
+// // //                     >
+// // //                       שלח בקשה
+// // //                     </Button>
+// // //                   </>
+// // //                 )
+// // //               }
+// // //             />
+// // //           );
+// // //         })
+// // //                 ) : (
+// // //           <p className="text-center col-span-full text-gray-500">לא נמצאו פריטים.</p>
+// // //         )}
+// // //       </div>
+// // //     </div>
+// // //   );
+// // // }
+
+// // // ✅ HomePage.tsx עם טעינה אינסופית וניהול עמודים כמו בהתראות
+// // import { useState, useEffect } from "react";
+// // import { FaEdit } from "react-icons/fa";
+// // import { GoTrash } from "react-icons/go";
+// // import { Input } from "@/components/ui/input";
+// // import {
+// //   Select,
+// //   SelectContent,
+// //   SelectGroup,
+// //   SelectItem,
+// //   SelectTrigger,
+// //   SelectValue,
+// // } from "@/components/ui/select";
+// // import { Button } from "@/components/ui/button";
+// // import ProductCard from "@/components/ProductCard";
+// // import { useAuth } from "@/context/AuthContext";
+// // import { AddProductButton } from "@/components/Buttons/AddProductButton";
+// // import { useNavigate } from "react-router-dom";
+// // import useProducts from "@/hooks/useProducts";
+// // import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+// // import { SkeletonProductCard } from "@/components/skelton/SkeletonProductCard";
+
+// // export default function HomePage() {
+// //   const { products, loading, loadingNextPage, hasMore, fetchProducts } =
+// //     useProducts();
+// //   const { user } = useAuth();
+// //   const navigate = useNavigate();
+// //   const [page, setPage] = useState(0);
+
+// //   useEffect(() => {
+// //     fetchProducts(page);
+// //   }, [page]);
+
+// //   const bottomRef = useInfiniteScroll({
+// //     isFetching: loadingNextPage,
+// //     hasMore,
+// //     onLoadMore: () => setPage((prev) => prev + 1),
+// //   });
+
+// //   return (
+// //     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
+// //       <h1 className="text-3xl font-bold text-center mb-6">
+// //         גלה והחלף פריטים
+// //       </h1>
+// //       <AddProductButton />
+
+// //       <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-6">
+// //         <Input placeholder="Search products..." className="w-full md:w-1/3" />
+// //         <Select>
+// //           <SelectTrigger className="w-full md:w-1/4">
+// //             <SelectValue placeholder="Category" />
+// //           </SelectTrigger>
+// //           <SelectContent>
+// //             <SelectGroup>
+// //               <SelectItem value="all">All Categories</SelectItem>
+// //               <SelectItem value="Puzzle">Puzzle</SelectItem>
+// //               <SelectItem value="Book">Book</SelectItem>
+// //               <SelectItem value="Board Game">Board Game</SelectItem>
+// //             </SelectGroup>
+// //           </SelectContent>
+// //         </Select>
+// //       </div>
+
+// //       {loading && products.length === 0 ? (
+// //         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
+// //           {Array.from({ length: 6 }).map((_, i) => (
+// //             <SkeletonProductCard key={i} />
+// //           ))}
+// //         </div>
+// //       ) : (
+// //         <div className="min-w-full">
+// //           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
+// //             {products.map((product, i) => {
+// //               const isOwner = user?.user_id === product.user_id;
+// //               return (
+// //                 <ProductCard
+// //                   key={product.product_id}
+// //                   product={product}
+// //                   actionButtons={
+// //                     isOwner ? (
+// //                       <>
+// //                         <FaEdit
+// //                           onClick={() =>
+// //                             navigate(`/edit-product/${product.product_id}`)
+// //                           }
+// //                           className="text-blue-600 cursor-pointer"
+// //                           title="ערוך"
+// //                         />
+// //                         <GoTrash
+// //                           onClick={() => console.log("TODO: מחיקת מוצר")}
+// //                           className="text-red-600 cursor-pointer"
+// //                           title="מחק"
+// //                         />
+// //                       </>
+// //                     ) : (
+// //                       <>
+// //                         <Button
+// //                           size="sm"
+// //                           onClick={() =>
+// //                             navigate(`/product/${product.product_id}`)
+// //                           }
+// //                           variant="secondary"
+// //                         >
+// //                           צפה בפרטים
+// //                         </Button>
+// //                         <Button
+// //                           size="sm"
+// //                           className="bg-blue-600 text-white"
+// //                           onClick={() =>
+// //                             console.log("TODO: פתיחת דיאלוג החלפה")
+// //                           }
+// //                         >
+// //                           שלח בקשה
+// //                         </Button>
+// //                       </>
+// //                     )
+// //                   }
+// //                 />
+// //               );
+// //             })}
+
+// //             {hasMore && (
+// //               <div ref={bottomRef} className="h-10 w-full col-span-full" />
+// //             )}
+
+// //             {loadingNextPage && (
+// //               <div className="flex justify-center col-span-full py-4">
+// //                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-blue-500" />
+// //               </div>
+// //             )}
+// //           </div>
+// //         </div>
+// //       )}
+// //     </div>
+// //   );
+// // }
+
 // import { useState, useEffect } from "react";
 // import { FaEdit } from "react-icons/fa";
 // import { GoTrash } from "react-icons/go";
-
-// import { Input } from "@/components/ui/input";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectGroup,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import ProductCard from "@/components/ProductCard";
-// import useProducts from "@/hooks/useProducts";
-// import { IProduct } from "@/types/products";
 // import { useNavigate } from "react-router-dom";
-// import { Button } from "@/components/ui/button";
+
 // import { useAuth } from "@/context/AuthContext";
+// import useProducts from "@/hooks/useProducts";
+// import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+// import ProductCard from "@/components/ProductCard";
 // import { AddProductButton } from "@/components/Buttons/AddProductButton";
+// import { SkeletonProductCard } from "@/components/skelton/SkeletonProductCard";
+// import { homePageFields } from "@/lib/filters/homePageFilters";
+// import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
+// import { DateRangePicker } from "@/components/DateRangePicker";
 
 // export default function HomePage() {
-//   const { products, loading, error } = useProducts();
+//   const { products, loading, loadingNextPage, hasMore, fetchProducts } = useProducts();
 //   const { user } = useAuth();
-//   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [category, setCategory] = useState<string>("all");
-//   const [condition, setCondition] = useState<string | null>(null);
-//   const [location, setLocation] = useState<string | null>(null);
-//   const [subcategory, setSubcategory] = useState<string | null>(null);
-//   const [sortBy, setSortBy] = useState<string>("newest");
 //   const navigate = useNavigate();
+//   const [page, setPage] = useState(0);
+
+//   const [filters, setFilters] = useState({
+//     search: "",
+//     category: null,
+//     subcategory: null,
+//     location: null,
+//     fromDate: "",
+//     toDate: "",
+//   });
+
+
 
 //   useEffect(() => {
-//     let filtered = products;
+//     fetchProducts(page, filters);
+//   }, [page, filters]);
 
-//     if (searchTerm) {
-//       filtered = filtered.filter((p) => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
-//     }
-//     if (category !== "all") {
-//       filtered = filtered.filter((p) => p.category === category);
-//     }
-//     if (condition) {
-//       filtered = filtered.filter((p) => p.condition === condition);
-//     }
-//     if (location) {
-//       filtered = filtered.filter((p) => p.location.toLowerCase() === location.toLowerCase());
-//     }
-//     if (subcategory) {
-//       filtered = filtered.filter((p) => p.subcategory === subcategory);
-//     }
-
-//     // Sorting
-//     if (sortBy === "newest") {
-//       filtered = filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-//     } else if (sortBy === "oldest") {
-//       filtered = filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-//     } else if (sortBy === "title") {
-//       filtered = filtered.sort((a, b) => a.title.localeCompare(b.title));
-//     }
-
-//     setFilteredProducts(filtered);
-//   }, [searchTerm, category, condition, location, subcategory, sortBy, products]);
+//   const bottomRef = useInfiniteScroll({
+//     isFetching: loadingNextPage,
+//     hasMore,
+//     onLoadMore: () => setPage((prev) => prev + 1),
+//   });
 
 //   return (
 //     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
-//       <h1 className="text-3xl font-bold text-center mb-6">Discover & Swap Items</h1>
-
-//       {/* כפתור הוספת מוצר */}
+//       <h1 className="text-3xl font-bold text-center mb-6">גלה והחלף פריטים</h1>
 //       <AddProductButton />
 
-//       {/* Search & Filters */}
-//       <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-6">
-//         <Input
-//           placeholder="Search products..."
-//           value={searchTerm}
-//           onChange={(e) => setSearchTerm(e.target.value)}
-//           className="w-full md:w-1/3"
-//         />
+//       <Filters
+//         filters={filters}
+//         setFilters={setFilters}
+//         resetPage={() => setPage(0)}
+//         fields={homePageFields}
+//       />
 
-//         <Select onValueChange={setCategory}>
-//           <SelectTrigger className="w-full md:w-1/4">
-//             <SelectValue placeholder="Category" />
-//           </SelectTrigger>
-//           <SelectContent>
-//             <SelectGroup>
-//               <SelectItem value="all">All Categories</SelectItem>
-//               <SelectItem value="Puzzle">Puzzle</SelectItem>
-//               <SelectItem value="Book">Book</SelectItem>
-//               <SelectItem value="Board Game">Board Game</SelectItem>
-//             </SelectGroup>
-//           </SelectContent>
-//         </Select>
+//       <DateRangePicker
+//         fromDate={filters.fromDate}
+//         toDate={filters.toDate}
+//         onChange={(from, to) =>
+//           setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
+//         }
+//       />
 
-//         <Select onValueChange={setCondition}>
-//           <SelectTrigger className="w-full md:w-1/4">
-//             <SelectValue placeholder="Condition" />
-//           </SelectTrigger>
-//           <SelectContent>
-//             <SelectGroup>
-//               <SelectItem value="New">New</SelectItem>
-//               <SelectItem value="Used">Used</SelectItem>
-//               <SelectItem value="Good Condition">Good Condition</SelectItem>
-//             </SelectGroup>
-//           </SelectContent>
-//         </Select>
+//       {loading && products.length === 0 ? (
+//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
+//           {Array.from({ length: 6 }).map((_, i) => (
+//             <SkeletonProductCard key={i} />
+//           ))}
+//         </div>
+//       ) : (
+//         <div className="min-w-full">
+//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
+//             {products.map((product) => {
+//               const isOwner = user?.user_id === product.user_id;
+//               return (
+//                 <ProductCard
+//                   key={product.product_id}
+//                   product={product}
+//                   actionButtons={
+//                     isOwner ? (
+//                       <>
+//                         <FaEdit
+//                           onClick={() =>
+//                             navigate(`/edit-product/${product.product_id}`)
+//                           }
+//                           className="text-blue-600 cursor-pointer"
+//                           title="ערוך"
+//                         />
+//                         <GoTrash
+//                           onClick={() => console.log("TODO: מחיקת מוצר")}
+//                           className="text-red-600 cursor-pointer"
+//                           title="מחק"
+//                         />
+//                       </>
+//                     ) : (
+//                       <>
+//                         <button
+//                           className="btn btn-secondary"
+//                           onClick={() =>
+//                             navigate(`/product/${product.product_id}`)
+//                           }
+//                         >
+//                           צפה בפרטים
+//                         </button>
+//                         <button
+//                           className="bg-blue-600 text-white rounded px-2 py-1"
+//                           onClick={() =>
+//                             console.log("TODO: פתיחת דיאלוג החלפה")
+//                           }
+//                         >
+//                           שלח בקשה
+//                         </button>
+//                       </>
+//                     )
+//                   }
+//                 />
+//               );
+//             })}
 
-//         <Select onValueChange={setLocation}>
-//           <SelectTrigger className="w-full md:w-1/4">
-//             <SelectValue placeholder="Location" />
-//           </SelectTrigger>
-//           <SelectContent>
-//             <SelectGroup>
-//               <SelectItem value="Tel Aviv">Tel Aviv</SelectItem>
-//               <SelectItem value="Jerusalem">Jerusalem</SelectItem>
-//               <SelectItem value="Haifa">Haifa</SelectItem>
-//               <SelectItem value="New York">New York</SelectItem>
-//               <SelectItem value="Los Angeles">Los Angeles</SelectItem>
-//               <SelectItem value="Chicago">Chicago</SelectItem>
-//             </SelectGroup>
-//           </SelectContent>
-//         </Select>
-//       </div>
+//             {hasMore && (
+//               <div ref={bottomRef} className="h-10 w-full col-span-full" />
+//             )}
 
-//  {/* TODO: get all the products except yours? */}
-//       {/* Products Grid */}
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-//         {filteredProducts.length > 0 ? (
-//          filteredProducts.map((product) => {
-//           const isOwner = user?.user_id === product.user_id;
-
-//           return (
-//             <ProductCard
-//               key={product.product_id}
-//               product={product}
-//               actionButtons={
-//                 isOwner ? (
-//                   <>
-//                     <FaEdit
-//                       onClick={() => navigate(`/edit-product/${product.product_id}`)}
-//                       className="text-blue-600 cursor-pointer"
-//                       title="ערוך"
-//                     />
-//                     <GoTrash
-//                       onClick={() => console.log("TODO: מחיקת מוצר")}
-//                       className="text-red-600 cursor-pointer"
-//                       title="מחק"
-//                     />
-//                   </>
-//                 ) : (
-//                   <>
-//                     <Button
-//                       size="sm"
-//                       onClick={() => navigate(`/product/${product.product_id}`)}
-//                       variant="secondary"
-//                     >
-//                       צפה בפרטים
-//                     </Button>
-//                     <Button
-//                       size="sm"
-//                       className="bg-blue-600 text-white"
-//                       onClick={() => console.log("TODO: פתיחת דיאלוג החלפה")}
-//                     >
-//                       שלח בקשה
-//                     </Button>
-//                   </>
-//                 )
-//               }
-//             />
-//           );
-//         })
-//                 ) : (
-//           <p className="text-center col-span-full text-gray-500">לא נמצאו פריטים.</p>
-//         )}
-//       </div>
+//             {loadingNextPage && (
+//               <div className="flex justify-center col-span-full py-4">
+//                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent border-blue-500" />
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       )}
 //     </div>
 //   );
 // }
 
-// ✅ HomePage.tsx עם טעינה אינסופית וניהול עמודים כמו בהתראות
+
 import { useState, useEffect } from "react";
 import { FaEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import ProductCard from "@/components/ProductCard";
-import { useAuth } from "@/context/AuthContext";
-import { AddProductButton } from "@/components/Buttons/AddProductButton";
 import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "@/context/AuthContext";
 import useProducts from "@/hooks/useProducts";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import ProductCard from "@/components/ProductCard";
+import { AddProductButton } from "@/components/Buttons/AddProductButton";
 import { SkeletonProductCard } from "@/components/skelton/SkeletonProductCard";
+import { homePageFields } from "@/lib/filters/homePageFilters";
+import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
+import { DateRangePicker } from "@/components/DateRangePicker";
 
 export default function HomePage() {
-  const { products, loading, loadingNextPage, hasMore, fetchProducts } =
-    useProducts();
+  const { products, loading, loadingNextPage, hasMore, fetchProducts } = useProducts();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
 
+  const [filters, setFilters] = useState({
+    search: "",
+    category: null,
+    subcategory: null,
+    location: null,
+    fromDate: "",
+    toDate: "",
+  });
+
   useEffect(() => {
-    fetchProducts(page);
-  }, [page]);
+    fetchProducts(page, filters);
+  }, [page, filters]);
 
   const bottomRef = useInfiniteScroll({
     isFetching: loadingNextPage,
@@ -218,27 +491,23 @@ export default function HomePage() {
 
   return (
     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        גלה והחלף פריטים
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">גלה והחלף פריטים</h1>
       <AddProductButton />
 
-      <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-6">
-        <Input placeholder="Search products..." className="w-full md:w-1/3" />
-        <Select>
-          <SelectTrigger className="w-full md:w-1/4">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Puzzle">Puzzle</SelectItem>
-              <SelectItem value="Book">Book</SelectItem>
-              <SelectItem value="Board Game">Board Game</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+      <Filters
+        filters={filters}
+        setFilters={setFilters}
+        resetPage={() => setPage(0)}
+        fields={homePageFields}
+      />
+
+      <DateRangePicker
+        fromDate={filters.fromDate}
+        toDate={filters.toDate}
+        onChange={(from, to) =>
+          setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
+        }
+      />
 
       {loading && products.length === 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
@@ -248,8 +517,14 @@ export default function HomePage() {
         </div>
       ) : (
         <div className="min-w-full">
+          {products.length === 0 && !loading && (
+            <div className="text-center text-gray-500 font-medium mt-8">
+              לא נמצאו פריטים מתאימים לסינון שבחרת 🎯
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
-            {products.map((product, i) => {
+            {products.map((product) => {
               const isOwner = user?.user_id === product.user_id;
               return (
                 <ProductCard
@@ -273,24 +548,22 @@ export default function HomePage() {
                       </>
                     ) : (
                       <>
-                        <Button
-                          size="sm"
+                        <button
+                          className="btn btn-secondary"
                           onClick={() =>
                             navigate(`/product/${product.product_id}`)
                           }
-                          variant="secondary"
                         >
                           צפה בפרטים
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-blue-600 text-white"
+                        </button>
+                        <button
+                          className="bg-blue-600 text-white rounded px-2 py-1"
                           onClick={() =>
                             console.log("TODO: פתיחת דיאלוג החלפה")
                           }
                         >
                           שלח בקשה
-                        </Button>
+                        </button>
                       </>
                     )
                   }
@@ -313,3 +586,4 @@ export default function HomePage() {
     </div>
   );
 }
+// TODO filter by dates do not working!!!

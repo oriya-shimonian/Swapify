@@ -67,11 +67,14 @@ export function useExchangeRequest() {
     userName: string
   ) => {
     try {
-      const res = await axios.put(
+      const res = await axios.post(
         exchangeRequestRoutes.completeExchangeRequest(id),
         {
           userId,
           userName,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       return res.data;
@@ -181,8 +184,9 @@ export function useExchangeRequest() {
   const getRequestById = async (id: number) => {
     try {
       const res = await axios.get(
-        exchangeRequestRoutes.getExchangeRequestById(id)
-      );
+        exchangeRequestRoutes.getExchangeRequestById(+id), {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
       return res.data;
     } catch (err) {
       console.error(err);
@@ -215,6 +219,19 @@ export function useExchangeRequest() {
     }
   };
 
+  const getExistingRequest = async (userId: number, productId: number) => {
+  try {
+    const res = await axios.get(
+      exchangeRequestRoutes.getExistingRequest(userId, productId),
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    return res.data; // אמור להחזיר את exchange_request_id
+  } catch (err) {
+    return null;
+  }
+};
+
+
   return {
     loading,
     error,
@@ -227,5 +244,6 @@ export function useExchangeRequest() {
     getIncomingRequests,
     getRequestById,
     updateExchangeRequestProposalOptions,
+    getExistingRequest
   };
 }

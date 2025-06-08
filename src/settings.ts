@@ -74,6 +74,7 @@ const exchangeRequestRoutes = {
   getAllUserExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/user/${userId}`, // כל הבקשות שהמשתמש שלח (דורש התחברות)
   getIncomingExchangeRequests: (userId: number) => `${baseBackendAddress}/exchange-requests/incoming/${userId}`, // כל הבקשות על מוצרים של המשתמש (דורש התחברות)
   getExchangeRequestById: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // בקשה בודדת לפי ID (דורש התחברות)
+  getExistingRequest: (userId: number, productId: number ) => `${baseBackendAddress}/exchange-requests/existing?product_id=${productId}&user_id=${userId}`, // בדיקת בקשה קיימת (דורש התחברות)
   createExchangeRequest: `${baseBackendAddress}/exchange-requests`, // יצירה (דורש התחברות + בדיקת חסימה)
   approveExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/approve`, // אישור בקשה (דורש התחברות + בדיקת חסימה)
   completeExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}/complete`, // השלמה (דורש התחברות + הרשאה)
@@ -107,6 +108,32 @@ const auditLogRoutes = {
   getAuditLogs: `${baseBackendAddress}/audit-logs`,
 };
 
+// todo delete this
+export const meetingOptionsRoutes = {
+  getAll: `${baseBackendAddress}/meeting-options`, // כל המיקומים האקטיביים בלבד
+  getAllAdmin: `${baseBackendAddress}/meeting-options/admin`, // כולל לא פעילים
+  create: `${baseBackendAddress}/meeting-options`,
+  update: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
+  delete: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
+  getById: (id: number) => `${baseBackendAddress}/meeting-options/${id}`,
+};
+
+const chatRoutes = {
+  createChat: `${baseBackendAddress}/chats`,
+  getChatByExchangeRequestId: (requestId: number) =>
+    `${baseBackendAddress}/chats/by-request/${requestId}`,
+  getChatById: (chatId: number) =>
+    `${baseBackendAddress}/chats/${chatId}`,
+  getUserChats: `${baseBackendAddress}/chats/my/all`,
+};
+
+const messageRoutes = {
+  getMessages: (chatId: number) => `${baseBackendAddress}/messages/chat/${chatId}`,
+  sendMessage: (chatId: number) => `${baseBackendAddress}/messages/chat/${chatId}`,
+  getMessageById: (messageId: number) => `${baseBackendAddress}/messages/${messageId}`,
+  markMessageAsRead: (messageId: number) => `${baseBackendAddress}/messages/mark-read/${messageId}`,
+};
+
 export {
   authRoutes,
   userRoutes,
@@ -120,4 +147,6 @@ export {
   uploadRoutes,
   aboutRoutes,
   auditLogRoutes,
+  chatRoutes,
+  messageRoutes
 };

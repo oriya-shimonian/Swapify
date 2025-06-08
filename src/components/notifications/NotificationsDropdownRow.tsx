@@ -11,6 +11,8 @@ export function NotificationsDropdownRow({
   onClick: () => void;
 }) {
   const getIcon = (type: string) => {
+    console.log(`Notification type: ${type}`); // Debugging line to check the type
+    
     switch (type) {
       case "new_request":
         return <Bell className="w-4 h-4 text-blue-500" />;
@@ -24,7 +26,9 @@ export function NotificationsDropdownRow({
         return <Bell className="w-4 h-4 text-red-500" />;
       case "match_found":
         return <Bell className="w-4 h-4 text-pink-500" />;
-      default:
+      case "new_message":
+        return <Bell className="w-4 h-4 text-teal-500" />;
+        default:
         return <Bell className="w-4 h-4 text-gray-400" />;
     }
   };
