@@ -1,4 +1,4 @@
-export const NUM_NOTIFICATIONS_IN_PAGE = 3;
+export const NUM_NOTIFICATIONS_IN_PAGE = 30;
 
 export interface Notification {
   notification_id: number;

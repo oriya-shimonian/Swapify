@@ -128,14 +128,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       console.log(response.data, "response");
+      const user = response.data.user;
 
       dispatch({
         type: "LOGIN",
         payload: {
-          user: response.data.user,
+          user,
           token: localStorage.getItem("token")!,
         },
       });
+      connectSocket(user.user_id);
     } catch (error) {
       logout();
     } finally {

@@ -24,6 +24,8 @@ import MySentRequestsTab from "./components/UserDashboard/MySentRequestsTab";
 import MyReceivedRequestsTab from "./components/UserDashboard/ReceivedRequestsTab";
 import NotificationsPage from "./pages/NotificationsPage";
 import { NotificationsProvider } from "./context/NotificationsContext";
+import ChatPage from "./pages/ChatPage";
+// import { ChatWindow } from "./pages/ChatPage";
 
 function App() {
   const { user } = useAuth();
@@ -58,6 +60,8 @@ function App() {
                 path="/admin/audits"
                 element={user.role_name === "Admin" ? <AuditLogsPage /> : <HomePage />}
               />
+              {/* <Route path="/admin/meeting-options" element={<MeetingOptionsAdminPage />} /> */}
+              <Route path="chat" element={<ChatPage />} />
               <Route path="/dashboard" element={<UserDashboardWrapper />}>
                 <Route path="my-products" element={<MyProductsTab />} />
                 <Route path="requests/sent" element={<MySentRequestsTab />} />
