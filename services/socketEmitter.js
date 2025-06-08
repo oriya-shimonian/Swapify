@@ -1,28 +1,6 @@
-// // 📁 services/socketEmitter.js
-// let io = null;
-// let connectedUsers = new Map();
-
-// function initSocketIO(ioInstance, usersMap) {
-//   io = ioInstance;
-//   connectedUsers = usersMap;
-// }
-
-// function emitNotification(userId, data) {
-//   const socketId = connectedUsers.get(userId);
-//   if (io && socketId) {
-//     console.log("📨 שליחת סוקט למשתמש:", userId, "=>", connectedUsers.get(userId));
-//     io.to(socketId).emit("new_notification", data);
-//   }
-// }
-
-// module.exports = {
-//   initSocketIO,
-//   emitNotification,
-// };
-
-// 📁 services/socketEmitter.js
 let io = null;
 let connectedUsers = new Map();
+let userCurrentChats = new Map();
 
 function initSocketIO(ioInstance, usersMap) {
   io = ioInstance;
@@ -32,12 +10,11 @@ function initSocketIO(ioInstance, usersMap) {
 function emitNewNotification(userId, data) {
   const socketId = connectedUsers.get(userId);
   if (io && socketId) {
-    console.log("📨 שליחת סוקט למשתמש:", userId, "=>", connectedUsers.get(userId));
+    // console.log("📨 שליחת סוקט למשתמש:", userId, "=>", connectedUsers.get(userId));
     io.to(socketId).emit("new_notification", data);
   }
 }
 
-// ✅ חדשה: שליחת סוקט של התאמה צולבת
 function emitCrossRequestMatch(userId, data) {
   const socketId = connectedUsers.get(userId);
   if (io && socketId) {
@@ -46,8 +23,30 @@ function emitCrossRequestMatch(userId, data) {
   }
 }
 
+function emitNewMessage(chatId, message) {
+  if (io) {
+    io.to(`chat_${chatId}`).emit("new_message", message);
+  }
+}
+
+function getUserCurrentChatId(userId) {
+  return userCurrentChats.get(userId);
+}
+
+function setUserCurrentChat(userId, chatId) {
+  userCurrentChats.set(userId, chatId);
+}
+
+function clearUserCurrentChat(userId) {
+  userCurrentChats.delete(userId);
+}
+
 module.exports = {
   initSocketIO,
   emitNewNotification,
-  emitCrossRequestMatch, // ✅ נוספה ל־exports
+  emitCrossRequestMatch,
+  emitNewMessage,
+  getUserCurrentChatId, 
+  setUserCurrentChat,
+  clearUserCurrentChat
 };

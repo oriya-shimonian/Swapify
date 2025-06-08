@@ -65,12 +65,171 @@ exports.createProduct = async (req, res) => {
 //     }
 // };
 
-// קבלת כל המוצרים הזמינים להחלפה (עם עימוד)
+// // קבלת כל המוצרים הזמינים להחלפה (עם עימוד)
+// // exports.getAllProducts = async (req, res) => {
+// //   console.log("Request query:", req.query); // הוספת לוג כדי לבדוק את ה- query
+// //   const limit = parseInt(req.query.limit) || 12;
+// //   const offset = parseInt(req.query.offset) || 0;
+// //   try {
+// //     const result = await db.query(
+// //       `
+// //       SELECT 
+// //         Products.*, 
+// //         Users.name 
+// //       FROM Products
+// //       JOIN Users ON Products.user_id = Users.user_id
+// //       WHERE availability IN ('Available', 'Interested')
+// //       ORDER BY Products.created_at DESC
+// //       LIMIT $1 OFFSET $2
+// //       `,
+// //       [limit, offset]
+// //     );
+
+// //     res.status(200).json(result.rows);
+// //   } catch (error) {
+// //     console.error("❌ שגיאה בשרת:", error);
+// //     res.status(500).json({ error: "Failed to fetch products" });
+// //   }
+// // };
+// exports.getAllProducts = async (req, res) => {
+//   console.log("Request query:", req.query);
+
+//   const {
+//     search,
+//     category,
+//     subcategory,
+//     location,
+//     from,
+//     to
+//   } = req.query;
+
+//   const conditions = ["Products.availability IN ('Available', 'Interested')"];
+//   const values = [];
+
+//   if (search) {
+//     values.push(`%${search}%`);
+//     conditions.push(`Products.title ILIKE $${values.length}`);
+//   }
+
+//   if (category) {
+//     values.push(category);
+//     conditions.push(`Products.category = $${values.length}`);
+//   }
+
+//   if (subcategory) {
+//     values.push(subcategory);
+//     conditions.push(`Products.subcategory = $${values.length}`);
+//   }
+
+//   if (location) {
+//     values.push(location);
+//     conditions.push(`Products.location = $${values.length}`);
+//   }
+
+//   if (from) {
+//     values.push(from);
+//     conditions.push(`Products.created_at >= $${values.length}`);
+//   }
+
+//   if (to) {
+//     values.push(to);
+//     conditions.push(`Products.created_at <= $${values.length}`);
+//   }
+
+//   const limit = parseInt(req.query.limit) || 12;
+//   const offset = parseInt(req.query.offset) || 0;
+
+//   values.push(limit);
+//   values.push(offset);
+
+//   const whereClause = `WHERE ${conditions.join(" AND ")}`;
+
+//   try {
+//     const result = await db.query(
+//       `
+//       SELECT 
+//         Products.*, 
+//         Users.name 
+//       FROM Products
+//       JOIN Users ON Products.user_id = Users.user_id
+//       ${whereClause}
+//       ORDER BY Products.created_at DESC
+//       LIMIT $${values.length - 1} OFFSET $${values.length}
+//       `,
+//       values
+//     );
+
+//     res.status(200).json(result.rows);
+//   } catch (error) {
+//     console.error("❌ שגיאה בשרת:", error);
+//     res.status(500).json({ error: "Failed to fetch products" });
+//   }
+// };
+
 exports.getAllProducts = async (req, res) => {
-  console.log("Request query:", req.query); // הוספת לוג כדי לבדוק את ה- query
-  const limit = parseInt(req.query.limit) || 12;
-  const offset = parseInt(req.query.offset) || 0;
+  console.log("Request query:", req.query);
+
+  const {
+    search,
+    category,
+    subcategory,
+    location,
+    from,
+    to
+  } = req.query;
+
+  const conditions = ["Products.availability IN ('Available', 'Interested')"];
+  const values = [];
+
+  if (search) {
+    values.push(`%${search}%`);
+    conditions.push(`Products.title ILIKE $${values.length}`);
+  }
+
+  if (category) {
+    values.push(category);
+    conditions.push(`Products.category = $${values.length}`);
+  }
+
+  if (subcategory) {
+    values.push(subcategory);
+    conditions.push(`Products.subcategory = $${values.length}`);
+  }
+
+  if (location) {
+    values.push(location);
+    conditions.push(`Products.location = $${values.length}`);
+  }
+
+  if (from) {
+    values.push(from);
+    conditions.push(`Products.created_at >= $${values.length}`);
+  }
+
+  if (to) {
+    values.push(to);
+    conditions.push(`Products.created_at < $${values.length}::date + INTERVAL '1 day'`);
+  }
+
+  const limit = parseInt(
+    Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit
+  ) || 12;
+  const offset = parseInt(
+    Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset
+  ) || 0;
+
+  values.push(limit);
+  values.push(offset);
+
+  const limitIndex = values.length - 1;
+  const offsetIndex = values.length;
+
+  const whereClause = `WHERE ${conditions.join(" AND ")}`;
+
   try {
+//     console.log("📄 Final WHERE clause:", whereClause);
+// console.log("📦 Final values:", values);
+
     const result = await db.query(
       `
       SELECT 
@@ -78,12 +237,14 @@ exports.getAllProducts = async (req, res) => {
         Users.name 
       FROM Products
       JOIN Users ON Products.user_id = Users.user_id
-      WHERE availability IN ('Available', 'Interested')
+      ${whereClause}
       ORDER BY Products.created_at DESC
-      LIMIT $1 OFFSET $2
+      LIMIT $${limitIndex} OFFSET $${offsetIndex}
       `,
-      [limit, offset]
+      values
     );
+    // console.log("📊 מוצרים שחזרו:");
+// result.rows.forEach(p => console.log("•", p.created_at));
 
     res.status(200).json(result.rows);
   } catch (error) {
@@ -91,6 +252,9 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 };
+
+
+
 
 // // קבלת כל המוצרים של משתמש מסוים
 // exports.getProductsByUser = async (req, res) => {

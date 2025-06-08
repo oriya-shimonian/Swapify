@@ -2,6 +2,8 @@ const db = require('../config/db');
 
 // Middleware לבדיקה אם משתמש הוא Admin
 exports.isAdmin = async (req, res, next) => {
+    console.log("Checking if user is admin...", req.user);
+    
     const userId = req.user?.id;  // מניחים שהמשתמש מאומת ו-ID נמצא ב-token
 
     try {
@@ -14,8 +16,8 @@ exports.isAdmin = async (req, res, next) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // נניח ש-Admin = role_id 1
-        if (result.rows[0].role_id !== 1) {
+        // נניח ש-Admin = role_id 3
+        if (result.rows[0].role_id !== 3) {
             return res.status(403).json({ error: 'Access denied: Admins only' });
         }
 
