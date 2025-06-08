@@ -6,7 +6,7 @@ ALTER DATABASE swapify SET timezone TO 'Asia/Jerusalem';
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- יצירת ENUMs
-CREATE TYPE request_status AS ENUM ('Pending', 'Approved', 'Rejected');
+CREATE TYPE request_status AS ENUM ('Pending', 'Approved', 'Completed', 'Rejected');
 CREATE TYPE user_report_status AS ENUM ('Open', 'Under Review', 'Closed');
 CREATE TYPE exchange_status AS ENUM ('Completed', 'Pending', 'Rejected');
 CREATE TYPE subcategory_puzzle AS ENUM ('Nature', 'Art', 'Kids', '3 D');
@@ -96,10 +96,10 @@ CREATE TABLE IF NOT EXISTS Board_Games (
 -- בקשות החלפה
 CREATE TABLE IF NOT EXISTS Exchange_Requests (
     Request_id SERIAL PRIMARY KEY,
-    User_id INT REFERENCES Users (user_id),
-    Product_id INT REFERENCES Products (product_id),
+    User_id INT REFERENCES Users (user_id), ----יוזם ההצעה
+    Product_id INT REFERENCES Products (product_id), --מקבל--
     Status request_status,
-    chosen_product_id INT REFERENCES Products(product_id),
+    chosen_product_id INT REFERENCES Products(product_id), ----של יוזם ההצעה
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     Chat_id INT
@@ -140,34 +140,17 @@ CREATE TABLE IF NOT EXISTS Chats (
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS MeetingOptions (
-  id SERIAL PRIMARY KEY,
-  city TEXT NOT NULL,
-  location_name TEXT NOT NULL,
-  hour TIME NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE
-);
 
 CREATE TABLE IF NOT EXISTS Messages (
     Message_id SERIAL PRIMARY KEY,
     Chat_id INT NOT NULL REFERENCES Chats(Chat_id) ON DELETE CASCADE,
     Sender_id INT NOT NULL REFERENCES Users(User_id) ON DELETE CASCADE,
-    Type TEXT NOT NULL CHECK (Type IN ('text', 'location_suggestion', 'meeting_response', 'status_confirmation', 'system')),
+    Type TEXT NOT NULL DEFAULT 'text' CHECK (
+        Type IN ('text', 'system')
+    ),
     Content TEXT,
-    Meeting_option_id INT REFERENCES MeetingOptions(id),
     Created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    read_by_recipient BOOLEAN DEFAULT false,
-    read_at TIMESTAMPTZ,
-    is_accepted BOOLEAN
-);
-
-CREATE TABLE IF NOT EXISTS Scheduled_Meetings (
-  meeting_id SERIAL PRIMARY KEY,
-  exchange_request_id INTEGER REFERENCES Exchange_Requests(request_id) ON DELETE CASCADE,
-  chat_id INTEGER REFERENCES Chats(chat_id) ON DELETE CASCADE,
-  meeting_option_id INTEGER REFERENCES MeetingOptions(id),
-  scheduled_date DATE NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    read_at TIMESTAMPTZ DEFAULT NULL
 );
 
 
