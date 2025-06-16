@@ -83,6 +83,9 @@ const exchangeRequestRoutes = {
   cancelExchangeRequest: (id: number) => `${baseBackendAddress}/exchange-requests/${id}`, // מחיקה/ביטול בקשה (דורש הרשאה)
 };
 
+const imageAiRoutes = {
+  getProductDetailsByImage: `${baseBackendAddress}/image-to-fields`, 
+}
 // Roles
 const roleRoutes = {
   getAllRoles: `${baseBackendAddress}/roles`,
@@ -134,8 +137,12 @@ const messageRoutes = {
   markMessageAsRead: (messageId: number) => `${baseBackendAddress}/messages/mark-read/${messageId}`,
 };
 
+const autoFillRoutes = {
+  autoFillProduct: `${baseBackendAddress}/auto-fill-product`, // מילוי אוטומטי של מוצר
+}
 export {
   authRoutes,
+  autoFillRoutes,
   userRoutes,
   productRoutes,
   boardGameRoutes,
@@ -143,6 +150,7 @@ export {
   puzzleRoutes,
   exchangeRequestRoutes,
   notificationRoutes,
+  imageAiRoutes,
   roleRoutes,
   uploadRoutes,
   aboutRoutes,

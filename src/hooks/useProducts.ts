@@ -314,15 +314,6 @@ const fetchProducts = useCallback(
 
   const addProduct = async ({ category, data }: CreateProductPayload) => {
     const routes = getRoutesByCategory(category);
-    // @ts-ignore
-
-    // console.log(
-    //   "routes",
-    //   routes,
-    //   category,
-    //   `create${category.replace(/\s/g, "")}`,
-    //   routes[`create${category.replace(/\s/g, "")}`]
-    // );
 
     try {
       setLoading(true);
