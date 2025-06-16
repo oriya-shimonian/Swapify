@@ -34,7 +34,27 @@ npm run dev
 ---
 
 ## 🤖 About AI Usage
-Swapify leverages AI-based image recognition (via the ClipDrop API) to help users fill in product details automatically based on uploaded images. This feature enhances the onboarding process and reduces friction in creating listings.
+Swapify includes a smart autofill feature to help users complete product details based on the product name only.
+
+When a user enters the product name and clicks “Auto-fill”, the following process takes place:
+
+Web search via SERP API – the product name is used to fetch relevant search snippets and pages from the internet (e.g., product listings, reviews, store descriptions).
+
+Content analysis via OpenAI's GPT – the fetched data is then summarized and structured by a GPT model to extract relevant metadata such as:
+
+Title
+
+Description
+
+Category
+
+Subcategory
+
+Extra fields based on product type (e.g., number of players for board games, author for books)
+
+📌 Note: This process does not use image recognition and does not autofill images. The AI works solely based on the product name.
+
+This feature reduces the effort required to fill in product forms and helps users list items more efficiently – especially for well-known games, books, and puzzles.
 
 ---
 
