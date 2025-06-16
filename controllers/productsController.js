@@ -34,141 +34,7 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// // קבלת כל המוצרים
-// exports.getAllProducts = async (req, res) => {
-//     try {
-//         const result = await db.query('SELECT * FROM Products');
-//         res.status(200).json(result.rows);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Failed to fetch products' });
-//     }
-// };
-
-//  קבלת כל המוצרים הזמינים להחלפה (לא משנה למי הם שייכים)
-// exports.getAllProducts = async (req, res) => {
-
-//     try {
-//         const result = await db.query(`
-//             SELECT
-//                 Products.*,
-//                 Users.name
-//             FROM Products
-//             JOIN Users ON Products.user_id = Users.user_id
-//             WHERE availability IN ('Available', 'Interested')
-//             ORDER BY Products.created_at DESC
-//         `);
-//         res.status(200).json(result.rows);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Failed to fetch products' });
-//     }
-// };
-
-// // קבלת כל המוצרים הזמינים להחלפה (עם עימוד)
-// // exports.getAllProducts = async (req, res) => {
-// //   console.log("Request query:", req.query); // הוספת לוג כדי לבדוק את ה- query
-// //   const limit = parseInt(req.query.limit) || 12;
-// //   const offset = parseInt(req.query.offset) || 0;
-// //   try {
-// //     const result = await db.query(
-// //       `
-// //       SELECT 
-// //         Products.*, 
-// //         Users.name 
-// //       FROM Products
-// //       JOIN Users ON Products.user_id = Users.user_id
-// //       WHERE availability IN ('Available', 'Interested')
-// //       ORDER BY Products.created_at DESC
-// //       LIMIT $1 OFFSET $2
-// //       `,
-// //       [limit, offset]
-// //     );
-
-// //     res.status(200).json(result.rows);
-// //   } catch (error) {
-// //     console.error("❌ שגיאה בשרת:", error);
-// //     res.status(500).json({ error: "Failed to fetch products" });
-// //   }
-// // };
-// exports.getAllProducts = async (req, res) => {
-//   console.log("Request query:", req.query);
-
-//   const {
-//     search,
-//     category,
-//     subcategory,
-//     location,
-//     from,
-//     to
-//   } = req.query;
-
-//   const conditions = ["Products.availability IN ('Available', 'Interested')"];
-//   const values = [];
-
-//   if (search) {
-//     values.push(`%${search}%`);
-//     conditions.push(`Products.title ILIKE $${values.length}`);
-//   }
-
-//   if (category) {
-//     values.push(category);
-//     conditions.push(`Products.category = $${values.length}`);
-//   }
-
-//   if (subcategory) {
-//     values.push(subcategory);
-//     conditions.push(`Products.subcategory = $${values.length}`);
-//   }
-
-//   if (location) {
-//     values.push(location);
-//     conditions.push(`Products.location = $${values.length}`);
-//   }
-
-//   if (from) {
-//     values.push(from);
-//     conditions.push(`Products.created_at >= $${values.length}`);
-//   }
-
-//   if (to) {
-//     values.push(to);
-//     conditions.push(`Products.created_at <= $${values.length}`);
-//   }
-
-//   const limit = parseInt(req.query.limit) || 12;
-//   const offset = parseInt(req.query.offset) || 0;
-
-//   values.push(limit);
-//   values.push(offset);
-
-//   const whereClause = `WHERE ${conditions.join(" AND ")}`;
-
-//   try {
-//     const result = await db.query(
-//       `
-//       SELECT 
-//         Products.*, 
-//         Users.name 
-//       FROM Products
-//       JOIN Users ON Products.user_id = Users.user_id
-//       ${whereClause}
-//       ORDER BY Products.created_at DESC
-//       LIMIT $${values.length - 1} OFFSET $${values.length}
-//       `,
-//       values
-//     );
-
-//     res.status(200).json(result.rows);
-//   } catch (error) {
-//     console.error("❌ שגיאה בשרת:", error);
-//     res.status(500).json({ error: "Failed to fetch products" });
-//   }
-// };
-
 exports.getAllProducts = async (req, res) => {
-  console.log("Request query:", req.query);
-
   const {
     search,
     category,
@@ -253,28 +119,7 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-
-
-
-// // קבלת כל המוצרים של משתמש מסוים
-// exports.getProductsByUser = async (req, res) => {
-//   console.log("Request query:", req.params, req.query); // הוספת לוג כדי לבדוק את ה- query
-//   const { userId } = req.params;
-//   const limit = parseInt(req.query.limit) || 12;
-//   const offset = parseInt(req.query.offset) || 0;
-//   try {
-//     const result = await db.query(
-//       "SELECT * FROM Products WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
-//       [userId, limit, offset]
-//     );
-//     // console.log(req.params, `Products for user ${userId}:`, result.rows); // הוספת לוג כדי לבדוק את המוצרים
-//     res.status(200).json(result.rows);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Failed to fetch user products" });
-//   }
-// };
-
+// קבלת מוצרים לפי משתמש
 exports.getProductsByUser = async (req, res) => {
   const { userId } = req.params;
   const {
@@ -349,7 +194,6 @@ exports.getProductsByUser = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user products" });
   }
 };
-
 
 // קבלת מוצרים שניתן להציע (שייכים למשתמש ועדיין לא הוחלפו)
 exports.getAllUsersOfferableProducts = async (req, res) => {
