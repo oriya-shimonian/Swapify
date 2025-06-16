@@ -123,7 +123,7 @@ app.use("/api/about", require("./routes/aboutRoutes"));
 app.use("/api/audit-logs", require("./routes/auditLogsRoutes"));
 app.use("/api/chats", require("./routes/chatsRoutes"));
 app.use("/api/messages", require("./routes/messagesRoutes"));
-
+app.use("/api", require("./routes/autoFillRoutes"));
 // ✅ 404
 const { notFoundHandler } = require("./middlewares/404Midlleware");
 app.use(notFoundHandler);
