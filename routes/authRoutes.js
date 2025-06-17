@@ -7,6 +7,8 @@ const { getFullUserById } = require("../services/userService");
 // נתיב להתחברות (Login)
 router.post('/login', authController.loginUser);
 
+router.post("/firebase-login", authController.firebaseLogin);
+
 // check if the user is already logged in
 router.get("/check-auth", authenticateUser, async (req, res) => {
   try {

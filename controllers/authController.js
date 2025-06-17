@@ -1,75 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
+const { admin } = require("../config/firebaseAdmin");
 require('dotenv').config();
 
-// התחברות משתמש (Login)
-// exports.loginUser = async (req, res) => {
-//     const { email, password } = req.body;
-
-//     // try {
-//     //     // חיפוש המשתמש במסד הנתונים
-//     //     const user = await db.query('SELECT * FROM Users WHERE email = $1', [email]);
-
-//     //     if (user.rows.length === 0) {
-//     //         return res.status(401).json({ error: 'Invalid email or password' });
-//     //     }
-
-//     //     // console.log(user.rows[0], "users rows", password, "password", user.rows[0].password_hash, "password_hash", email, "email");
-//     //     // בדיקת הסיסמה (השוואת סיסמאות עם bcrypt)
-//     //     const isMatch = await bcrypt.compare(password, user.rows[0].password_hash);
-//     //     if (!isMatch) {
-//     //         return res.status(401).json({ error: 'Invalid email or password' });
-//     //     }
-
-//     //     // יצירת טוקן JWT עם נתוני המשתמש
-//     //     const token = jwt.sign(
-//     //         { id: user.rows[0].user_id, role: user.rows[0].role_id },
-//     //         process.env.JWT_SECRET,  // ה-SECRET מתוך `.env`
-//     //         { expiresIn: '7d' }      // תוקף הטוקן: שבוע
-//     //     );
-        
-//     //     res.status(200).json({ token, user: user.rows[0] });
-//     try {
-//         // חיפוש המשתמש במסד הנתונים כולל שם התפקיד
-//         const userQuery = `
-//             SELECT u.user_id, u.name, u.email, u.password_hash, u.profile_picture, u.location, 
-//                    u.auth_provider, u.notification_enabled, u.is_banned, 
-//                    u.created_at, u.updated_at, r.Role_name AS role_name
-//             FROM Users u
-//             JOIN Roles r ON u.Role_id = r.Role_id
-//             WHERE u.email = $1
-//         `;
-//         const userResult = await db.query(userQuery, [email]);
-
-//         if (userResult.rows.length === 0) {
-//             return res.status(401).json({ error: 'Invalid email or password' });
-//         }
-
-//         const user = userResult.rows[0];
-
-//         // בדיקת הסיסמה (השוואת סיסמאות עם bcrypt)
-//         const isMatch = await bcrypt.compare(password, user.password_hash);
-//         if (!isMatch) {
-//             return res.status(401).json({ error: 'Invalid email or password' });
-//         }
-
-//         // יצירת טוקן JWT עם נתוני המשתמש (עכשיו כולל role_name במקום role_id)
-//         const token = jwt.sign(
-//             { id: user.user_id, role: user.role_name }, // מחליף role_id ב-role_name
-//             process.env.JWT_SECRET, 
-//             { expiresIn: '7d' }
-//         );
-
-//         // הסרת password_hash מהאובייקט שנחזיר
-//         delete user.password_hash;
-
-//         res.status(200).json({ token, user });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Failed to log in' });
-//     }
-// };
 
 const { getFullUserById } = require("../services/userService");
 
@@ -114,5 +48,46 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+exports.firebaseLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: "Missing token" });
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    const { email, name, picture, firebase: { sign_in_provider } } = decoded;
+
+    const authProvider = sign_in_provider; // google.com / facebook.com
+    const cleanProvider = authProvider.includes("google") ? "Google" : "Facebook";
+
+    // בדיקה אם קיים
+    const userQuery = await db.query(`SELECT * FROM Users WHERE email = $1`, [email]);
+    let user = userQuery.rows[0];
+
+    if (!user) {
+      const insert = await db.query(
+        `INSERT INTO Users (name, email, profile_picture, auth_provider, role_id, is_banned, notification_enabled, location)
+         VALUES ($1, $2, $3, $4, 2, false, true, '') RETURNING *`,
+        [name, email, picture || null, cleanProvider]
+      );
+      user = insert.rows[0];
+    } else if (user.auth_provider !== cleanProvider) {
+      return res.status(400).json({
+        error: `משתמש זה נרשם באמצעות ${user.auth_provider} – לא ניתן להתחבר עם ${cleanProvider}`,
+      });
+    }
+
+    // JWT משלך
+    const jwtToken = jwt.sign(
+      { id: user.user_id, role: user.role_id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ token: jwtToken, user });
+  } catch (err) {
+    console.error("firebaseLogin error:", err);
+    res.status(401).json({ error: "Firebase authentication failed" });
+  }
+};
 
 
