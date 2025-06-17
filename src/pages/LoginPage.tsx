@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/AuthContext';
+import { useSocialAuth } from '@/hooks/useSocialAuth';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ const LoginPage = () => {
   const { login, checkAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { socialLogin } = useSocialAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +43,7 @@ const LoginPage = () => {
           ברוכים הבאים
         </h2>
         <p className="text-center text-gray-500 dark:text-gray-300 mb-6">
-        Facebook או Google התחברו עם חשבון
+        התחברו עם חשבון קיים או התחברו עם רשת חברתית
         </p>
 
         {/* Social Login Buttons */}
@@ -50,6 +51,7 @@ const LoginPage = () => {
           <motion.button 
             whileTap={{ scale: 0.99 }}
             className="w-full flex items-center justify-center gap-3 bg-transparent text-blue-600 border border-blue-600 py-3 rounded-lg hover:text-blue-700 hover:border-blue-700 transition-colors"
+            onClick={() => socialLogin("facebook")}
           >
             <FaFacebook size={24} />
             Facebook התחברו עם 
@@ -58,6 +60,7 @@ const LoginPage = () => {
           <motion.button 
             whileTap={{ scale: 0.99 }}
             className="w-full flex items-center justify-center gap-3 bg-transparent text-red-600 border border-red-600 py-3 rounded-lg hover:text-red-700 hover:border-red-700 transition-colors"
+            onClick={() => socialLogin("google")}
           >
             <FaGoogle size={24} />
             Google התחברו עם 
