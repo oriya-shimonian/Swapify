@@ -1,5 +1,5 @@
 const multer = require('multer');
-const bucket = require('../config/firebaseConfig');
+const bucket = require('../config/firebaseAdmin');
 const { v4: uuidv4 } = require('uuid');
 
 // קביעת מגבלות קובץ (לדוגמה, מקסימום 5MB)
