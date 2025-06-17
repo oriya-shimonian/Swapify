@@ -6,6 +6,7 @@ const authRoutes = {
   register: `${baseBackendAddress}/auth/register`,
   logout: `${baseBackendAddress}/auth/logout`,
   checkAuth: `${baseBackendAddress}/auth/check-auth`, // לבדוק אם המשתמש מחובר
+  firebaseLogin: `${baseBackendAddress}/auth/firebase-login`, // התחברות עם Firebase
 };
 
 // Users
