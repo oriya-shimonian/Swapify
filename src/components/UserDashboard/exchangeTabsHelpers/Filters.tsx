@@ -22,6 +22,7 @@ interface FiltersProps<T extends Record<string, any>> {
   setFilters: (filters: (prev: T) => T) => void;
   resetPage: () => void;
   fields: FilterField[];
+  design?: string;
 }
 
 export function Filters<T extends Record<string, any>>({
@@ -29,6 +30,7 @@ export function Filters<T extends Record<string, any>>({
   setFilters,
   resetPage,
   fields,
+  design
 }: FiltersProps<T>) {
   const handleChange = (field: string, value: string | null) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
@@ -66,7 +68,7 @@ export function Filters<T extends Record<string, any>>({
     : [];
 
   return (
-    <div className="flex flex-wrap gap-4 mb-6">
+    <div className={`flex flex-wrap gap-4 mb-6 ${design}`}>
       {fields.map((field) => {
         const value = filters[field.key] ?? "";
 

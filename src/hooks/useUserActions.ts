@@ -86,12 +86,15 @@ export const useUserActions = () => {
   };
 
   const banUser = async (userId: number) => {
+    console.log(localStorage.getItem("token"), "espreso");
+    
     if (user && user.role_name === "Admin") {
       try {
-        await axios.put(userRoutes.banUser(userId), {
+        const res = await axios.put(userRoutes.banUser(userId), {}, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        toast.success("המשתמש נחסם");
+        toast.success(res.data.message);
+        return res.data
       } catch (error: any) {
         toast.error("שגיאה בחסימת המשתמש");
       }

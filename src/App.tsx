@@ -31,7 +31,7 @@ import FancyBackground from "./components/FancyBackground";
 // import { ChatWindow } from "./pages/ChatPage";
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   const hideFooter =
@@ -39,6 +39,13 @@ function App() {
     location.pathname === "/signup" ||
     location.pathname === "/profile";
 
+  // if (loading && !hideFooter) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+  //       <div className="text-gray-500 dark:text-gray-300">טוען משתמש...</div>
+  //     </div>
+  //   );
+  // }
   const AppLayout = (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-all">
       <FancyBackground />
@@ -85,7 +92,6 @@ function App() {
                 </Route>
               )}
 
-              <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
             </>
           )}
