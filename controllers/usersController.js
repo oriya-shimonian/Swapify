@@ -1,6 +1,7 @@
 const db = require('../config/db'); // חיבור ל-PostgreSQL
 const bcrypt = require('bcryptjs');
 const admin = require("firebase-admin");
+const { emitForceLogout } = require('../services/socketEmitter');
 
 exports.createUser = async (req, res) => {
     try {
@@ -164,30 +165,40 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+// Ban or Unban User
 exports.banUser = async (req, res) => {
-    const { id } = req.params; // ה-ID של המשתמש שחוסמים
-    const adminId = req.user.id; // ה-ID של המשתמש המבצע (נניח שהוא ב-token)
-    
-    try {
-        // בדיקה אם המשתמש הוא ADMIN
-        const adminCheck = await db.query('SELECT role_id FROM Users WHERE user_id = $1', [adminId]);
-        if (adminCheck.rows.length === 0 || adminCheck.rows[0].role_id !== 1) { // נניח 1 = Admin
-            return res.status(403).json({ error: 'Unauthorized: Only Admins can ban users' });
-        }
+  const { id } = req.params;
+  const adminId = req.user.id;
 
-        // חסימת המשתמש
-        const result = await db.query(
-            'UPDATE Users SET is_banned = TRUE WHERE user_id = $1 RETURNING *',
-            [id]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.status(200).json({ message: 'User has been banned', user: result.rows[0] });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to ban user' });
+  try {
+    const adminCheck = await db.query('SELECT role_id FROM Users WHERE user_id = $1', [adminId]);
+    if (adminCheck.rows.length === 0 || adminCheck.rows[0].role_id !== 3) {
+      return res.status(403).json({ error: 'Unauthorized: Only Admins can ban users' });
     }
+
+    const userResult = await db.query('SELECT is_banned FROM Users WHERE user_id = $1', [id]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentStatus = userResult.rows[0].is_banned;
+    const newStatus = !currentStatus;
+
+    const result = await db.query(
+      'UPDATE Users SET is_banned = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING *',
+      [newStatus, id]
+    );
+
+    if (newStatus) {
+      emitForceLogout(Number(id));
+    }
+
+    res.status(200).json({
+      message: `User has been ${newStatus ? 'banned' : 'unbanned'}`,
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update user status' });
+  }
 };
