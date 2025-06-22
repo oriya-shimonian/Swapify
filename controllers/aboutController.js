@@ -1,5 +1,5 @@
 const db = require('../config/db');
-
+const logAudit = require('../utils/auditLogger');
 exports.getAllSections = async (req, res) => {
   const result = await db.query(`
     SELECT section_id, title, content, updated_by

@@ -1,6 +1,6 @@
 const db = require("../config/db");
 const { createNotification } = require("../services/notificationsService");
-
+const logAudit = require("../utils/auditLogger");
 // יצירת בקשת החלפה חדשה עם אפשרות להצעת עד 4 מוצרים
 
 exports.createExchangeRequest = async (req, res) => {
