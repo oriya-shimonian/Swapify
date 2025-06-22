@@ -78,7 +78,7 @@ export const useUserActions = () => {
         await axios.delete(userRoutes.deleteUser(userId), {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        toast.success("המשתמש נמחק");
+        toast.success("המשתמש נמחק בהצלחה");
       } catch (error: any) {
         toast.error("שגיאה במחיקת המשתמש");
       }
@@ -93,13 +93,55 @@ export const useUserActions = () => {
         const res = await axios.put(userRoutes.banUser(userId), {}, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        toast.success(res.data.message);
+        const updated = res.data.user;
+
+      toast.success(
+        updated.is_banned
+          ? "המשתמש נחסם בהצלחה"
+          : "חסימת המשתמש בוטלה בהצלחה"
+      );
         return res.data
       } catch (error: any) {
         toast.error("שגיאה בחסימת המשתמש");
       }
     }
   };
+
+  const deleteUsers = async (userIds: number[]) => {
+    try {
+      await axios.delete(userRoutes.deleteUsers, {
+        data: { userIds },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      toast.success("המשתמשים נמחקו");
+    } catch (error: any) {
+      toast.error("שגיאה במחיקת המשתמשים");
+    }
+  };
+
+  const banUsers = async (userIds: number[]) => {
+    try {
+      const res = await axios.put(userRoutes.banUsers, { userIds }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      toast.success("סטטוס המשתמשים עודכן");
+      return res.data;
+    } catch (error: any) {
+      toast.error("שגיאה בעדכון סטטוס המשתמשים");
+    }
+  };
+
+  const updateUserRole = async (userId: number, newRoleId: number) => {
+    try {
+      await axios.put(userRoutes.updateUserRole(userId), { newRoleId }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+      toast.success("הרול עודכן בהצלחה");
+    } catch (error: any) {
+      toast.error("שגיאה בעדכון הרול");
+    }
+  };
+
 
   return {
     createUser,
@@ -108,6 +150,9 @@ export const useUserActions = () => {
     getAllUsers,
     deleteUser,
     banUser,
+    deleteUsers,
+    banUsers,
+    updateUserRole,
     loading,
   };
 };

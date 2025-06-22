@@ -17,6 +17,9 @@ const userRoutes = {
   updateUser: (id: number) => `${baseBackendAddress}/users/${id}`, // עדכון משתמש
   banUser: (id: number) => `${baseBackendAddress}/users/${id}/ban`, // חסימת משתמש (Admin)
   deleteUser: (id: number) => `${baseBackendAddress}/users/${id}`, // מחיקת משתמש (Admin)
+  deleteUsers: `${baseBackendAddress}/users/many`, // מחיקת משתמשים מרובים (Admin)
+  banUsers: `${baseBackendAddress}/users/ban-many`, // חסימת משתמשים
+  updateUserRole: (id: number) => `${baseBackendAddress}/users/${id}/role`, // עדכון רול של משתמש (Admin)
 };
 
 // Notifications
