@@ -144,6 +144,10 @@ const messageRoutes = {
 const autoFillRoutes = {
   autoFillProduct: `${baseBackendAddress}/auto-fill-product`, // מילוי אוטומטי של מוצר
 }
+
+const statisticRoutes = {
+  getStatistics: `${baseBackendAddress}/statistics`, // סטטיסטיקות כלליות
+}
 export {
   authRoutes,
   autoFillRoutes,
@@ -160,5 +164,6 @@ export {
   aboutRoutes,
   auditLogRoutes,
   chatRoutes,
-  messageRoutes
+  messageRoutes,
+  statisticRoutes
 };

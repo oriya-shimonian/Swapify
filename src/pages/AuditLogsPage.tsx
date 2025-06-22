@@ -23,7 +23,7 @@ export default function AuditLogsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between p-6 mt-[4.5rem]">
+    <div className="min-h-screen flex flex-col p-6 mt-[4.5rem]">
       <div>
         <h1 className="text-2xl font-bold mb-4">Audit Logs</h1>
 
