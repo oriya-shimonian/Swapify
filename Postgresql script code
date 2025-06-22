@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS Users (
     User_id SERIAL PRIMARY KEY,
     Name VARCHAR (100) NOT NULL,
     Email VARCHAR (255) NOT NULL UNIQUE,
-    Password_hash VARCHAR (255) NOT NULL,
+    Password_hash VARCHAR (255),
     Profile_picture VARCHAR (255),
     Location VARCHAR (100),
     Auth_provider VARCHAR (100) CHECK (Auth_provider IN ('Facebook', 'Google', 'Regular')) NOT NULL DEFAULT 'Regular',
