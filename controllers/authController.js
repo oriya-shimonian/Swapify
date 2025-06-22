@@ -28,6 +28,10 @@ exports.loginUser = async (req, res) => {
 
     const userWithPassword = result.rows[0];
 
+    if (userWithPassword['is_banned']) {
+      return res.status(403).json({ error: "User is banned" });
+    }
+
     const isMatch = await bcrypt.compare(password, userWithPassword.password_hash);
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid email or password" });
@@ -62,6 +66,11 @@ exports.firebaseLogin = async (req, res) => {
     // בדיקה אם קיים
     const userQuery = await db.query(`SELECT * FROM Users WHERE email = $1`, [email]);
     let user = userQuery.rows[0];
+    console.log(user, " - User found for firebase login attempt");
+    
+    if (user && user.is_banned) {
+      return res.status(403).json({ error: "המשתמש חסום ואינו יכול להתחבר" });
+    }
 
     if (!user) {
       const insert = await db.query(

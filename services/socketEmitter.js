@@ -41,6 +41,14 @@ function clearUserCurrentChat(userId) {
   userCurrentChats.delete(userId);
 }
 
+function emitForceLogout(userId) {
+  const socketId = connectedUsers.get(userId);
+  if (io && socketId) {
+    io.to(socketId).emit("force_logout");
+  }
+}
+
+
 module.exports = {
   initSocketIO,
   emitNewNotification,
@@ -48,5 +56,6 @@ module.exports = {
   emitNewMessage,
   getUserCurrentChatId, 
   setUserCurrentChat,
-  clearUserCurrentChat
+  clearUserCurrentChat,
+  emitForceLogout
 };

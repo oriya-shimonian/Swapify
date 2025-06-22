@@ -2,8 +2,6 @@ const db = require('../config/db');
 
 // Middleware לבדיקה אם משתמש הוא Admin
 exports.isAdmin = async (req, res, next) => {
-    console.log("Checking if user is admin...", req.user);
-    
     const userId = req.user?.id;  // מניחים שהמשתמש מאומת ו-ID נמצא ב-token
 
     try {
@@ -35,7 +33,6 @@ require('dotenv').config();
 exports.authenticateUser = (req, res, next) => {
     const token = req.header('Authorization')?.split(" ")[1]; // להוציא רק את הטוקן עצמו
     // console.log(`Token: ${token}`); // הוספת לוג כדי לבדוק את הטוקן
-    
     if (!token) {
         return res.status(401).json({ error: 'Access denied. No token provided.' });
     }

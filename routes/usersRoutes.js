@@ -7,6 +7,12 @@ const checkBanStatus = require('../middlewares/checkBanStatus'); // ✅ הוספ
 // קבלת כל המשתמשים (Admin בלבד)
 router.get('/', authenticateUser, isAdmin, usersController.getAllUsers);
 
+// חסימת משתמשים (Admin בלבד)
+router.put('/ban-many', authenticateUser, isAdmin, usersController.banUsers);
+
+// מחיקת משתמשים(Admin בלבד)
+router.delete('/many', authenticateUser, isAdmin, usersController.deleteUsers);
+
 // קבלת משתמש לפי ID (רק המשתמש עצמו או Admin יכול לראות את הפרופיל)
 router.get('/:id', authenticateUser, usersController.getUserById);
 
@@ -21,5 +27,8 @@ router.put('/:id/ban', authenticateUser, isAdmin, usersController.banUser);
 
 // מחיקת משתמש (Admin בלבד)
 router.delete('/:id', authenticateUser, isAdmin, usersController.deleteUser);
+
+// שינוי רול של משתמש בודד
+router.put('/:id/role', authenticateUser, isAdmin, usersController.updateUserRole);
 
 module.exports = router;
