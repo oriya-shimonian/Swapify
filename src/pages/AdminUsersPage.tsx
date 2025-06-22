@@ -8,10 +8,9 @@ import StatsCardsSkeleton from "@/components/skelton/StatsCardsSkeleton";
 import FiltersSkeleton from "@/components/skelton/FiltersSkeleton";
 import UsersTableSkeleton from "@/components/skelton/UsersTableSkeleton";
 import { userManagementFilterFields } from "@/lib/filters/userManagementFilterFields";
-import GenericTable, { Column } from "@/components/table/GenericTable";
+import GenericTable from "@/components/table/GenericTable";
 import StatsCards from "@/components/StatsCards";
-import { UserCheck, UserX, Ban, Trash2 } from "lucide-react";
-import { getProviderImage, getRoleBadgeColor } from "@/utils/manageUserUtils";
+import { UserCheck, UserX } from "lucide-react";
 import AppDialog from "@/components/AppDialog";
 import { getUsersTableColumns } from "@/components/adminUsers/UsersTableColumns";
 import UsersBulkActions from "@/components/adminUsers/UsersBulkActions";
@@ -183,20 +182,6 @@ const AdminUsersPage = () => {
         </div>
 
         {selectedUsers.length > 0 && (
-          // <div className="flex gap-4 justify-end mb-4">
-          //   <button
-          //     onClick={handleBulkBanToggle}
-          //     className="px-4 py-2 bg-orange-100 text-orange-800 rounded-lg hover:bg-orange-200 transition-colors"
-          //   >
-          //     חסום/שחרר נבחרים
-          //   </button>
-          //   <button
-          //     onClick={() => setShowBulkDeleteDialog(true)}
-          //     className="px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
-          //   >
-          //     מחק נבחרים
-          //   </button>
-          // </div>
           <UsersBulkActions
             selectedUsers={selectedUsers}
             handleBulkBanToggle={handleBulkBanToggle}
@@ -206,11 +191,6 @@ const AdminUsersPage = () => {
         )}
 
         {/* Table */}
-        {/* <GenericTable
-          items={filteredUsers}
-          columns={manageUsersColumns}
-          rowKey={(user: IUser) => user.user_id}
-        /> */}
         <GenericTable
           items={filteredUsers}
           columns={getUsersTableColumns({
