@@ -16,11 +16,11 @@ export const statisticsFilterFields: FilterField[] = [
     type: "select",
     placeholder: "בחר תת קטגוריה",
   },
-  {
-    key: "location",
-    type: "input",
-    placeholder: "סינון לפי מיקום",
-  },
+  // {
+  //   key: "location",
+  //   type: "input",
+  //   placeholder: "סינון לפי מיקום",
+  // },
   {
     key: "fromDate",
     type: "input",

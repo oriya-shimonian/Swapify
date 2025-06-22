@@ -190,6 +190,7 @@ const AdminStatisticsPage = () => {
           fields={statisticsFilterFields.filter(
             (f) => f.key !== "fromDate" && f.key !== "toDate"
           )}
+          design="w-[600px]"
         />
       </div>
       {loading ? (
