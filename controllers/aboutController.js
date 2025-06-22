@@ -23,10 +23,17 @@ exports.createSection = async (req, res) => {
     [title, content, userName]
   );
 
-  await db.query(
-    `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-     VALUES ($1, $2, $3, $4)`,
-    ['הוספת חלק חדש בעמוד קצת עלינו', userId, userName, `כותרת: ${title || '[empty]'} תוכן: ${content || '[empty]'}`]
+  // await db.query(
+  //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+  //    VALUES ($1, $2, $3, $4)`,
+  //   ['הוספת חלק חדש בעמוד קצת עלינו', userId, userName, `כותרת: ${title || '[empty]'} תוכן: ${content || '[empty]'}`]
+  // );
+
+  await logAudit(
+    'הוספת חלק חדש בעמוד קצת עלינו',
+    userId,
+    userName,
+    `כותרת: ${title || '[empty]'}, תוכן: ${content || '[empty]'}`
   );
 
   res.status(201).json(insert.rows[0]);
@@ -44,10 +51,17 @@ exports.updateSection = async (req, res) => {
     [title, content, userName, id]
   );
 
-  await db.query(
-    `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-     VALUES ($1, $2, $3, $4)`,
-    ['עדכון חלק בעמוד קצת עלינו', userId, userName, `מזהה החלק: ${id}, כותרת: ${title || '[empty]'}, תוכן: ${content || '[empty]'}`]
+  // await db.query(
+  //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+  //    VALUES ($1, $2, $3, $4)`,
+  //   ['עדכון חלק בעמוד קצת עלינו', userId, userName, `מזהה החלק: ${id}, כותרת: ${title || '[empty]'}, תוכן: ${content || '[empty]'}`]
+  // );
+
+  await logAudit(
+    'עדכון חלק בעמוד קצת עלינו',
+    userId,
+    userName,
+    `מזהה החלק: ${id}, כותרת: ${title || '[empty]'}, תוכן: ${content || '[empty]'}`
   );
 
   res.status(204).json(update.rows[0]);
@@ -62,10 +76,17 @@ exports.deleteSection = async (req, res) => {
     [id]
   );
 
-  await db.query(
-    `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-     VALUES ($1, $2, $3, $4)`,
-    ['מחיקת חלק בעמוד קצת עלינו', userId, userName, `נמחק על ידי: ${userName} `]
+  // await db.query(
+  //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+  //    VALUES ($1, $2, $3, $4)`,
+  //   ['מחיקת חלק בעמוד קצת עלינו', userId, userName, `נמחק על ידי: ${userName} `]
+  // );
+
+  await logAudit(
+    'מחיקת חלק בעמוד קצת עלינו',
+    userId,
+    userName,
+    `נמחק על ידי: ${userName}`
   );
 
   res.status(204).end();

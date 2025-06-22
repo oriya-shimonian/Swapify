@@ -100,16 +100,23 @@ exports.createExchangeRequest = async (req, res) => {
     );
     const productTitle = productInfo[0]?.title || `#${productId}`;
 
-    await client.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-       VALUES ('יצירת בקשת החלפה', $1, $2, $3)`,
-      [
-        userId,
-        userName,
-        `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(
-          ", "
-        )}`,
-      ]
+    // await client.query(
+    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+    //    VALUES ('יצירת בקשת החלפה', $1, $2, $3)`,
+    //   [
+    //     userId,
+    //     userName,
+    //     `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(
+    //       ", "
+    //     )}`,
+    //   ]
+    // );
+
+    await logAudit(
+      "יצירת בקשת החלפה",
+      userId,
+      userName,
+      `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(", ")}`
     );
 
     const { rows: targetProductOwner } = await client.query(
@@ -199,14 +206,21 @@ exports.approveExchangeRequest = async (req, res) => {
     );
 
     // לוג
-    await client.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-       VALUES ('אישור בקשת החלפה', $1, $2, $3)`,
-      [
-        userId,
-        userName,
-        `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`,
-      ]
+    // await client.query(
+    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+    //    VALUES ('אישור בקשת החלפה', $1, $2, $3)`,
+    //   [
+    //     userId,
+    //     userName,
+    //     `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`,
+    //   ]
+    // );
+
+    await logAudit(
+      "אישור בקשת החלפה",
+      userId,
+      userName,
+      `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`
     );
 
     // יצירת התראות עבור ההצעות שלא נבחרו
@@ -299,14 +313,21 @@ exports.completeExchangeRequest = async (req, res) => {
       [id]
     );
 
-    await client.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-       VALUES ('השלמת החלפה', $1, $2, $3)`,
-      [
-        userId,
-        userName,
-        `הבקשה ${id} הושלמה – המוצר "${chosenTitle}" הוחלף עם "${targetTitle}"`,
-      ]
+    // await client.query(
+    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+    //    VALUES ('השלמת החלפה', $1, $2, $3)`,
+    //   [
+    //     userId,
+    //     userName,
+    //     `הבקשה ${id} הושלמה – המוצר "${chosenTitle}" הוחלף עם "${targetTitle}"`,
+    //   ]
+    // );
+
+    await logAudit(
+      "השלמת החלפה",
+      userId,
+      userName,
+      `הבקשה ${id} הושלמה – המוצר "${chosenTitle}" הוחלף עם "${targetTitle}"`
     );
 
     await client.query("COMMIT");
@@ -594,10 +615,17 @@ exports.updateExchangeRequestStatus = async (req, res) => {
 
     const productTitle = productRows[0]?.title || `מוצר מספר ${product_id}`;
 
-    await client.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-       VALUES ('עדכון סטטוס בקשת החלפה', $1, $2, $3)`,
-      [userId, userName, `עודכן סטטוס הבקשה על "${productTitle}" ל-${status}`]
+    // await client.query(
+    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+    //    VALUES ('עדכון סטטוס בקשת החלפה', $1, $2, $3)`,
+    //   [userId, userName, `עודכן סטטוס הבקשה על "${productTitle}" ל-${status}`]
+    // );
+
+    await logAudit(
+      "עדכון סטטוס בקשת החלפה",
+      userId,
+      userName,
+      `עודכן סטטוס הבקשה על "${productTitle}" ל-${status}`
     );
 
     await client.query("COMMIT");
@@ -718,15 +746,22 @@ exports.cancelExchangeRequest = async (req, res) => {
       );
     }
 
-    // לוג
-    await client.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-       VALUES ('ביטול בקשת החלפה', $1, $2, $3)`,
-      [
-        userId,
-        userName,
-        `בוטלה בקשה על "${request.product_title}" (מספר ${id})`,
-      ]
+    // // לוג
+    // await client.query(
+    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+    //    VALUES ('ביטול בקשת החלפה', $1, $2, $3)`,
+    //   [
+    //     userId,
+    //     userName,
+    //     `בוטלה בקשה על "${request.product_title}" (מספר ${id})`,
+    //   ]
+    // );
+
+    await logAudit(
+      "ביטול בקשת החלפה",
+      userId,
+      userName,
+      `בוטלה בקשה על "${request.product_title}" (מספר ${id})`
     );
 
     await client.query("COMMIT");
@@ -767,17 +802,23 @@ exports.confirmMeeting = async (req, res) => {
 
     const { city, location_name, hour } = meetingDetails.rows[0];
 
-    // הוספת שורת Audit Log
-    await db.query(
-      `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-       VALUES ($1, $2, $3, $4)`,
-      [
-        "Meeting Confirmed",
-        userId,
-        userName,
-        `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`,
-      ]
-    );
+    // // הוספת שורת Audit Log
+    // await db.query(
+    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
+    //    VALUES ($1, $2, $3, $4)`,
+    //   [
+    //     "Meeting Confirmed",
+    //     userId,
+    //     userName,
+    //     `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`,
+    //   ]
+    // );
+
+    await logAudit(
+      "Meeting Confirmed",
+      userId,
+      userName,
+      `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`)
 
     res.status(200).json({ message: "Meeting confirmed successfully." });
   } catch (error) {
