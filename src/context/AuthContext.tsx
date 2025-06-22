@@ -48,6 +48,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 const AuthContext = createContext<{
   user: IUser | null;
   state: AuthState;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
@@ -56,30 +57,7 @@ const AuthContext = createContext<{
 // Provider
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
-  // const [user, setUser] = useState<IUser | null>(null);
-  // פונקציה להתחברות
-  // const login = async (email: string, password: string) => {
-  //   try {
-  //     const response = await axios.post(authRoutes.login, { email, password });
-  //     const { token, user } = response.data;
-  //     state.user(user);
-  //     localStorage.setItem("token", token);
-
-  //     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`; // הגדרת טוקן קבועה
-
-  //     dispatch({ type: "LOGIN", payload: { user, token } });
-  //   } catch (error: any) {
-  //     // הצגת שגיאות מפורטות
-  //     if (error.response) {
-  //       toast.error(
-  //         `שגיאה: ${error.response.data.message || "ניסיון ההתחברות נכשל"}`
-  //       );
-  //     } else {
-  //       toast.error("אירעה שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
-  //     }
-  //   }
-  // };
-
+ 
   const login = async (email: string, password: string) => {
     try {
       const response = await axios.post(authRoutes.login, { email, password });
@@ -94,6 +72,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // 🧠 התחברות ל־Socket אחרי login
       connectSocket(user.user_id);
     } catch (error: any) {
+      console.log("Login error:", error.status);
+      if(error.status === 403) {
+        toast.error("המשתמש נחסם. פנה למנהל המערכת.");
+        return;
+      }
       if (error.response) {
         toast.error(
           `שגיאה: ${error.response.data.message || "ניסיון ההתחברות נכשל"}`
@@ -154,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user: state.user, state, login, logout, checkAuth }}
+      value={{ user: state.user, loading: state.loading, state, login, logout, checkAuth }}
     >
       {children}
     </AuthContext.Provider>

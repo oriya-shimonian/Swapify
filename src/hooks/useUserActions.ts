@@ -5,10 +5,16 @@ import { userRoutes } from "@/settings";
 import { useAuth } from "@/context/AuthContext"; // כדי להתממשק עם המשתמש המחובר
 
 export const useUserActions = () => {
-  const { login } = useAuth(); // להשתמש ב-login אם רוצים להתחבר אחרי הרשמה
+  const { login, user } = useAuth(); // להשתמש ב-login אם רוצים להתחבר אחרי הרשמה
   const [loading, setLoading] = useState(false);
 
-  const createUser = async (username: string, email: string, password: string, notificationEnabled: boolean, locations: string[]) => {
+  const createUser = async (
+    username: string,
+    email: string,
+    password: string,
+    notificationEnabled: boolean,
+    locations: string[]
+  ) => {
     setLoading(true);
     try {
       const response = await axios.post(userRoutes.createUser, {
@@ -16,7 +22,7 @@ export const useUserActions = () => {
         email,
         password,
         notificationEnabled,
-        locations
+        locations,
       });
 
       await login(email, password);
@@ -51,5 +57,102 @@ export const useUserActions = () => {
     }
   };
 
-  return { createUser, getUserById, updateUser, loading };
+  // ❗ ב־useUserActions.ts
+  const getAllUsers = async () => {
+    if (user && user.role_name === "Admin") {
+      try {
+        const res = await axios.get(userRoutes.getAllUsers, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        return res.data;
+      } catch (error: any) {
+        toast.error("שגיאה בקבלת רשימת המשתמשים");
+        return [];
+      }
+    }
+  };
+
+  const deleteUser = async (userId: number) => {
+    if (user && user.role_name === "Admin") {
+      try {
+        await axios.delete(userRoutes.deleteUser(userId), {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        toast.success("המשתמש נמחק בהצלחה");
+      } catch (error: any) {
+        toast.error("שגיאה במחיקת המשתמש");
+      }
+    }
+  };
+
+  const banUser = async (userId: number) => {
+    console.log(localStorage.getItem("token"), "espreso");
+    
+    if (user && user.role_name === "Admin") {
+      try {
+        const res = await axios.put(userRoutes.banUser(userId), {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const updated = res.data.user;
+
+      toast.success(
+        updated.is_banned
+          ? "המשתמש נחסם בהצלחה"
+          : "חסימת המשתמש בוטלה בהצלחה"
+      );
+        return res.data
+      } catch (error: any) {
+        toast.error("שגיאה בחסימת המשתמש");
+      }
+    }
+  };
+
+  const deleteUsers = async (userIds: number[]) => {
+    try {
+      await axios.delete(userRoutes.deleteUsers, {
+        data: { userIds },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      toast.success("המשתמשים נמחקו");
+    } catch (error: any) {
+      toast.error("שגיאה במחיקת המשתמשים");
+    }
+  };
+
+  const banUsers = async (userIds: number[]) => {
+    try {
+      const res = await axios.put(userRoutes.banUsers, { userIds }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      toast.success("סטטוס המשתמשים עודכן");
+      return res.data;
+    } catch (error: any) {
+      toast.error("שגיאה בעדכון סטטוס המשתמשים");
+    }
+  };
+
+  const updateUserRole = async (userId: number, newRoleId: number) => {
+    try {
+      await axios.put(userRoutes.updateUserRole(userId), { newRoleId }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+      toast.success("הרול עודכן בהצלחה");
+    } catch (error: any) {
+      toast.error("שגיאה בעדכון הרול");
+    }
+  };
+
+
+  return {
+    createUser,
+    getUserById,
+    updateUser,
+    getAllUsers,
+    deleteUser,
+    banUser,
+    deleteUsers,
+    banUsers,
+    updateUserRole,
+    loading,
+  };
 };

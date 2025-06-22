@@ -25,10 +25,13 @@ import MyReceivedRequestsTab from "./components/UserDashboard/ReceivedRequestsTa
 import NotificationsPage from "./pages/NotificationsPage";
 import { NotificationsProvider } from "./context/NotificationsContext";
 import ChatPage from "./pages/ChatPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
+import AdminLayout from "./pages/AdminLayout";
+import FancyBackground from "./components/FancyBackground";
 // import { ChatWindow } from "./pages/ChatPage";
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   const hideFooter =
@@ -36,8 +39,16 @@ function App() {
     location.pathname === "/signup" ||
     location.pathname === "/profile";
 
+  // if (loading && !hideFooter) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+  //       <div className="text-gray-500 dark:text-gray-300">טוען משתמש...</div>
+  //     </div>
+  //   );
+  // }
   const AppLayout = (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-all">
+      <FancyBackground />
       <Navbar />
       <main className={!hideFooter ? `min-h-[84vh]` : ""}>
         <Routes>
@@ -56,17 +67,31 @@ function App() {
           {/* Routes that require a user */}
           {user && (
             <>
-              <Route
+              {/* <Route
                 path="/admin/audits"
-                element={user.role_name === "Admin" ? <AuditLogsPage /> : <HomePage />}
-              />
+                element={
+                  user.role_name === "Admin" ? <AuditLogsPage /> : <HomePage />
+                }
+              /> */}
               {/* <Route path="/admin/meeting-options" element={<MeetingOptionsAdminPage />} /> */}
               <Route path="chat" element={<ChatPage />} />
               <Route path="/dashboard" element={<UserDashboardWrapper />}>
                 <Route path="my-products" element={<MyProductsTab />} />
                 <Route path="requests/sent" element={<MySentRequestsTab />} />
-                <Route path="requests/received" element={<MyReceivedRequestsTab />} />
+                <Route
+                  path="requests/received"
+                  element={<MyReceivedRequestsTab />}
+                />
               </Route>
+              {user?.role_name === "Admin" && (
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="users" element={<AdminUsersPage />} />
+                  <Route path="audits" element={<AuditLogsPage />} />
+                  {/* <Route path="meeting-options" element={<MeetingOptionsAdminPage />} /> */}
+                  {/* עמודים נוספים בהמשך */}
+                </Route>
+              )}
+
               <Route path="/notifications" element={<NotificationsPage />} />
             </>
           )}
@@ -83,6 +108,5 @@ function App() {
     AppLayout
   );
 }
-
 
 export default App;

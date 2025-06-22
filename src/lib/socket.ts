@@ -17,6 +17,13 @@ export const connectSocket = (userId: number) => {
     socket.on("disconnect", () => {
       console.log("🔌 Socket disconnected");
     });
+
+    socket.on("force_logout", () => {
+      console.log("🚫 Force logout received");
+      localStorage.removeItem("token");
+      alert("המשתמש שלך נחסם ונותקת מהמערכת."); // או toast
+      window.location.href = "/login"; // או כל נתיב אחר
+    });
   }
 
   return socket;
