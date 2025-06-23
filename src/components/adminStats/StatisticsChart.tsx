@@ -83,17 +83,24 @@ const StatisticsChart = ({
           )}
 
           {type === "bar" && (
-            <BarChart
-              data={formattedData}
-              layout="vertical"
-              margin={{ top: 20, right: 20, bottom: 20, left: 60 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" />
-              <Tooltip />
-              <Bar dataKey="value" fill="#60a5fa" />
-            </BarChart>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={data}
+                layout="vertical"
+                margin={{ top: 20, right: 30, left: -50, bottom: 20 }} // הגדלנו את left
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tick={{ fontSize: 14, textAnchor: "start", dx: -10 }} // הזחה לשמאל
+                  width={150} // תוספת מקום לטקסטים בעברית
+                />
+                <Tooltip formatter={(value) => [`${value} משתמשים`, "כמות"]} />
+                <Bar dataKey="value" fill="#60a5fa" />
+              </BarChart>
+            </ResponsiveContainer>
           )}
 
           {type === "line" && (

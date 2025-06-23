@@ -10,14 +10,23 @@ import UsersTableSkeleton from "@/components/skelton/UsersTableSkeleton";
 import { userManagementFilterFields } from "@/lib/filters/userManagementFilterFields";
 import GenericTable from "@/components/table/GenericTable";
 import StatsCards from "@/components/StatsCards";
-import { UserCheck, UserX } from "lucide-react";
+import { UserCheck, UserX, UsersRound, Shield } from "lucide-react";
 import AppDialog from "@/components/AppDialog";
 import { getUsersTableColumns } from "@/components/adminUsers/UsersTableColumns";
 import UsersBulkActions from "@/components/adminUsers/UsersBulkActions";
+import { useUserLocationStats } from "@/hooks/useUserLocationStats";
+import StatisticsChart from "@/components/adminStats/StatisticsChart";
+import { normalizeLocations } from "@/utils/manageUserUtils";
 
 const AdminUsersPage = () => {
-  const { getAllUsers, deleteUser, banUser, deleteUsers, banUsers, updateUserRole } =
-    useUserActions();
+  const {
+    getAllUsers,
+    deleteUser,
+    banUser,
+    deleteUsers,
+    banUsers,
+    updateUserRole,
+  } = useUserActions();
   const [userToDelete, setUserToDelete] = useState<IUser | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
@@ -98,8 +107,8 @@ const AdminUsersPage = () => {
   const handleChangeRole = async (userId: number, newRoleName: string) => {
     const newRoleId = newRoleName === "Admin" ? 3 : 2;
     await updateUserRole(userId, newRoleId);
-    setUsers(prev =>
-      prev.map(u =>
+    setUsers((prev) =>
+      prev.map((u) =>
         u.user_id === userId
           ? { ...u, role_name: newRoleName as "User" | "Admin" }
           : u
@@ -124,7 +133,7 @@ const AdminUsersPage = () => {
       label: "כל המשתמשים",
       value: users.length,
       color: "blue",
-      Icon: UserCheck,
+      Icon: UsersRound,
     },
     {
       label: "משתמשים פעילים",
@@ -142,7 +151,7 @@ const AdminUsersPage = () => {
       label: "מנהלים",
       value: users.filter((u) => u.role_name === "Admin").length,
       color: "purple",
-      Icon: UserCheck,
+      Icon: Shield,
     },
   ];
 
@@ -168,7 +177,7 @@ const AdminUsersPage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <StatsCards items={manageUsersCardstats} />
+        <StatsCards items={manageUsersCardstats}/>
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 pb-0 mb-8">
@@ -187,7 +196,6 @@ const AdminUsersPage = () => {
             handleBulkBanToggle={handleBulkBanToggle}
             handleBulkDelete={handleBulkDelete}
           />
-
         )}
 
         {/* Table */}
@@ -209,7 +217,8 @@ const AdminUsersPage = () => {
         description={
           userToDelete && (
             <>
-              האם את/ה בטוח/ה שברצונך למחוק את <strong>{userToDelete.name}</strong>?<br />
+              האם את/ה בטוח/ה שברצונך למחוק את{" "}
+              <strong>{userToDelete.name}</strong>?<br />
               פעולה זו אינה ניתנת לשחזור.
             </>
           )
@@ -233,7 +242,8 @@ const AdminUsersPage = () => {
         title="מחיקת משתמשים"
         description={
           <>
-            האם את/ה בטוח/ה שברצונך למחוק <strong>{selectedUsers.length}</strong> משתמשים?
+            האם את/ה בטוח/ה שברצונך למחוק{" "}
+            <strong>{selectedUsers.length}</strong> משתמשים?
             <br />
             פעולה זו אינה ניתנת לשחזור.
           </>
@@ -250,10 +260,7 @@ const AdminUsersPage = () => {
           setShowBulkDeleteDialog(false);
         }}
       />
-
-
     </div>
-    
   );
 };
 

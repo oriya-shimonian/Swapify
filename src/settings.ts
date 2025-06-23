@@ -20,6 +20,7 @@ const userRoutes = {
   deleteUsers: `${baseBackendAddress}/users/many`, // מחיקת משתמשים מרובים (Admin)
   banUsers: `${baseBackendAddress}/users/ban-many`, // חסימת משתמשים
   updateUserRole: (id: number) => `${baseBackendAddress}/users/${id}/role`, // עדכון רול של משתמש (Admin)
+  getLocationStats: `${baseBackendAddress}/users/location-stats`, // סטטיסטיקות לפי מיקום
 };
 
 // Notifications

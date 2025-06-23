@@ -131,6 +131,8 @@ import GaugeChart from "./GaugeChart";
 import { StatisticsData, typeMap } from "@/types/statistics";
 import { Card } from "../ui/card";
 import { productCategoryLabels } from "@/types/products";
+import { normalizeLocations } from "@/utils/manageUserUtils";
+import { useUserLocationStats } from "@/hooks/useUserLocationStats";
 
 interface Props {
   data: StatisticsData;
@@ -138,6 +140,8 @@ interface Props {
 
 const StatisticsChartsSection = ({ data }: Props) => {
   const total = data.exchangeRequests.total;
+  const { data: locationStats, loading: loadingLocations } =
+    useUserLocationStats();
   const approved =
     data.exchangeRequests.byStatus.find((s) => s.status === "Approved")
       ?.count || 0;
@@ -180,19 +184,25 @@ const StatisticsChartsSection = ({ data }: Props) => {
       title: "אחוז פאזלים מכלל המוצרים",
       color: "#3b82f6",
       value:
-        totalProducts > 0 ? (getCategoryCount("Puzzle") / totalProducts) * 100 : 0,
+        totalProducts > 0
+          ? (getCategoryCount("Puzzle") / totalProducts) * 100
+          : 0,
     },
     {
       title: "אחוז ספרים מכלל המוצרים",
       color: "#8b5cf6",
       value:
-        totalProducts > 0 ? (getCategoryCount("Book") / totalProducts) * 100 : 0,
+        totalProducts > 0
+          ? (getCategoryCount("Book") / totalProducts) * 100
+          : 0,
     },
     {
       title: "אחוז משחקי קופסה מכלל המוצרים",
       color: "#ec4899",
       value:
-        totalProducts > 0 ? (getCategoryCount("Board Game") / totalProducts) * 100 : 0,
+        totalProducts > 0
+          ? (getCategoryCount("Board Game") / totalProducts) * 100
+          : 0,
     },
   ];
 
@@ -233,6 +243,13 @@ const StatisticsChartsSection = ({ data }: Props) => {
           name: item.month,
           value: +item.count,
         }))}
+      />
+
+      <StatisticsChart
+        title="התפלגות מיקומי המשתמשים"
+        type="bar"
+        data={normalizeLocations(locationStats)}
+        className="h-full lg:col-span-2 sm:col-span-1 md:col-span-2"
       />
 
       {/* חמישה מחוונים בתוך כרטיס אחד */}
