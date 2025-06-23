@@ -1,93 +1,3 @@
-// import { useState } from "react";
-// import { useStatistics } from "@/hooks/useStatistics";
-// import { StatisticsData } from "@/types/statistics";
-// import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
-// import { statisticsFilterFields } from "@/lib/filters/statisticsFilterFields";
-// import StatsCards from "@/components/StatsCards";
-// import StatsCardsSkeleton from "@/components/skelton/StatsCardsSkeleton";
-
-// import { BarChart, PieChart } from "lucide-react"; // אייקונים לדוגמה
-
-// const AdminStatisticsPage = () => {
-//   const [filters, setFilters] = useState({
-//     fromDate: null,
-//     toDate: null,
-//     category: null,
-//     subcategory: null,
-//     location: "",
-//   });
-
-//   const resetPage = () => {}; // חובה לפי Filters אבל אין בו צורך כאן
-
-//   const { data, loading } = useStatistics(filters);
-
-//   const cards = data
-//     ? [
-//         {
-//           label: "מוצרים זמינים",
-//           value: data.productsCount.available,
-//           color: "green",
-//           Icon: PieChart,
-//         },
-//         {
-//           label: "לא זמינים / מוחלפים",
-//           value: data.productsCount.unavailable,
-//           color: "orange",
-//           Icon: BarChart,
-//         },
-//         {
-//           label: "בקשות החלפה",
-//           value: data.exchangeRequests.total,
-//           color: "blue",
-//           Icon: BarChart,
-//         },
-//         {
-//           label: "החלפות שבוצעו",
-//           value: data.exchanges.total,
-//           color: "purple",
-//           Icon: PieChart,
-//         },
-//         {
-//           label: "התראות שנשלחו",
-//           value: data.notifications.total,
-//           color: "gray",
-//           Icon: BarChart,
-//         },
-//         {
-//           label: "צ׳אטים שנפתחו",
-//           value: data.chatsCount,
-//           color: "blue",
-//           Icon: PieChart,
-//         },
-//       ]
-//     : [];
-
-//   return (
-//     <section className="p-6 space-y-8">
-//       <h1 className="text-2xl font-bold">סטטיסטיקות כלליות</h1>
-
-//       <Filters
-//         filters={filters}
-//         setFilters={setFilters}
-//         resetPage={resetPage}
-//         fields={statisticsFilterFields}
-//       />
-
-//       {loading ? (
-//         <StatsCardsSkeleton />
-//       ) : (
-//         <StatsCards items={cards} columns={3} />
-//       )}
-
-//       {/* כאן נוסיף בהמשך גרפים וטבלאות */}
-//       {/* <StatisticsCharts data={data} /> */}
-//       {/* <StatisticsBreakdownTable data={data} /> */}
-//     </section>
-//   );
-// };
-
-// export default AdminStatisticsPage;
-
 import { useState } from "react";
 import { useStatistics } from "@/hooks/useStatistics";
 import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
@@ -96,9 +6,12 @@ import StatsCards from "@/components/StatsCards";
 import StatsCardsSkeleton from "@/components/skelton/StatsCardsSkeleton";
 import StatisticsChartsSection from "@/components/adminStats/StatisticsChartsSection";
 
-import { BarChart, PieChart } from "lucide-react";
+import { BarChart, Download, PieChart } from "lucide-react";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import StatisticsBreakdownTable from "@/components/adminStats/StatisticsBreakdownTable";
+import { downloadStatisticsCSV } from "@/utils/manageUserUtils";
+import { Button } from "@/components/ui/button";
+import AppButton from "@/components/Buttons/AppButton";
 
 const AdminStatisticsPage = () => {
   const [filters, setFilters] = useState<{
@@ -168,38 +81,89 @@ const AdminStatisticsPage = () => {
       ]
     : [];
 
-    console.log("Statistics data:", data);
-    
+  console.log("Statistics data:", data);
+
   return (
     <section className="p-6 space-y-8">
       <h1 className="text-2xl font-bold">סטטיסטיקות כלליות</h1>
+{/* 
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 pb-0 mb-8 flex lg:flex-nowrap sm:flex-wrap">
+        <div className="gap-4 items-end w-full">
+          <div className="max-w-full mb-6">
+            <DateRangePicker
+              fromDate={filters.fromDate ?? ""}
+              toDate={filters.toDate ?? ""}
+              onChange={handleDateChange}
+            />
+          </div>
 
-      <div className="flex flex-wrap gap-4 items-end w-full">
-        <div className="max-w-full mb-6">
-          <DateRangePicker
-          fromDate={filters.fromDate ?? ""}
-          toDate={filters.toDate ?? ""}
-          onChange={handleDateChange}
+          <Filters
+            filters={filters}
+            setFilters={setFilters}
+            resetPage={resetPage}
+            fields={statisticsFilterFields.filter(
+              (f) => f.key !== "fromDate" && f.key !== "toDate"
+            )}
+            design="w-[600px]"
           />
         </div>
-        
-        <Filters
-          filters={filters}
-          setFilters={setFilters}
-          resetPage={resetPage}
-          fields={statisticsFilterFields.filter(
-            (f) => f.key !== "fromDate" && f.key !== "toDate"
-          )}
-          design="w-[600px]"
-        />
-      </div>
+        <AppButton className="items-center w-64 mb-4 h-fit py-3 gap-4 text-sm flex flex-row" onClick={() => data && downloadStatisticsCSV(data)}>
+          <Download size={16} className="mt-0.5"/>
+          הורדת המידע לקובץ CSV
+        </AppButton>
+      </div> */}
+
+<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+  <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    
+    {/* 🟦 Date Picker */}
+    <div className="w-full lg:w-auto mb-6">
+      <DateRangePicker
+        fromDate={filters.fromDate ?? ""}
+        toDate={filters.toDate ?? ""}
+        onChange={handleDateChange}
+      />
+    </div>
+
+    {/* 🟨 Filters */}
+    <div className="w-full lg:flex-1">
+      <Filters
+        filters={filters}
+        setFilters={setFilters}
+        resetPage={resetPage}
+        fields={statisticsFilterFields.filter(
+          (f) => f.key !== "fromDate" && f.key !== "toDate"
+        )}
+        design="w-full"
+      />
+    </div>
+
+    {/* 🟪 כפתור הורדה */}
+    <div className="w-full lg:w-auto mb-6">
+      <AppButton
+        onClick={() => data && downloadStatisticsCSV(data)}
+        className="w-full lg:w-64 py-3 text-sm justify-center"
+      >
+        <Download size={16} />
+        הורדת המידע לקובץ CSV
+      </AppButton>
+    </div>
+    
+  </div>
+</div>
+
+
+
+
       {loading ? (
         <StatsCardsSkeleton />
       ) : (
         <>
           <StatsCards items={cards} columns={3} />
           {!loading && data && <StatisticsChartsSection data={data} />}
-          {!loading && data && <StatisticsBreakdownTable data={data.productBreakdown} />}
+          {!loading && data && (
+            <StatisticsBreakdownTable data={data.productBreakdown} />
+          )}
         </>
       )}
     </section>
