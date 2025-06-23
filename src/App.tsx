@@ -25,9 +25,10 @@ import MyReceivedRequestsTab from "./components/UserDashboard/ReceivedRequestsTa
 import NotificationsPage from "./pages/NotificationsPage";
 import { NotificationsProvider } from "./context/NotificationsContext";
 import ChatPage from "./pages/ChatPage";
-import AdminUsersPage from "./pages/AdminUsersPage";
-import AdminLayout from "./pages/AdminLayout";
+import AdminUsersPage from "./pages/Admin/AdminUsersPage";
+import AdminLayout from "./pages/Admin/AdminLayout";
 import FancyBackground from "./components/FancyBackground";
+import AdminStatisticsPage from "./pages/Admin/AdminStatisticsPage";
 // import { ChatWindow } from "./pages/ChatPage";
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route path="users" element={<AdminUsersPage />} />
                   <Route path="audits" element={<AuditLogsPage />} />
+                  <Route path="stats" element={<AdminStatisticsPage />} />
                   {/* <Route path="meeting-options" element={<MeetingOptionsAdminPage />} /> */}
                   {/* עמודים נוספים בהמשך */}
                 </Route>

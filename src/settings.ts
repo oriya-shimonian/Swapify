@@ -20,6 +20,7 @@ const userRoutes = {
   deleteUsers: `${baseBackendAddress}/users/many`, // מחיקת משתמשים מרובים (Admin)
   banUsers: `${baseBackendAddress}/users/ban-many`, // חסימת משתמשים
   updateUserRole: (id: number) => `${baseBackendAddress}/users/${id}/role`, // עדכון רול של משתמש (Admin)
+  getLocationStats: `${baseBackendAddress}/users/location-stats`, // סטטיסטיקות לפי מיקום
 };
 
 // Notifications
@@ -144,6 +145,10 @@ const messageRoutes = {
 const autoFillRoutes = {
   autoFillProduct: `${baseBackendAddress}/auto-fill-product`, // מילוי אוטומטי של מוצר
 }
+
+const statisticRoutes = {
+  getStatistics: `${baseBackendAddress}/statistics`, // סטטיסטיקות כלליות
+}
 export {
   authRoutes,
   autoFillRoutes,
@@ -160,5 +165,6 @@ export {
   aboutRoutes,
   auditLogRoutes,
   chatRoutes,
-  messageRoutes
+  messageRoutes,
+  statisticRoutes
 };

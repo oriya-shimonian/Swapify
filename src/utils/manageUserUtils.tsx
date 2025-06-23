@@ -1,6 +1,7 @@
 import googleIcon from "../assets/users-resources logo/google-icon.png";
 import facebookIcon from "../assets/users-resources logo/facebook logo.png";
-  export const getRoleBadgeColor = (role: string) => {
+
+export const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "מנהל":
         return "bg-red-100 text-red-800 border-red-200";
@@ -25,5 +26,26 @@ import facebookIcon from "../assets/users-resources logo/facebook logo.png";
     }
   };
 
+
+  export function normalizeLocations(raw: { location: string | null; count: number }[]) {
+  const map = new Map<string, number>();
+
+  raw.forEach((item) => {
+    const locs = (item.location || "לא ידוע")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    locs.forEach((loc) => {
+      map.set(loc, (map.get(loc) || 0) + Number(item.count));
+    });
+  });
+
+  // הפיכה למערך
+  return Array.from(map.entries()).map(([location, count]) => ({
+    name: location,
+    value: count,
+  }));
+}
 
 

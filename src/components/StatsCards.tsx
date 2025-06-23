@@ -16,7 +16,7 @@ interface StatsCardsProps {
 
 const StatsCards = ({ items, columns = 4 }: StatsCardsProps) => {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-${columns} gap-6 mb-8`}>
+    <div className={`grid lg:grid-cols-${columns} md:grid-cols-2 sm:grid-cols-1 gap-6 mb-8`}>
       {items.map(({ label, value, color, Icon }) => (
         <div
           key={label}
