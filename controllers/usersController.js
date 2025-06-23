@@ -385,3 +385,19 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
+
+exports.getLocationStats = async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT location, COUNT(*) AS count
+       FROM Users
+       GROUP BY location
+       ORDER BY count DESC`
+    );
+
+    res.json({ locationDistribution: result.rows });
+  } catch (err) {
+    console.error("Error fetching location stats:", err);
+    res.status(500).json({ error: "שגיאה בעת שליפת נתוני מיקומים" });
+  }
+};
