@@ -7,6 +7,8 @@ const checkBanStatus = require('../middlewares/checkBanStatus'); // ✅ הוספ
 // קבלת כל המשתמשים (Admin בלבד)
 router.get('/', authenticateUser, isAdmin, usersController.getAllUsers);
 
+router.get("/location-stats", authenticateUser, isAdmin, usersController.getLocationStats);
+
 // חסימת משתמשים (Admin בלבד)
 router.put('/ban-many', authenticateUser, isAdmin, usersController.banUsers);
 
