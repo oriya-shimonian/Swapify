@@ -1,54 +1,61 @@
-import { NAV_LINKS } from "@/constants/navigationLinks";
-import { FaFacebook, FaInstagram, FaLinkedin, FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { useAuth } from "@/context/AuthContext";
+import { NAV_LINKS, USER_LINKS, ADMIN_LINKS } from "@/constants/navigationLinks";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
-export default function Footer({design}: {design: string}) {
+export default function Footer({ design }: { design?: string }) {
+  const { user, loading } = useAuth();
+
+  const linksToShow = [
+    ...NAV_LINKS,
+    ...(user ? USER_LINKS : []),
+    ...(user?.role_name === "Admin" ? ADMIN_LINKS : []),
+  ];
+
   return (
-    <footer className={`${design} w-full border-t p-6 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300`}>
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between">
-        
+    <footer className={`${design || ""} w-full border-t p-6 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300`}>
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 flex-wrap">
+
         {/* לוגו */}
-        <div className="text-2xl font-semibold">
         <motion.img
-            src="/logo-without bg.png"
-            alt="הלוגו של SWAPIFY"
-            className="lg:h-10 md:h-8 sm:h-4 h-5"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          />
-        </div>
+          src="/logo-without bg.png"
+          alt="הלוגו של SWAPIFY"
+          className="h-8 md:h-10"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        />
 
         {/* קישורים */}
-        <div className="flex space-x-6">
-          {NAV_LINKS.map((link) => (
-            <a
+        <div className="flex flex-wrap justify-center gap-4">
+          {linksToShow.map((link) => (
+            <Link
               key={link.path}
-              href={link.path}
-              className="hover:text-black dark:hover:text-white transition"
+              to={link.path}
+              className="hover:underline hover:text-black dark:hover:text-white transition text-sm"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </div>
 
-        {/* אייקונים חברתיים */}
-        <div className="flex space-x-4 text-2xl">
-          <FaFacebook className="cursor-pointer hover:text-blue-600" />
-          <FaInstagram className="cursor-pointer hover:text-pink-500" />
-          <FaXTwitter className="cursor-pointer hover:text-gray-700" />
-          <FaLinkedin className="cursor-pointer hover:text-blue-700" />
-          <FaYoutube className="cursor-pointer hover:text-red-600" />
+        {/* מייל ליצירת קשר */}
+        <div className="text-sm text-center">
+          ניתן לפנות אלינו במייל:{" "}
+          <a
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=swapify418@gmail.com&subject=פנייה מהאתר Swapify&body=שלום, אשמח לעזרה בנושא..."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-black dark:hover:text-white"
+          >
+            swapify418@gmail.com
+          </a>
         </div>
       </div>
 
       {/* זכויות יוצרים */}
-      <div className="text-center mt-4 text-sm">
-         2025 Swapify כל הזכויות שמורות ©
-        {/* TODO */}
-        {/* <a href="/privacy-policy" className="ml-2 underline hover:text-black dark:hover:text-white">Privacy Policy</a>
-        <a href="/terms-of-service" className="ml-2 underline hover:text-black dark:hover:text-white">Terms of Service</a>
-        <a href="/cookies-settings" className="ml-2 underline hover:text-black dark:hover:text-white">Cookies Settings</a> */}
+      <div className="text-center mt-4 text-xs text-gray-500 dark:text-gray-400">
+        כל הזכויות שמורות © Swapify 2025
       </div>
     </footer>
   );

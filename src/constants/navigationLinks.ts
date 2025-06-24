@@ -5,11 +5,6 @@ export const NAV_LINKS = [
   { name: "קצת עלינו", path: "/about" },
 ];
 
-export const NOT_ADMIN_LINKS = [
-  { name: "צור קשר", path: "/contact" },
-  { name: "משוב", path: "/feedback" },
-];
-
 export const USER_LINKS = [
   { name: "ניהול החלפות", path: "/profile" },
   // { name: "הודעות", path: "/messages" },
@@ -19,5 +14,4 @@ export const ADMIN_LINKS = [
   { name: "סטטיסטיקות", path: "/admin/stats" },
   { name: "לוגים", path: "/admin/audits" },
   { name: "ניהול משתמשים", path: "/admin/users" },
-  // { name: "ניהול מיקומי החלפה", path: "/admin/meeting-options" },
 ];
