@@ -99,8 +99,10 @@ import { Card } from "@/components/ui/card";
 import {
   getProductCategoryLabel,
   getProductConditionLabel,
+  getSubcategoryLabel,
   IProduct,
 } from "@/types/products";
+import { getAvailabilityBadge } from "@/utils/BadgeUtils";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductCard({
@@ -136,15 +138,20 @@ export default function ProductCard({
         <h3 className="text-lg font-semibold truncate">{product.title}</h3>
         <p className="text-sm text-muted-foreground truncate">
           {getProductCategoryLabel(product.category)}
-          {product.subcategory && ` / ${product.subcategory}`}
+          {product.subcategory && ` / ${getSubcategoryLabel(product.category, product.subcategory) }`}
         </p>
 
         {/* כפתורים (אם רלוונטי) */}
-        {actionButtons && (
+        {/* {actionButtons && (
           <div className="flex gap-2 mt-2">
             {actionButtons}
           </div>
-        )}
+        )} */}
+        
+        <div className="flex gap-2 mt-2">
+          <div>{getAvailabilityBadge(product.availability)}</div>
+          <p>{getProductConditionLabel(product.condition)}</p>
+        </div>
       </div>
     </Card>
   );

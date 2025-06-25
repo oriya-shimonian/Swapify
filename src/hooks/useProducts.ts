@@ -201,7 +201,8 @@ const fetchProducts = useCallback(
       location?: string | null;
       fromDate?: string;
       toDate?: string;
-    }
+    },
+    excludeMyProducts?: boolean
   ) => {
     const offset = page * NUM_PRODUCTS_IN_PAGE;
     setLoadingNextPage(true);
@@ -215,8 +216,11 @@ const fetchProducts = useCallback(
     if (filters?.toDate) params.append("to", filters.toDate);
 
     try {
-      const url = productRoutes.getAllProducts(NUM_PRODUCTS_IN_PAGE, offset) + `&${params.toString()}`;
-      const res = await axios.get(url);
+      const url = productRoutes.getAllProducts(NUM_PRODUCTS_IN_PAGE, offset, excludeMyProducts) + `&${params.toString()}`;
+      const token = localStorage.getItem("token");
+      const res = await axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const newProducts = res.data;
 
       if (page === 0 && newProducts.length === 0) {
