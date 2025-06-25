@@ -34,6 +34,93 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+// exports.getAllProducts = async (req, res) => {
+//   const {
+//     search,
+//     category,
+//     subcategory,
+//     location,
+//     from,
+//     to
+//   } = req.query;
+
+//   const conditions = ["Products.availability IN ('Available', 'Interested')"];
+//   const values = [];
+
+//   if (search) {
+//     values.push(`%${search}%`);
+//     conditions.push(`Products.title ILIKE $${values.length}`);
+//   }
+
+//   if (category) {
+//     values.push(category);
+//     conditions.push(`Products.category = $${values.length}`);
+//   }
+
+//   if (subcategory) {
+//     values.push(subcategory);
+//     conditions.push(`Products.subcategory = $${values.length}`);
+//   }
+
+//   if (location) {
+//     values.push(location);
+//     conditions.push(`Products.location = $${values.length}`);
+//   }
+
+//   if (from) {
+//     values.push(from);
+//     conditions.push(`Products.created_at >= $${values.length}`);
+//   }
+
+//   if (to) {
+//     values.push(to);
+//     conditions.push(`Products.created_at < $${values.length}::date + INTERVAL '1 day'`);
+//   }
+
+//   const limit = parseInt(
+//     Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit
+//   ) || 12;
+//   const offset = parseInt(
+//     Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset
+//   ) || 0;
+
+//   values.push(limit);
+//   values.push(offset);
+
+//   const limitIndex = values.length - 1;
+//   const offsetIndex = values.length;
+
+//   const whereClause = `WHERE ${conditions.join(" AND ")}`;
+
+//   try {
+// //     console.log("📄 Final WHERE clause:", whereClause);
+// // console.log("📦 Final values:", values);
+
+//     const result = await db.query(
+//       `
+//       SELECT 
+//         Products.*, 
+//         Users.name 
+//       FROM Products
+//       JOIN Users ON Products.user_id = Users.user_id
+//       ${whereClause}
+//       ORDER BY Products.created_at DESC
+//       LIMIT $${limitIndex} OFFSET $${offsetIndex}
+//       `,
+//       values
+//     );
+//     // console.log("📊 מוצרים שחזרו:");
+// // result.rows.forEach(p => console.log("•", p.created_at));
+
+//     res.status(200).json(result.rows);
+//   } catch (error) {
+//     console.error("❌ שגיאה בשרת:", error);
+//     res.status(500).json({ error: "Failed to fetch products" });
+//   }
+// };
+
+// קבלת מוצרים לפי משתמש
+
 exports.getAllProducts = async (req, res) => {
   const {
     search,
@@ -41,9 +128,10 @@ exports.getAllProducts = async (req, res) => {
     subcategory,
     location,
     from,
-    to
+    to,
+    excludeMyProducts 
   } = req.query;
-
+ 
   const conditions = ["Products.availability IN ('Available', 'Interested')"];
   const values = [];
 
@@ -77,9 +165,16 @@ exports.getAllProducts = async (req, res) => {
     conditions.push(`Products.created_at < $${values.length}::date + INTERVAL '1 day'`);
   }
 
+  // סינון לפי משתמש – רק אם excludeMyProducts=true ויש משתמש מחובר
+  if (excludeMyProducts === 'true' && req.user?.id) {
+    values.push(req.user.id);
+    conditions.push(`Products.user_id != $${values.length}`);
+  }
+
   const limit = parseInt(
     Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit
   ) || 12;
+
   const offset = parseInt(
     Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset
   ) || 0;
@@ -93,9 +188,6 @@ exports.getAllProducts = async (req, res) => {
   const whereClause = `WHERE ${conditions.join(" AND ")}`;
 
   try {
-//     console.log("📄 Final WHERE clause:", whereClause);
-// console.log("📦 Final values:", values);
-
     const result = await db.query(
       `
       SELECT 
@@ -109,8 +201,6 @@ exports.getAllProducts = async (req, res) => {
       `,
       values
     );
-    // console.log("📊 מוצרים שחזרו:");
-// result.rows.forEach(p => console.log("•", p.created_at));
 
     res.status(200).json(result.rows);
   } catch (error) {
@@ -119,7 +209,7 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// קבלת מוצרים לפי משתמש
+
 exports.getProductsByUser = async (req, res) => {
   const { userId } = req.params;
   const {
