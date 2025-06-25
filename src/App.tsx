@@ -38,15 +38,17 @@ function App() {
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/profile";
-    const publicRoutes = ['/', '/explore', '/login', '/signup', '/all-products', '/product/:productId', '/about', '*'];
+    const publicRoutes = ['/', '/explore', '/login', '/signup', '/all-products', '/product', '/about', '*'];
 
+    console.log("Current location:", location.pathname);
+    
   const AppLayout = (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 transition-all">
       <FancyBackground />
       <Navbar />
 
       <main className={`flex-grow ${hideFooter ? "pb-0" : "pb-6"}`}>
-        {loading && !publicRoutes.includes(location.pathname) ? (
+        {loading && !publicRoutes.some(route => location.pathname.startsWith(route)) ? (
           <div className="flex flex-col items-center justify-center min-h-[30vh] text-gray-500 dark:text-gray-300 mt-8">
             <img src="/logo-without bg.png" className="h-52 sm:h-28 animate-bounce mb-3 mt-40" alt="טוען..." />
           </div>
