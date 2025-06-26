@@ -289,12 +289,12 @@ export default function ProductDetailPage() {
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
             <div className="flex items-center gap-3 mb-4">
               <IconAndBgWithText
-                    Icon={MapPin}
-                    color="red"
-                    label="מיקומים זמינים"
-                    value={""}
-                    design="!text-lg font-semibold text-gray-800"
-                  />
+                Icon={MapPin}
+                color="red"
+                label="מיקומים זמינים"
+                value={""}
+                design="!text-lg font-semibold text-gray-800"
+              />
               {isOwner && <Info size={14} className="text-blue-600" />}
             </div>
             <LocationBubbles locations={locations} />
@@ -323,7 +323,7 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {isOwner && !isEditing && (
+            {/* {isOwner && !isEditing && (
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => setIsEditing(true)}
@@ -335,6 +335,27 @@ export default function ProductDetailPage() {
                 <button
                   onClick={() => setShowDeleteDialog(true)}
                   className="flex items-center justify-center gap-3 bg-red-500 text-white font-semibold py-4 px-6 rounded-2xl shadow"
+                >
+                  <Trash2 size={20} />
+                  מחק מוצר
+                </button>
+              </div>
+            )} */}
+
+            {isOwner && !isEditing && (
+              <div className="grid grid-cols-2 gap-4">
+                <AppButton
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center justify-center"
+                >
+                  <>
+                    <Edit3 size={20} />
+                    ערוך מוצר
+                  </>
+                </AppButton>
+                <button
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="flex items-center justify-center gap-3 bg-white text-red-700 font-semibold py-4 px-6 rounded-2xl shadow border"
                 >
                   <Trash2 size={20} />
                   מחק מוצר
