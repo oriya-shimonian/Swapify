@@ -14,7 +14,8 @@ import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters"
 import { DateRangePicker } from "@/components/DateRangePicker";
 
 export default function HomePage() {
-  const { products, loading, loadingNextPage, hasMore, fetchProducts } = useProducts();
+  const { products, loading, loadingNextPage, hasMore, fetchProducts } =
+    useProducts();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
@@ -43,20 +44,31 @@ export default function HomePage() {
       <h1 className="text-3xl font-bold text-center mb-6">גלה והחלף פריטים</h1>
       <AddProductButton />
 
-      <Filters
-        filters={filters}
-        setFilters={setFilters}
-        resetPage={() => setPage(0)}
-        fields={homePageFields}
-      />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+          {/* 🟦 Date Picker */}
+          <div className="w-full lg:w-auto mb-6">
+            <DateRangePicker
+              fromDate={filters.fromDate ?? ""}
+              toDate={filters.toDate ?? ""}
+              onChange={(from, to) =>
+                setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
+              }
+            />
+          </div>
 
-      <DateRangePicker
-        fromDate={filters.fromDate}
-        toDate={filters.toDate}
-        onChange={(from, to) =>
-          setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
-        }
-      />
+          {/*  Filters */}
+          <div className="w-full lg:flex-1">
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              resetPage={() => setPage(0)}
+              fields={homePageFields}
+              design="w-full"
+            />
+          </div>
+        </div>
+      </div>
 
       {loading && products.length === 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">

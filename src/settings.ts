@@ -35,7 +35,9 @@ const notificationRoutes = {
 
 // Products
 const productRoutes = {
-  getAllProducts: (limit: number, offset?: number, excludeMyProducts?: boolean) => `${baseBackendAddress}/products?limit=${limit}&offset=${offset}${excludeMyProducts ? "&excludeMyProducts=true" : ""}`,
+  getAllProducts: () => `${baseBackendAddress}/products`,
+
+  // getAllProducts: (limit: number, offset?: number, excludeMyProducts?: boolean) => `${baseBackendAddress}/products?limit=${limit}&offset=${offset}${excludeMyProducts ? "&excludeMyProducts=true" : ""}`,
   getProductById: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות
   getProductsByUser: (userId: number, limit: number, offset?: number) => `${baseBackendAddress}/products/user/${userId}?limit=${limit}&offset=${offset}`, // דורש התחברות
   getOfferableProducts: (userId: number) => `${baseBackendAddress}/products/offerable/${userId}`, // דורש התחברות

@@ -172,25 +172,75 @@ const useProducts = () => {
   const [loadingNextPage, setLoadingNextPage] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // const fetchProducts = useCallback(async (page: number) => {
-  //   const offset = page * NUM_PRODUCTS_IN_PAGE;
-  //   setLoadingNextPage(true);
-  //   try {
-  //     const res = await axios.get(
-  //       productRoutes.getAllProducts(NUM_PRODUCTS_IN_PAGE, offset)
-  //     );
-  //     const newProducts = res.data;
-  //     console.log("Fetched products:", newProducts);
-  //     setProducts((prev) => [...prev, ...newProducts]);
-  //     setHasMore(newProducts.length === NUM_PRODUCTS_IN_PAGE);
-  //   } catch (err: any) {
-  //     console.error("שגיאה בטעינת מוצרים:", err);
-  //     setError(err?.response?.data?.error || "שגיאה בטעינה");
-  //   } finally {
-  //     setLoading(false);
-  //     setLoadingNextPage(false);
-  //   }
-  // }, []);
+//   // const fetchProducts = useCallback(async (page: number) => {
+//   //   const offset = page * NUM_PRODUCTS_IN_PAGE;
+//   //   setLoadingNextPage(true);
+//   //   try {
+//   //     const res = await axios.get(
+//   //       productRoutes.getAllProducts(NUM_PRODUCTS_IN_PAGE, offset)
+//   //     );
+//   //     const newProducts = res.data;
+//   //     console.log("Fetched products:", newProducts);
+//   //     setProducts((prev) => [...prev, ...newProducts]);
+//   //     setHasMore(newProducts.length === NUM_PRODUCTS_IN_PAGE);
+//   //   } catch (err: any) {
+//   //     console.error("שגיאה בטעינת מוצרים:", err);
+//   //     setError(err?.response?.data?.error || "שגיאה בטעינה");
+//   //   } finally {
+//   //     setLoading(false);
+//   //     setLoadingNextPage(false);
+//   //   }
+//   // }, []);
+// const fetchProducts = useCallback(
+//   async (
+//     page: number,
+//     filters?: {
+//       search?: string;
+//       category?: string | null;
+//       subcategory?: string | null;
+//       location?: string | null;
+//       fromDate?: string;
+//       toDate?: string;
+//     },
+//     excludeMyProducts?: boolean
+//   ) => {
+//     const offset = page * NUM_PRODUCTS_IN_PAGE;
+//     setLoadingNextPage(true);
+
+//     const params = new URLSearchParams();
+//     if (filters?.search) params.append("search", filters.search);
+//     if (filters?.category) params.append("category", filters.category);
+//     if (filters?.subcategory) params.append("subcategory", filters.subcategory);
+//     if (filters?.location) params.append("location", filters.location);
+//     if (filters?.fromDate) params.append("from", filters.fromDate);
+//     if (filters?.toDate) params.append("to", filters.toDate);
+
+//     try {
+//       const url = productRoutes.getAllProducts(NUM_PRODUCTS_IN_PAGE, offset, excludeMyProducts) + `&${params.toString()}`;
+//       const token = localStorage.getItem("token");
+//       const res = await axios.get(url, {
+//         headers: token ? { Authorization: `Bearer ${token}` } : {},
+//       });
+//       const newProducts = res.data;
+
+//       if (page === 0 && newProducts.length === 0) {
+//         setProducts([]); // ✅ איפוס רשימה
+//         setHasMore(false);
+//       } else {
+//         setProducts((prev) => (page === 0 ? newProducts : [...prev, ...newProducts]));
+//         setHasMore(newProducts.length === NUM_PRODUCTS_IN_PAGE);
+//       }
+//     } catch (err: any) {
+//       console.error("שגיאה בטעינת מוצרים:", err);
+//       setError(err?.response?.data?.error || "שגיאה בטעינה");
+//     } finally {
+//       setLoading(false);
+//       setLoadingNextPage(false);
+//     }
+//   },
+//   []
+// );
+
 const fetchProducts = useCallback(
   async (
     page: number,
@@ -207,24 +257,31 @@ const fetchProducts = useCallback(
     const offset = page * NUM_PRODUCTS_IN_PAGE;
     setLoadingNextPage(true);
 
-    const params = new URLSearchParams();
-    if (filters?.search) params.append("search", filters.search);
-    if (filters?.category) params.append("category", filters.category);
-    if (filters?.subcategory) params.append("subcategory", filters.subcategory);
-    if (filters?.location) params.append("location", filters.location);
-    if (filters?.fromDate) params.append("from", filters.fromDate);
-    if (filters?.toDate) params.append("to", filters.toDate);
-
     try {
-      const url = productRoutes.getAllProducts(NUM_PRODUCTS_IN_PAGE, offset, excludeMyProducts) + `&${params.toString()}`;
+      // בניית הפרמטרים ל־URL
+      const params = new URLSearchParams();
+      params.append("limit", String(NUM_PRODUCTS_IN_PAGE));
+      params.append("offset", String(offset));
+      if (excludeMyProducts) params.append("excludeMyProducts", "true");
+
+      if (filters?.search) params.append("search", filters.search);
+      if (filters?.category) params.append("category", filters.category);
+      if (filters?.subcategory) params.append("subcategory", filters.subcategory);
+      if (filters?.location) params.append("location", filters.location);
+      if (filters?.fromDate) params.append("from", filters.fromDate);
+      if (filters?.toDate) params.append("to", filters.toDate);
+
+      const url = `${productRoutes.getAllProducts()}?${params.toString()}`;
       const token = localStorage.getItem("token");
+
       const res = await axios.get(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+
       const newProducts = res.data;
 
       if (page === 0 && newProducts.length === 0) {
-        setProducts([]); // ✅ איפוס רשימה
+        setProducts([]);
         setHasMore(false);
       } else {
         setProducts((prev) => (page === 0 ? newProducts : [...prev, ...newProducts]));
