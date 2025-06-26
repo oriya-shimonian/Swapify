@@ -36,7 +36,7 @@ import { getFormattedDateWithRelative } from "@/utils/FormatAndRelativeDate";
 import { useExchangeRequest } from "@/hooks/useExchangeRequest";
 import { getAvailabilityBadge } from "@/utils/BadgeUtils";
 import AppButton from "@/components/Buttons/AppButton";
-import IconAndBgWithText from "@/components/Buttons/IconAndBgWithText";
+import IconAndBgWithText from "@/components/ProductDetails/IconAndBgWithText";
 
 export default function ProductDetailPage() {
   const { productId } = useParams();
