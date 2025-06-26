@@ -302,7 +302,7 @@ export default function ProductDetailPage() {
 
           {/* כפתורים */}
           <div className="space-y-4">
-            {!isOwner && (
+            {!isOwner && user && (
               <div className="grid grid-cols-2 gap-4">
                 <AppButton
                   onClick={() => setShowExchangeDialog(true)}
