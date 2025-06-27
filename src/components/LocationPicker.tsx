@@ -76,7 +76,6 @@
 //   );
 // }
 
-
 import { useState, ChangeEvent, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { FaTimes } from "react-icons/fa";
@@ -101,15 +100,41 @@ export default function LocationPicker({
     if (readonly || !input.trim()) return;
 
     const fetchLocations = async () => {
+      // const response = await fetch(
+      //   `https://nominatim.openstreetmap.org/search?format=json&q=${input}&accept-language=he&countrycodes=IL`
+      // );
+
+      // const data = await response.json();
+      // setSuggested(
+      //   data.slice(0, 5).map((loc: { display_name: string }) => ({
+      //     label: loc.display_name.split(",")[0],
+      //   }))
+      // );
+
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${input}&accept-language=he`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${input}&accept-language=he&countrycodes=IL&addressdetails=1`
       );
       const data = await response.json();
       setSuggested(
         data
+          .filter((loc: any) =>
+            // {
+            // console.log(loc, 444);
+            ["city", "town", "village", "hamlet", "valley", "region", "ridge"].includes(loc.addresstype)
+            
+          // }
+          )
           .slice(0, 5)
-          .map((loc: { display_name: string }) => ({
-            label: loc.display_name.split(",")[0],
+          .map((loc: any) => ({
+            label:
+              loc.address?.city ||
+              loc.address?.valley ||
+              loc.address?.town ||
+              loc.address?.village ||
+              loc.address?.hamlet ||
+              loc.address?.region ||
+              loc.address?.ridge ||
+              loc.display_name.split(",")[0],
           }))
       );
     };
@@ -133,9 +158,7 @@ export default function LocationPicker({
   return (
     <div className="relative">
       {error && (
-        <label className="block text-red-500 text-sm min-h-6">
-          * {error}
-        </label>
+        <label className="block text-red-500 text-sm min-h-6">* {error}</label>
       )}
 
       {!readonly && (
@@ -146,9 +169,7 @@ export default function LocationPicker({
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             setInput(e.target.value)
           }
-          className={`w-full dark:bg-white ${
-            error && "border border-red-500"
-          }`}
+          className={`w-full dark:bg-white ${error && "border border-red-500"}`}
         />
       )}
 

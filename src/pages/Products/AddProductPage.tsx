@@ -348,7 +348,7 @@ export default function AddProductPage() {
         </Select>
       </FormField>
 
-      <FormField label="מיקומים מועדפים להחלפה">
+      <FormField label="מיקומים מועדפים להחלפה בישראל">
         <div className="flex items-center gap-2">
           <LocationBubbles locations={user?.location?.split(", ") || []} />
           <Tooltip>

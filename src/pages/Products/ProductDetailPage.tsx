@@ -111,7 +111,7 @@ export default function ProductDetailPage() {
       });
       if (result) {
         toast.success("המוצר נמחק בהצלחה");
-        navigate("/all-products");
+        navigate("/dashboard/my-products");
       } else {
         toast.error("אירעה שגיאה בעת המחיקה");
       }
@@ -158,7 +158,7 @@ export default function ProductDetailPage() {
               <img
                 src={product.image_url!}
                 alt={product.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-fit transition-transform duration-700 group-hover:scale-105"
               />
             )}
           </div>
