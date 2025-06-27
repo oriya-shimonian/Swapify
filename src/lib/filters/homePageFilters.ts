@@ -25,8 +25,19 @@ export const availabilityOptions = Object.values(ProductAvailability).map(
 );
 
 export const homePageFields = (user: IUser | null): FilterField[] => [
+//  יחפש:
+
+// בכותרת
+
+// בתיאור
+
+// בשם המשתמש
+
+// בשם מחבר/הוצאה
+
+// ביצרן הפאזל וכו'
   {
-    key: "searchTerm",
+    key: "search",
     type: "input",
     placeholder: "חיפוש חופשי",
   },
