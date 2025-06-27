@@ -182,6 +182,7 @@ const useProducts = () => {
         location?: string | null;
         fromDate?: string;
         toDate?: string;
+        availability?: string | null;
         // שדות דינמיים
         author: string;
         publisher: string;
@@ -203,7 +204,7 @@ const useProducts = () => {
         params.append("limit", String(NUM_PRODUCTS_IN_PAGE));
         params.append("offset", String(offset));
         if (excludeMyProducts) params.append("excludeMyProducts", "true");
-
+        if (filters?.availability) params.append("availability", filters.availability);
         if (filters?.search) params.append("search", filters.search);
         if (filters?.category) params.append("category", filters.category);
         if (filters?.subcategory)
@@ -283,14 +284,15 @@ const useProducts = () => {
       if (filters?.fromDate) params.append("from", filters.fromDate);
       if (filters?.toDate) params.append("to", filters.toDate);
 
-      const response = await axios.get(
-        productRoutes.getProductsByUser(userId, limit, offset) +
-          `&${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      return response.data;
+      // const response = await axios.get(
+      //   productRoutes.getProductsByUser(userId, limit, offset) +
+      //     `&${params.toString()}`,
+      //   {
+      //     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      //   }
+      // );
+      // return response.data;
+      return new Promise((resolve, reject) => {})
     } catch (error) {
       console.error("Error fetching user products:", error);
       return [];

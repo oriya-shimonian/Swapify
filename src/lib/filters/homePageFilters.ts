@@ -7,6 +7,8 @@ import {
   ProductAvailability,
   productAvailabilityLabels,
 } from "@/types/products";
+import { IUser } from "@/types/type";
+
 
 // יצירת אפשרויות קטגוריה
 export const categoryOptions = Object.values(ProductCategory).map((cat) => ({
@@ -22,7 +24,7 @@ export const availabilityOptions = Object.values(ProductAvailability).map(
   })
 );
 
-export const homePageFields: FilterField[] = [
+export const homePageFields = (user: IUser | null): FilterField[] => [
   {
     key: "searchTerm",
     type: "input",
@@ -42,17 +44,15 @@ export const homePageFields: FilterField[] = [
   },
   {
     key: "location",
-    type: "select",
-    placeholder: "מיקום",
-    options: [
-      { label: "תל אביב", value: "תל אביב" },
-      { label: "ירושלים", value: "ירושלים" },
-    ],
+    type: "location",
+    placeholder: "בחר מיקום",
   },
   {
     key: "availability",
     type: "select",
     placeholder: "זמינות",
-    options: availabilityOptions,
+    options: user && user?.role_name === "Admin" ? availabilityOptions : availabilityOptions.filter(
+      (option) => option.value !== ProductAvailability.PENDING && option.value !== ProductAvailability.EXCHANGED, 
+    ),
   },
 ];

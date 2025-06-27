@@ -22,25 +22,24 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
 
-const [filters, setFilters] = useState({
-  search: "",
-  category: null,
-  subcategory: null,
-  location: null,
-  availability: null,
-  fromDate: "",
-  toDate: "",
-  // שדות דינמיים
-  author: "",
-  publisher: "",
-  publish_year: "",
-  manufacturer: "",
-  piecesCount: "",
-  min_players: "",
-  max_players: "",
-  duration: "",
-});
-
+  const [filters, setFilters] = useState({
+    search: "",
+    category: null,
+    subcategory: null,
+    location: null,
+    availability: null,
+    fromDate: "",
+    toDate: "",
+    // שדות דינמיים
+    author: "",
+    publisher: "",
+    publish_year: "",
+    manufacturer: "",
+    piecesCount: "",
+    min_players: "",
+    max_players: "",
+    duration: "",
+  });
 
   useEffect(() => {
     fetchProducts(page, filters, true);
@@ -54,9 +53,9 @@ const [filters, setFilters] = useState({
 
   const selectedCategory = filters.category as ProductCategory | null;
 
-const extendedFields = selectedCategory
-  ? [...homePageFields, ...(extraFieldsByCategory[selectedCategory] || [])]
-  : homePageFields;
+  const extendedFields = selectedCategory
+    ? [...homePageFields(user), ...(extraFieldsByCategory[selectedCategory] || [])]
+    : homePageFields(user);
 
   return (
     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
@@ -64,26 +63,24 @@ const extendedFields = selectedCategory
       {/* <AddProductButton /> */}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-          {/* 🟦 Date Picker */}
-          <div className="w-full lg:w-auto mb-6">
-            <DateRangePicker
-              fromDate={filters.fromDate ?? ""}
-              toDate={filters.toDate ?? ""}
-              onChange={(from, to) =>
-                setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
-              }
-            />
-          </div>
-
-          {/*  Filters */}
-          <div className="w-full lg:flex-1">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
             <Filters
               filters={filters}
               setFilters={setFilters}
               resetPage={() => setPage(0)}
               fields={extendedFields}
               design="w-full"
+            />
+          </div>
+
+          <div className="min-w-[200px] self-baseline">
+            <DateRangePicker
+              fromDate={filters.fromDate ?? ""}
+              toDate={filters.toDate ?? ""}
+              onChange={(from, to) =>
+                setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
+              }
             />
           </div>
         </div>

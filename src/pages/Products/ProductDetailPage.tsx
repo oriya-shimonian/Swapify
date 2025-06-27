@@ -362,7 +362,8 @@ export default function ProductDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <AppButton
                   onClick={() => setShowExchangeDialog(true)}
-                  className="inline-flex items-center justify-center"
+                  className="inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-current"
+                  disabled={!product.availability || product.availability === "Pending" || product.availability === "Exchanged"}
                 >
                   <>
                     <Send size={20} />
@@ -383,7 +384,8 @@ export default function ProductDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <AppButton
                   onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center justify-center"
+                  className="inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!product.availability || product.availability === "Pending" || product.availability === "Exchanged"}
                 >
                   <>
                     <Edit3 size={20} />
@@ -392,7 +394,8 @@ export default function ProductDetailPage() {
                 </AppButton>
                 <button
                   onClick={() => setShowDeleteDialog(true)}
-                  className="flex items-center justify-center gap-3 bg-white text-red-700 font-semibold py-4 px-6 rounded-2xl shadow border"
+                  className="flex items-center justify-center gap-3 bg-white text-red-700 font-semibold py-4 px-6 rounded-2xl shadow border disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!product.availability || product.availability === "Pending" || product.availability === "Exchanged"}
                 >
                   <Trash2 size={20} />
                   מחק מוצר
