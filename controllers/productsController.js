@@ -36,6 +36,7 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   const {
+    search,
     category,
     subcategory,
     location,
@@ -62,6 +63,23 @@ exports.getAllProducts = async (req, res) => {
     conditions.push(`Products.availability = $${values.length}`);
   } else {
     conditions.push(`Products.availability IN ('Available', 'Interested')`);
+  }
+
+  if (typeof search === "string" && search.trim()) {
+    const searchValue = `%${search.trim()}%`;
+    values.push(searchValue); // זה ייקח מספר כמו $1 או $2 לפי הסדר
+
+    const searchConditions = [
+      `Products.title ILIKE $${values.length}`,
+      `Products.description ILIKE $${values.length}`,
+      `Products.subcategory ILIKE $${values.length}`,
+      `Users.name ILIKE $${values.length}`,
+      `b.author ILIKE $${values.length}`,
+      `b.publisher ILIKE $${values.length}`,
+      `pz.manufacturer ILIKE $${values.length}`,
+    ];
+
+    conditions.push(`(${searchConditions.join(" OR ")})`);
   }
 
   if (category) {
@@ -174,7 +192,6 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 };
-
 
 exports.getProductsByUser = async (req, res) => {
   const { userId } = req.params;
