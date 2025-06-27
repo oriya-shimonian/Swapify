@@ -36,13 +36,13 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   const {
-    search,
     category,
     subcategory,
     location,
     from,
     to,
     excludeMyProducts,
+    availability, // ✅ חדש
     author,
     publisher,
     publish_year,
@@ -53,12 +53,15 @@ exports.getAllProducts = async (req, res) => {
     duration,
   } = req.query;
 
-  const conditions = ["Products.availability IN ('Available', 'Interested')"];
+  const conditions = [];
   const values = [];
 
-  if (search) {
-    values.push(`%${search}%`);
-    conditions.push(`Products.title ILIKE $${values.length}`);
+  // ✅ זמינות – לפי פרמטר או ברירת מחדל
+  if (availability) {
+    values.push(availability);
+    conditions.push(`Products.availability = $${values.length}`);
+  } else {
+    conditions.push(`Products.availability IN ('Available', 'Interested')`);
   }
 
   if (category) {
@@ -72,8 +75,8 @@ exports.getAllProducts = async (req, res) => {
   }
 
   if (location) {
-    values.push(location);
-    conditions.push(`Products.location = $${values.length}`);
+    values.push(`%${location}%`);
+    conditions.push(`Products.location ILIKE $${values.length}`);
   }
 
   if (from) {
@@ -83,43 +86,51 @@ exports.getAllProducts = async (req, res) => {
 
   if (to) {
     values.push(to);
-    conditions.push(`Products.created_at < $${values.length}::date + INTERVAL '1 day'`);
+    conditions.push(
+      `Products.created_at < $${values.length}::date + INTERVAL '1 day'`
+    );
   }
 
-  if (excludeMyProducts === 'true' && req.user?.id) {
+  if (excludeMyProducts === "true" && req.user?.id) {
     values.push(req.user.id);
     conditions.push(`Products.user_id != $${values.length}`);
   }
 
-  // 💡 תנאים לשדות מיוחדים
   if (author) {
     values.push(`%${author}%`);
     conditions.push(`b.author ILIKE $${values.length}`);
   }
+
   if (publisher) {
     values.push(`%${publisher}%`);
     conditions.push(`b.publisher ILIKE $${values.length}`);
   }
+
   if (publish_year) {
     values.push(publish_year);
     conditions.push(`b.publish_year = $${values.length}`);
   }
+
   if (manufacturer) {
     values.push(`%${manufacturer}%`);
     conditions.push(`pz.manufacturer ILIKE $${values.length}`);
   }
+
   if (piecesCount) {
     values.push(piecesCount);
     conditions.push(`pz.pieces_count = $${values.length}`);
   }
+
   if (min_players) {
     values.push(min_players);
     conditions.push(`bg.min_players <= $${values.length}`);
   }
+
   if (max_players) {
     values.push(max_players);
     conditions.push(`bg.max_players >= $${values.length}`);
   }
+
   if (duration) {
     values.push(duration);
     conditions.push(`bg.duration <= $${values.length}`);
@@ -134,7 +145,9 @@ exports.getAllProducts = async (req, res) => {
   const limitIndex = values.length - 1;
   const offsetIndex = values.length;
 
-  const whereClause = `WHERE ${conditions.join(" AND ")}`;
+  const whereClause = conditions.length
+    ? `WHERE ${conditions.join(" AND ")}`
+    : "";
 
   try {
     const result = await db.query(
@@ -161,6 +174,7 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 };
+
 
 exports.getProductsByUser = async (req, res) => {
   const { userId } = req.params;
@@ -201,7 +215,9 @@ exports.getProductsByUser = async (req, res) => {
   }
 
   if (search) {
-    conditions.push(`(LOWER(title) LIKE $${paramIndex} OR LOWER(description) LIKE $${paramIndex})`);
+    conditions.push(
+      `(LOWER(title) LIKE $${paramIndex} OR LOWER(description) LIKE $${paramIndex})`
+    );
     values.push(`%${search.toLowerCase()}%`);
     paramIndex++;
   }
@@ -216,7 +232,8 @@ exports.getProductsByUser = async (req, res) => {
     values.push(to);
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   const query = `
     SELECT * FROM Products
@@ -299,7 +316,6 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
   const {
@@ -348,12 +364,10 @@ exports.deleteProduct = async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Product deleted successfully",
-        product: result.rows[0],
-      });
+    res.status(200).json({
+      message: "Product deleted successfully",
+      product: result.rows[0],
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to delete product" });
