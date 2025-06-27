@@ -162,8 +162,10 @@ import {
   IProduct,
   NUM_PRODUCTS_IN_PAGE,
   ProductCategory,
+  ProductFilters,
   UpdateProductPayload,
 } from "@/types/products";
+import { buildProductQueryParams } from "@/utils/buildProductQueryParams";
 
 const useProducts = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -172,89 +174,131 @@ const useProducts = () => {
   const [loadingNextPage, setLoadingNextPage] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchProducts = useCallback(
-    async (
-      page: number,
-      filters?: {
-        search?: string;
-        category?: string | null;
-        subcategory?: string | null;
-        location?: string | null;
-        fromDate?: string;
-        toDate?: string;
-        availability?: string | null;
-        // שדות דינמיים
-        author: string;
-        publisher: string;
-        publish_year: string;
-        manufacturer: string;
-        piecesCount: string;
-        min_players: string;
-        max_players: string;
-        duration: string;
-      },
-      excludeMyProducts?: boolean
-    ) => {
-      const offset = page * NUM_PRODUCTS_IN_PAGE;
-      setLoadingNextPage(true);
+  // const fetchProducts = useCallback(
+  //   async (
+  //     page: number,
+  //     filters?: {
+  //       search?: string;
+  //       category?: string | null;
+  //       subcategory?: string | null;
+  //       location?: string | null;
+  //       fromDate?: string;
+  //       toDate?: string;
+  //       availability?: string | null;
+  //       // שדות דינמיים
+  //       author: string;
+  //       publisher: string;
+  //       publish_year: string;
+  //       manufacturer: string;
+  //       piecesCount: string;
+  //       min_players: string;
+  //       max_players: string;
+  //       duration: string;
+  //     },
+  //     excludeMyProducts?: boolean
+  //   ) => {
+  //     const offset = page * NUM_PRODUCTS_IN_PAGE;
+  //     setLoadingNextPage(true);
 
-      try {
-        // בניית הפרמטרים ל־URL
-        const params = new URLSearchParams();
-        params.append("limit", String(NUM_PRODUCTS_IN_PAGE));
-        params.append("offset", String(offset));
-        if (excludeMyProducts) params.append("excludeMyProducts", "true");
-        if (filters?.availability) params.append("availability", filters.availability);
-        if (filters?.search) params.append("search", filters.search);
-        if (filters?.category) params.append("category", filters.category);
-        if (filters?.subcategory)
-          params.append("subcategory", filters.subcategory);
-        if (filters?.location) params.append("location", filters.location);
-        if (filters?.fromDate) params.append("from", filters.fromDate);
-        if (filters?.toDate) params.append("to", filters.toDate);
-        if (filters?.author) params.append("author", filters.author);
-        if (filters?.publisher) params.append("publisher", filters.publisher);
-        if (filters?.publish_year)
-          params.append("publish_year", filters.publish_year);
-        if (filters?.manufacturer)
-          params.append("manufacturer", filters.manufacturer);
-        if (filters?.piecesCount)
-          params.append("piecesCount", filters.piecesCount);
-        if (filters?.min_players)
-          params.append("min_players", filters.min_players);
-        if (filters?.max_players)
-          params.append("max_players", filters.max_players);
-        if (filters?.duration) params.append("duration", filters.duration);
+  //     try {
+  //       // בניית הפרמטרים ל־URL
+  //       const params = new URLSearchParams();
+  //       params.append("limit", String(NUM_PRODUCTS_IN_PAGE));
+  //       params.append("offset", String(offset));
+  //       if (excludeMyProducts) params.append("excludeMyProducts", "true");
+  //       if (filters?.availability) params.append("availability", filters.availability);
+  //       if (filters?.search) params.append("search", filters.search);
+  //       if (filters?.category) params.append("category", filters.category);
+  //       if (filters?.subcategory)
+  //         params.append("subcategory", filters.subcategory);
+  //       if (filters?.location) params.append("location", filters.location);
+  //       if (filters?.fromDate) params.append("from", filters.fromDate);
+  //       if (filters?.toDate) params.append("to", filters.toDate);
+  //       if (filters?.author) params.append("author", filters.author);
+  //       if (filters?.publisher) params.append("publisher", filters.publisher);
+  //       if (filters?.publish_year)
+  //         params.append("publish_year", filters.publish_year);
+  //       if (filters?.manufacturer)
+  //         params.append("manufacturer", filters.manufacturer);
+  //       if (filters?.piecesCount)
+  //         params.append("piecesCount", filters.piecesCount);
+  //       if (filters?.min_players)
+  //         params.append("min_players", filters.min_players);
+  //       if (filters?.max_players)
+  //         params.append("max_players", filters.max_players);
+  //       if (filters?.duration) params.append("duration", filters.duration);
 
-        const url = `${productRoutes.getAllProducts()}?${params.toString()}`;
-        const token = localStorage.getItem("token");
+  //       const url = `${productRoutes.getAllProducts()}?${params.toString()}`;
+  //       const token = localStorage.getItem("token");
 
-        const res = await axios.get(url, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+  //       const res = await axios.get(url, {
+  //         headers: token ? { Authorization: `Bearer ${token}` } : {},
+  //       });
 
-        const newProducts = res.data;
+  //       const newProducts = res.data;
 
-        if (page === 0 && newProducts.length === 0) {
-          setProducts([]);
-          setHasMore(false);
-        } else {
-          setProducts((prev) =>
-            page === 0 ? newProducts : [...prev, ...newProducts]
-          );
-          setHasMore(newProducts.length === NUM_PRODUCTS_IN_PAGE);
-        }
-      } catch (err: any) {
-        console.error("שגיאה בטעינת מוצרים:", err);
-        setError(err?.response?.data?.error || "שגיאה בטעינה");
-      } finally {
-        setLoading(false);
-        setLoadingNextPage(false);
+  //       if (page === 0 && newProducts.length === 0) {
+  //         setProducts([]);
+  //         setHasMore(false);
+  //       } else {
+  //         setProducts((prev) =>
+  //           page === 0 ? newProducts : [...prev, ...newProducts]
+  //         );
+  //         setHasMore(newProducts.length === NUM_PRODUCTS_IN_PAGE);
+  //       }
+  //     } catch (err: any) {
+  //       console.error("שגיאה בטעינת מוצרים:", err);
+  //       setError(err?.response?.data?.error || "שגיאה בטעינה");
+  //     } finally {
+  //       setLoading(false);
+  //       setLoadingNextPage(false);
+  //     }
+  //   },
+  //   []
+  // );
+
+const fetchProducts = useCallback(
+  async (page: number, filters: ProductFilters = {}, excludeMyProducts?: boolean) => {
+    const offset = page * NUM_PRODUCTS_IN_PAGE;
+    setLoadingNextPage(true);
+
+    try {
+      const params = buildProductQueryParams(filters, {
+        limit: NUM_PRODUCTS_IN_PAGE,
+        offset,
+        excludeMyProducts,
+      });
+
+      const url = `${productRoutes.getAllProducts()}?${params.toString()}`;
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      const newProducts = res.data;
+
+      if (page === 0 && newProducts.length === 0) {
+        setProducts([]);
+        setHasMore(false);
+      } else {
+        setProducts((prev) =>
+          page === 0 ? newProducts : [...prev, ...newProducts]
+        );
+        setHasMore(newProducts.length === NUM_PRODUCTS_IN_PAGE);
       }
-    },
-    []
-  );
+    } catch (err: any) {
+      console.error("שגיאה בטעינת מוצרים:", err);
+      setError(err?.response?.data?.error || "שגיאה בטעינה");
+    } finally {
+      setLoading(false);
+      setLoadingNextPage(false);
+    }
+  },
+  []
+);
 
+  
   const fetchUserProducts = async (
     userId: number,
     limit: number,
@@ -284,15 +328,15 @@ const useProducts = () => {
       if (filters?.fromDate) params.append("from", filters.fromDate);
       if (filters?.toDate) params.append("to", filters.toDate);
 
-      // const response = await axios.get(
-      //   productRoutes.getProductsByUser(userId, limit, offset) +
-      //     `&${params.toString()}`,
-      //   {
-      //     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      //   }
-      // );
-      // return response.data;
-      return new Promise((resolve, reject) => {})
+      const response = await axios.get(
+        productRoutes.getProductsByUser(userId, limit, offset) +
+          `&${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      return response.data;
+      // return new Promise((resolve, reject) => {})
     } catch (error) {
       console.error("Error fetching user products:", error);
       return [];
