@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
+  BoardGameSubcategory,
+  BookSubcategory,
   getProductCategoryLabel,
   getProductConditionLabel,
   getSubcategoryLabel,
@@ -9,6 +11,8 @@ import {
   IPuzzleProduct,
   ProductCategory,
   ProductCondition,
+  PuzzleSubcategory,
+  subcategoryMaps,
 } from "@/types/products";
 import {
   Calendar,
@@ -37,6 +41,7 @@ import { useExchangeRequest } from "@/hooks/useExchangeRequest";
 import { getAvailabilityBadge } from "@/utils/BadgeUtils";
 import AppButton from "@/components/Buttons/AppButton";
 import IconAndBgWithText from "@/components/ProductDetails/IconAndBgWithText";
+import CategorySpecificFields from "@/components/CategorySpecificFields";
 
 export default function ProductDetailPage() {
   const { productId } = useParams();
@@ -60,6 +65,8 @@ export default function ProductDetailPage() {
           productRoutes.getProductById(Number(productId))
         );
         setProduct(res.data);
+        console.log("Fetched product:", res.data);
+        
         setEditedProduct(res.data);
       } catch (err) {
         console.error("Failed to fetch product", err);
@@ -123,7 +130,8 @@ export default function ProductDetailPage() {
         id: String(product.product_id),
         data: editedProduct,
       });
-      setProduct(updated.product);
+      
+      setProduct(updated);
       setIsEditing(false);
       toast.success("המוצר עודכן בהצלחה!");
     } catch (err) {
@@ -160,7 +168,7 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-4 shadow-xl border border-white/20 lg:min-h[333px]">
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-4 shadow-xl border border-white/20">
             {isEditing ? (
               <>
                 <input
@@ -171,7 +179,7 @@ export default function ProductDetailPage() {
                       title: e.target.value,
                     }))
                   }
-                  className="w-full text-3xl font-bold bg-transparent border-none outline-none focus:bg-white/50 rounded-xl p-3"
+                  className="text-3xl font-boldw-full bg-white/80 border rounded-xl p-3"
                 />
                 <textarea
                   value={editedProduct.description}
@@ -181,7 +189,7 @@ export default function ProductDetailPage() {
                       description: e.target.value,
                     }))
                   }
-                  className="w-full bg-transparent border-none outline-none focus:bg-white/50 rounded-xl p-3 resize-none h-32"
+                  className="w-full bg-white/80 border rounded-xl p-3 resize-none h-32"
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <select
@@ -202,15 +210,28 @@ export default function ProductDetailPage() {
                   </select>
                   <select
                     value={editedProduct.category}
-                    onChange={(e) =>
-                      setEditedProduct(
-                        (prev) =>
-                          ({
-                            ...prev,
-                            category: e.target.value as ProductCategory,
-                          } as IPuzzleProduct)
-                      )
-                    }
+                    onChange={(e) => {
+                      const newCategory = e.target.value as ProductCategory;
+
+                      setEditedProduct((prev) => {
+                        return {
+                          ...prev,
+                          category: newCategory,
+                          // איפוס שדות שאינם רלוונטיים לקטגוריה החדשה
+                          subcategory: undefined,
+                          author: undefined,
+                          publisher: undefined,
+                          publish_year: undefined,
+                          page_count: undefined,
+                          manufacturer: undefined,
+                          piecesCount: undefined,
+                          game_name: undefined,
+                          min_players: undefined,
+                          max_players: undefined,
+                          duration: undefined,
+                        };
+                      });
+                    }}
                     className="bg-white/80 border rounded-xl p-3"
                   >
                     {categoryOptions.map((option) => (
@@ -220,19 +241,54 @@ export default function ProductDetailPage() {
                     ))}
                   </select>
                 </div>
-                <input
-                  value={editedProduct.subcategory || ""}
-                  onChange={(e) =>
-                    setEditedProduct(
-                      (prev) =>
-                        ({
-                          ...prev,
-                          subcategory: e.target.value,
-                        } as IPuzzleProduct)
-                    )
+                {editedProduct.category && (
+                  <select
+                    value={editedProduct.subcategory || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setEditedProduct((prev) => {
+                        if (prev.category === ProductCategory.PUZZLE) {
+                          return {
+                            ...prev,
+                            subcategory: value as PuzzleSubcategory,
+                          };
+                        } else if (prev.category === ProductCategory.BOOK) {
+                          return {
+                            ...prev,
+                            subcategory: value as BookSubcategory,
+                          };
+                        } else if (
+                          prev.category === ProductCategory.BOARD_GAME
+                        ) {
+                          return {
+                            ...prev,
+                            subcategory: value as BoardGameSubcategory,
+                          };
+                        } else {
+                          return prev; // fallback בטוח
+                        }
+                      });
+                    }}
+                    className="w-full bg-white/80 border rounded-xl p-3"
+                  >
+                    <option value="">בחר תת קטגוריה</option>
+                    {Object.entries(
+                      subcategoryMaps[editedProduct.category]?.toLabel || {}
+                    ).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <CategorySpecificFields
+                  product={editedProduct}
+                  isEditing={true}
+                  onChange={(key, value) =>
+                    setEditedProduct((prev) => ({ ...prev, [key]: value }))
                   }
-                  className="w-full bg-white/80 border rounded-xl p-3"
-                  placeholder="תת קטגוריה"
                 />
               </>
             ) : (
@@ -281,11 +337,12 @@ export default function ProductDetailPage() {
                     }
                   />
                 </div>
+
+                <CategorySpecificFields product={product} isEditing={false} />
               </>
             )}
           </div>
 
-          {/* מיקום */}
           <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/20">
             <div className="flex items-center gap-3 mb-4">
               <IconAndBgWithText
@@ -300,7 +357,6 @@ export default function ProductDetailPage() {
             <LocationBubbles locations={locations} />
           </div>
 
-          {/* כפתורים */}
           <div className="space-y-4">
             {!isOwner && user && (
               <div className="grid grid-cols-2 gap-4">
@@ -322,25 +378,6 @@ export default function ProductDetailPage() {
                 </button>
               </div>
             )}
-
-            {/* {isOwner && !isEditing && (
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center justify-center gap-3 bg-yellow-400 text-white font-semibold py-4 px-6 rounded-2xl shadow"
-                >
-                  <Edit3 size={20} />
-                  ערוך מוצר
-                </button>
-                <button
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="flex items-center justify-center gap-3 bg-red-500 text-white font-semibold py-4 px-6 rounded-2xl shadow"
-                >
-                  <Trash2 size={20} />
-                  מחק מוצר
-                </button>
-              </div>
-            )} */}
 
             {isOwner && !isEditing && (
               <div className="grid grid-cols-2 gap-4">

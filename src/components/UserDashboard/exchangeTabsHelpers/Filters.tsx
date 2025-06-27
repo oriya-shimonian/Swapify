@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { ProductCategory, subcategoryMaps } from "@/types/products";
 
-type FilterFieldType = "input" | "select";
+type FilterFieldType = "input" | "select" | "number";
 
 export interface FilterField {
   key: string;
@@ -72,10 +72,11 @@ export function Filters<T extends Record<string, any>>({
       {fields.map((field) => {
         const value = filters[field.key] ?? "";
 
-        if (field.type === "input") {
+        if (field.type === "input" || field.type === "number") {
           return (
             <Input
               key={field.key}
+              type={field.type === "number" ? "number" : "text"}
               placeholder={field.placeholder}
               value={value}
               onChange={(e) => handleChange(field.key, e.target.value)}

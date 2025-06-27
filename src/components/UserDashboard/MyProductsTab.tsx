@@ -14,6 +14,7 @@ import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { Filters } from "./exchangeTabsHelpers/Filters";
 import { filterFieldsMyProductsTab } from "@/lib/filters/myProductsTabFilters";
 import { DateRangePicker } from "../DateRangePicker";
+import { AddProductButton } from "../Buttons/AddProductButton";
 
 export default function MyProductsTab() {
   const { user } = useAuth();
@@ -21,7 +22,9 @@ export default function MyProductsTab() {
   const { deleteProduct, fetchUserProducts } = useProducts();
 
   const [myProducts, setMyProducts] = useState<IProduct[]>([]);
-  const [selectedToDelete, setSelectedToDelete] = useState<IProduct | null>(null);
+  const [selectedToDelete, setSelectedToDelete] = useState<IProduct | null>(
+    null
+  );
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -63,11 +66,18 @@ export default function MyProductsTab() {
     if (!user?.user_id || page === 0) return;
 
     setLoadingNextPage(true);
-    fetchUserProducts(user.user_id, NUM_PRODUCTS_IN_PAGE, page * NUM_PRODUCTS_IN_PAGE, filters)
+    fetchUserProducts(
+      user.user_id,
+      NUM_PRODUCTS_IN_PAGE,
+      page * NUM_PRODUCTS_IN_PAGE,
+      filters
+    )
       .then((newData) => {
         setMyProducts((prev) => {
           const existingIds = new Set(prev.map((p) => p.product_id));
-          const uniqueNew = newData.filter((p) => !existingIds.has(p.product_id));
+          const uniqueNew = newData.filter(
+            (p) => !existingIds.has(p.product_id)
+          );
           return [...prev, ...uniqueNew];
         });
         if (newData.length < NUM_PRODUCTS_IN_PAGE) {
@@ -102,7 +112,7 @@ export default function MyProductsTab() {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">המוצרים שלי</h1>
-        <Button onClick={() => navigate("/add-product")}>הוסף מוצר חדש</Button>
+        <AddProductButton />
       </div>
 
       <Filters
@@ -126,7 +136,7 @@ export default function MyProductsTab() {
         />
       </div>
 
-      {(loadingNextPage && page === 0) ? (
+      {loadingNextPage && page === 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
           {Array.from({ length: 6 }).map((_, i) => (
             <SkeletonProductCard key={i} />
@@ -146,7 +156,9 @@ export default function MyProductsTab() {
                     className="text-blue-600 cursor-pointer"
                     size={18}
                     title="ערוך"
-                    onClick={() => navigate(`/edit-product/${product.product_id}`)}
+                    onClick={() =>
+                      navigate(`/edit-product/${product.product_id}`)
+                    }
                   />
                   <GoTrash
                     className="text-red-600 cursor-pointer"

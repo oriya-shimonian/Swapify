@@ -12,6 +12,8 @@ import { SkeletonProductCard } from "@/components/skelton/SkeletonProductCard";
 import { homePageFields } from "@/lib/filters/homePageFilters";
 import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
 import { DateRangePicker } from "@/components/DateRangePicker";
+import { ProductCategory } from "@/types/products";
+import { extraFieldsByCategory } from "@/lib/filters/extraFieldsByCategory";
 
 export default function HomePage() {
   const { products, loading, loadingNextPage, hasMore, fetchProducts } =
@@ -20,14 +22,25 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    category: null,
-    subcategory: null,
-    location: null,
-    fromDate: "",
-    toDate: "",
-  });
+const [filters, setFilters] = useState({
+  search: "",
+  category: null,
+  subcategory: null,
+  location: null,
+  availability: null,
+  fromDate: "",
+  toDate: "",
+  // שדות דינמיים
+  author: "",
+  publisher: "",
+  publish_year: "",
+  manufacturer: "",
+  piecesCount: "",
+  min_players: "",
+  max_players: "",
+  duration: "",
+});
+
 
   useEffect(() => {
     fetchProducts(page, filters, true);
@@ -39,10 +52,16 @@ export default function HomePage() {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
+  const selectedCategory = filters.category as ProductCategory | null;
+
+const extendedFields = selectedCategory
+  ? [...homePageFields, ...(extraFieldsByCategory[selectedCategory] || [])]
+  : homePageFields;
+
   return (
     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">
       <h1 className="text-3xl font-bold text-center mb-6">גלה והחלף פריטים</h1>
-      <AddProductButton />
+      {/* <AddProductButton /> */}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
@@ -63,7 +82,7 @@ export default function HomePage() {
               filters={filters}
               setFilters={setFilters}
               resetPage={() => setPage(0)}
-              fields={homePageFields}
+              fields={extendedFields}
               design="w-full"
             />
           </div>

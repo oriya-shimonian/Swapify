@@ -68,7 +68,7 @@ const AdminStatisticsPage = () => {
         {
           label: "התראות שנשלחו",
           value: data.notifications.total,
-          color: "gray",
+          color: "teal",
           Icon: BellRing,
         },
         {
