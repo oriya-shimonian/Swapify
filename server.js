@@ -4,15 +4,15 @@ const pool = require("./config/db");
 const cors = require("cors");
 const http = require("http");
 const cron = require("node-cron");
-const {
-  cleanupPastMeetings,
-} = require("./controllers/exchangeRequestsController");
+// const {
+//   cleanupPastMeetings,
+// } = require("./controllers/exchangeRequestsController");
 
-// להריץ כל יום ב־00:00
-cron.schedule("0 0 * * *", async () => {
-  console.log("📆 רץ cron job למחיקת פגישות ישנות...");
-  await cleanupPastMeetings();
-});
+// // להריץ כל יום ב־00:00
+// cron.schedule("0 0 * * *", async () => {
+//   console.log("📆 רץ cron job למחיקת פגישות ישנות...");
+//   await cleanupPastMeetings();
+// });
 
 const { Server } = require("socket.io");
 

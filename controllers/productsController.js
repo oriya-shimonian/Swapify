@@ -34,93 +34,6 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// exports.getAllProducts = async (req, res) => {
-//   const {
-//     search,
-//     category,
-//     subcategory,
-//     location,
-//     from,
-//     to
-//   } = req.query;
-
-//   const conditions = ["Products.availability IN ('Available', 'Interested')"];
-//   const values = [];
-
-//   if (search) {
-//     values.push(`%${search}%`);
-//     conditions.push(`Products.title ILIKE $${values.length}`);
-//   }
-
-//   if (category) {
-//     values.push(category);
-//     conditions.push(`Products.category = $${values.length}`);
-//   }
-
-//   if (subcategory) {
-//     values.push(subcategory);
-//     conditions.push(`Products.subcategory = $${values.length}`);
-//   }
-
-//   if (location) {
-//     values.push(location);
-//     conditions.push(`Products.location = $${values.length}`);
-//   }
-
-//   if (from) {
-//     values.push(from);
-//     conditions.push(`Products.created_at >= $${values.length}`);
-//   }
-
-//   if (to) {
-//     values.push(to);
-//     conditions.push(`Products.created_at < $${values.length}::date + INTERVAL '1 day'`);
-//   }
-
-//   const limit = parseInt(
-//     Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit
-//   ) || 12;
-//   const offset = parseInt(
-//     Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset
-//   ) || 0;
-
-//   values.push(limit);
-//   values.push(offset);
-
-//   const limitIndex = values.length - 1;
-//   const offsetIndex = values.length;
-
-//   const whereClause = `WHERE ${conditions.join(" AND ")}`;
-
-//   try {
-// //     console.log("📄 Final WHERE clause:", whereClause);
-// // console.log("📦 Final values:", values);
-
-//     const result = await db.query(
-//       `
-//       SELECT 
-//         Products.*, 
-//         Users.name 
-//       FROM Products
-//       JOIN Users ON Products.user_id = Users.user_id
-//       ${whereClause}
-//       ORDER BY Products.created_at DESC
-//       LIMIT $${limitIndex} OFFSET $${offsetIndex}
-//       `,
-//       values
-//     );
-//     // console.log("📊 מוצרים שחזרו:");
-// // result.rows.forEach(p => console.log("•", p.created_at));
-
-//     res.status(200).json(result.rows);
-//   } catch (error) {
-//     console.error("❌ שגיאה בשרת:", error);
-//     res.status(500).json({ error: "Failed to fetch products" });
-//   }
-// };
-
-// קבלת מוצרים לפי משתמש
-
 exports.getAllProducts = async (req, res) => {
   const {
     search,
@@ -129,9 +42,17 @@ exports.getAllProducts = async (req, res) => {
     location,
     from,
     to,
-    excludeMyProducts 
+    excludeMyProducts,
+    author,
+    publisher,
+    publish_year,
+    manufacturer,
+    piecesCount,
+    min_players,
+    max_players,
+    duration,
   } = req.query;
- 
+
   const conditions = ["Products.availability IN ('Available', 'Interested')"];
   const values = [];
 
@@ -165,19 +86,47 @@ exports.getAllProducts = async (req, res) => {
     conditions.push(`Products.created_at < $${values.length}::date + INTERVAL '1 day'`);
   }
 
-  // סינון לפי משתמש – רק אם excludeMyProducts=true ויש משתמש מחובר
   if (excludeMyProducts === 'true' && req.user?.id) {
     values.push(req.user.id);
     conditions.push(`Products.user_id != $${values.length}`);
   }
 
-  const limit = parseInt(
-    Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit
-  ) || 12;
+  // 💡 תנאים לשדות מיוחדים
+  if (author) {
+    values.push(`%${author}%`);
+    conditions.push(`b.author ILIKE $${values.length}`);
+  }
+  if (publisher) {
+    values.push(`%${publisher}%`);
+    conditions.push(`b.publisher ILIKE $${values.length}`);
+  }
+  if (publish_year) {
+    values.push(publish_year);
+    conditions.push(`b.publish_year = $${values.length}`);
+  }
+  if (manufacturer) {
+    values.push(`%${manufacturer}%`);
+    conditions.push(`pz.manufacturer ILIKE $${values.length}`);
+  }
+  if (piecesCount) {
+    values.push(piecesCount);
+    conditions.push(`pz.pieces_count = $${values.length}`);
+  }
+  if (min_players) {
+    values.push(min_players);
+    conditions.push(`bg.min_players <= $${values.length}`);
+  }
+  if (max_players) {
+    values.push(max_players);
+    conditions.push(`bg.max_players >= $${values.length}`);
+  }
+  if (duration) {
+    values.push(duration);
+    conditions.push(`bg.duration <= $${values.length}`);
+  }
 
-  const offset = parseInt(
-    Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset
-  ) || 0;
+  const limit = parseInt(req.query.limit) || 12;
+  const offset = parseInt(req.query.offset) || 0;
 
   values.push(limit);
   values.push(offset);
@@ -190,11 +139,15 @@ exports.getAllProducts = async (req, res) => {
   try {
     const result = await db.query(
       `
-      SELECT 
-        Products.*, 
-        Users.name 
+      SELECT Products.*, Users.name,
+             b.author, b.publisher, b.publish_year,
+             pz.manufacturer, pz.pieces_count,
+             bg.min_players, bg.max_players, bg.duration
       FROM Products
       JOIN Users ON Products.user_id = Users.user_id
+      LEFT JOIN Books b ON Products.product_id = b.product_id
+      LEFT JOIN Puzzles pz ON Products.product_id = pz.product_id
+      LEFT JOIN Board_Games bg ON Products.product_id = bg.product_id
       ${whereClause}
       ORDER BY Products.created_at DESC
       LIMIT $${limitIndex} OFFSET $${offsetIndex}
@@ -208,7 +161,6 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch products" });
   }
 };
-
 
 exports.getProductsByUser = async (req, res) => {
   const { userId } = req.params;
@@ -309,29 +261,45 @@ exports.getAllUsersOfferableProducts = async (req, res) => {
 // קבלת מוצר לפי ID
 exports.getProductById = async (req, res) => {
   const { id } = req.params;
+
   try {
     const result = await db.query(
       `
-            SELECT 
-                Products.*, 
-                Users.name 
-            FROM Products
-            JOIN Users ON Products.user_id = Users.user_id
-            WHERE Products.product_id = $1
-        `,
+      SELECT 
+        Products.*, 
+        Users.name,
+        Books.author,
+        Books.publisher,
+        Books.publish_year,
+        Books.page_count,
+        Puzzles.manufacturer,
+        Puzzles.pieces_count AS "piecesCount",
+        Board_Games.min_players,
+        Board_Games.max_players,
+        Board_Games.duration
+      FROM Products
+      JOIN Users ON Products.user_id = Users.user_id
+      LEFT JOIN Books ON Products.product_id = Books.product_id
+      LEFT JOIN Puzzles ON Products.product_id = Puzzles.product_id
+      LEFT JOIN Board_Games ON Products.product_id = Board_Games.product_id
+      WHERE Products.product_id = $1
+      `,
       [id]
     );
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
+
     res.status(200).json(result.rows[0]);
+    return result.rows[0];
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch product" });
   }
 };
 
-// עדכון מוצר
+
 exports.updateProduct = async (req, res) => {
   const { id } = req.params;
   const {
