@@ -1,14 +1,18 @@
-// 📁 lib/filters/homePageFields.ts
-
 import { FilterField } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
 import {
   ProductCategory,
   productCategoryLabels,
   ProductAvailability,
   productAvailabilityLabels,
+  productConditionLabels,
+  ProductCondition,
 } from "@/types/products";
 import { IUser } from "@/types/type";
 
+export const conditionOptions = Object.values(ProductCondition).map((condition) => ({
+  label: productConditionLabels[condition],
+  value: String(condition),
+}));
 
 // יצירת אפשרויות קטגוריה
 export const categoryOptions = Object.values(ProductCategory).map((cat) => ({
@@ -65,5 +69,11 @@ export const homePageFields = (user: IUser | null): FilterField[] => [
     options: user && user?.role_name === "Admin" ? availabilityOptions : availabilityOptions.filter(
       (option) => option.value !== ProductAvailability.PENDING && option.value !== ProductAvailability.EXCHANGED, 
     ),
+  },
+    {
+    key: "condition",
+    type: "select",
+    placeholder: "מצב",
+    options: conditionOptions,
   },
 ];

@@ -298,7 +298,6 @@ const fetchProducts = useCallback(
   []
 );
 
-  
   const fetchUserProducts = async (
     userId: number,
     limit: number,

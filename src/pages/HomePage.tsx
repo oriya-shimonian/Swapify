@@ -7,7 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 import useProducts from "@/hooks/useProducts";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import ProductCard from "@/components/ProductCard";
-import { AddProductButton } from "@/components/Buttons/AddProductButton";
 import { SkeletonProductCard } from "@/components/skelton/SkeletonProductCard";
 import { homePageFields } from "@/lib/filters/homePageFilters";
 import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";

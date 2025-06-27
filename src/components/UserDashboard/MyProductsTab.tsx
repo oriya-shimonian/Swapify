@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
-import { IProduct, NUM_PRODUCTS_IN_PAGE } from "@/types/products";
+import { useEffect, useMemo, useState } from "react";
+import {
+  IProduct,
+  NUM_PRODUCTS_IN_PAGE,
+  ProductCategory,
+} from "@/types/products";
 import useProducts from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import AppDialog from "@/components/AppDialog";
 import toast from "react-hot-toast";
@@ -12,9 +15,10 @@ import { FaEdit } from "react-icons/fa";
 import { SkeletonProductCard } from "../skelton/SkeletonProductCard";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { Filters } from "./exchangeTabsHelpers/Filters";
-import { filterFieldsMyProductsTab } from "@/lib/filters/myProductsTabFilters";
 import { DateRangePicker } from "../DateRangePicker";
 import { AddProductButton } from "../Buttons/AddProductButton";
+import { extraFieldsByCategory } from "@/lib/filters/extraFieldsByCategory";
+import { homePageFields } from "@/lib/filters/homePageFilters";
 
 export default function MyProductsTab() {
   const { user } = useAuth();
@@ -36,9 +40,29 @@ export default function MyProductsTab() {
     subcategory: null,
     condition: null,
     availability: null,
+    location: null,
     fromDate: "",
     toDate: "",
+    // שדות דינמיים
+    author: "",
+    publisher: "",
+    publish_year: "",
+    manufacturer: "",
+    piecesCount: "",
+    min_players: "",
+    max_players: "",
+    duration: "",
   });
+
+  const selectedCategory = filters.category as ProductCategory | null;
+  const extendedFields = useMemo(() => {
+    return selectedCategory
+      ? [
+          ...homePageFields(user),
+          ...(extraFieldsByCategory[selectedCategory] || []),
+        ]
+      : homePageFields(user);
+  }, [selectedCategory, user]);
 
   const bottomRef = useInfiniteScroll({
     isFetching: loadingNextPage,
@@ -46,7 +70,7 @@ export default function MyProductsTab() {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
-  // טוען דף ראשון מחדש בכל שינוי פילטרים
+  // טעינת עמוד ראשון בכל שינוי פילטרים
   useEffect(() => {
     if (!user?.user_id) return;
 
@@ -61,7 +85,7 @@ export default function MyProductsTab() {
       .finally(() => setLoadingNextPage(false));
   }, [user?.user_id, filters]);
 
-  // טוען עמודים נוספים (אחרי עמוד ראשון)
+  // טעינת עמודים נוספים
   useEffect(() => {
     if (!user?.user_id || page === 0) return;
 
@@ -119,7 +143,7 @@ export default function MyProductsTab() {
         filters={filters}
         setFilters={setFilters}
         resetPage={() => setPage(0)}
-        fields={filterFieldsMyProductsTab}
+        fields={extendedFields}
       />
 
       <div className="mb-4 w-full sm:w-auto">
