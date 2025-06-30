@@ -271,7 +271,7 @@ export function RequestsTable({
 }: RequestsTableProps) {
   const columns = type === "sent" ? sentColumns : receivedColumns;
   const [expandedRows, setExpandedRows] = useState<number[]>(
-    requests.map((r) => r.request_id)
+   []
   );
 
   useEffect(() => {
@@ -521,3 +521,101 @@ const receivedColumns = [
   { key: "requester", label: "שם מבקש" },
   ...baseColumns.slice(2),
 ] as const;
+
+// import { useEffect, useState } from "react";
+// import {
+//   IExchangeRequest,
+//   ReceivedExchangeRequest,
+// } from "@/types/exchangeRequest";
+// import GenericRowTable from "@/components/table/GenericRowTable";
+// import { buildExchangeRequestColumns } from "@/utils/buildExchangeRequestColumns";
+// import { ExchangeOfferCards } from "./ExchangeOfferCards";
+
+// interface RequestsTableProps {
+//   requests: IExchangeRequest[];
+//   onImageClick: (imageUrl: string) => void;
+//   onEditClick?: (requestId: number) => void;
+//   onDeleteClick?: (requestId: number) => void;
+//   onApproveClick?: (request: IExchangeRequest, productId: number) => void;
+//   onRejectClick?: (request: IExchangeRequest) => void;
+//   AutomaticRejection?: (request: IExchangeRequest) => void;
+//   type: "sent" | "received";
+// }
+
+// export function RequestsTable({
+//   requests,
+//   onImageClick,
+//   onEditClick,
+//   onDeleteClick,
+//   onApproveClick,
+//   onRejectClick,
+//   AutomaticRejection,
+//   type,
+// }: RequestsTableProps) {
+//   const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+//   useEffect(() => {
+//     const hash = window.location.hash;
+//     if (hash?.startsWith("#request-")) {
+//       const id = Number(hash.replace("#request-", ""));
+//       setExpandedRows([id]);
+//       const el = document.getElementById(`request-${id}`);
+//       if (el) {
+//         el.scrollIntoView({ behavior: "smooth", block: "center" });
+//         el.classList.add("pulse-highlight");
+//         setTimeout(() => el.classList.remove("pulse-highlight"), 2000);
+//       }
+//     }
+//   }, [requests]);
+
+//   const toggleExpand = (id: number) => {
+//     setExpandedRows((prev) =>
+//       prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+//     );
+//   };
+
+//   const columns = buildExchangeRequestColumns(
+//     type,
+//     onImageClick,
+//     onEditClick,
+//     onDeleteClick,
+//     toggleExpand,
+//     expandedRows
+//   );
+
+//   return (
+//     <div className="overflow-x-auto w-full bg-white rounded-xl shadow-sm border border-gray-100">
+//       {/* Header */}
+//       <div className="grid grid-cols-10 gap-4 items-center px-6 py-4 text-sm font-medium text-gray-600 bg-gray-50 border-b">
+//         {columns.map((col, i) => (
+//           <div key={i} className={col.width ?? "col-span-1"}>
+//             {col.label}
+//           </div>
+//         ))}
+//       </div>
+
+//       {/* Rows */}
+//       <div className="divide-y divide-gray-200">
+//         {requests.map((req) => (
+//           <div key={req.request_id} id={`request-${req.request_id}`}>
+//             <GenericRowTable
+//               item={req}
+//               columns={columns}
+//               gridCols="grid-cols-10"
+//             />
+//             {type === "received" && expandedRows.includes(req.request_id) && (
+//               <div className="bg-background px-6 py-3">
+//                 <ExchangeOfferCards
+//                   request={req as ReceivedExchangeRequest}
+//                   onApprove={onApproveClick!}
+//                   onReject={onRejectClick!}
+//                   AutomaticRejection={AutomaticRejection!}
+//                 />
+//               </div>
+//             )}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }

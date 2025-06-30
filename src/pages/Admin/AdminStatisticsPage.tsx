@@ -68,7 +68,7 @@ const AdminStatisticsPage = () => {
         {
           label: "התראות שנשלחו",
           value: data.notifications.total,
-          color: "gray",
+          color: "teal",
           Icon: BellRing,
         },
         {
@@ -79,8 +79,6 @@ const AdminStatisticsPage = () => {
         },
       ]
     : [];
-
-  console.log("Statistics data:", data);
 
   return (
     <section className="p-6 space-y-8">

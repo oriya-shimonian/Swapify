@@ -115,7 +115,7 @@ export default function ProfilePage() {
               <label className="block text-red-500 text-sm min-h-6">
                 {errors.locations && `* ${errors.locations}`}
               </label>
-              <p>:מיקומים מועדפים להחלפה</p>
+              <p>מיקומים מועדפים להחלפה בישראל:</p>
               {!isEditing ? (
                 <LocationBubbles locations={form.locations} />
               ) : (

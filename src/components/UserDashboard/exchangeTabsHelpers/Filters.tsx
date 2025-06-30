@@ -1,3 +1,4 @@
+import LocationPicker from "@/components/LocationPicker";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { ProductCategory, subcategoryMaps } from "@/types/products";
 
-type FilterFieldType = "input" | "select";
+type FilterFieldType = "input" | "select" | "number" | "location";
 
 export interface FilterField {
   key: string;
@@ -30,7 +31,7 @@ export function Filters<T extends Record<string, any>>({
   setFilters,
   resetPage,
   fields,
-  design
+  design,
 }: FiltersProps<T>) {
   const handleChange = (field: string, value: string | null) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
@@ -72,10 +73,11 @@ export function Filters<T extends Record<string, any>>({
       {fields.map((field) => {
         const value = filters[field.key] ?? "";
 
-        if (field.type === "input") {
+        if (field.type === "input" || field.type === "number") {
           return (
             <Input
               key={field.key}
+              type={field.type === "number" ? "number" : "text"}
               placeholder={field.placeholder}
               value={value}
               onChange={(e) => handleChange(field.key, e.target.value)}
@@ -131,6 +133,17 @@ export function Filters<T extends Record<string, any>>({
               </Select>
             );
           }
+        }
+
+        if (field.type === "location") {
+          return (
+            <LocationPicker
+              selectedLocations={filters.location ? [filters.location] : []}
+              onChange={(locs) =>
+                setFilters((prev) => ({ ...prev, location: locs[0] || null }))
+              }
+            />
+          );
         }
 
         return null;

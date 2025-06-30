@@ -7,6 +7,7 @@ import ButtonLink from "@/components/ButtonLink";
 import {
   ADMIN_LINKS,
   NAV_LINKS,
+  USER_LINKS,
 } from "@/constants/navigationLinks";
 import { useAuth } from "@/context/AuthContext";
 import { IoNotifications } from "react-icons/io5";
@@ -54,6 +55,18 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {user &&
+            USER_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-black dark:text-gray-300 hover:text-primary transition"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
 
           {user &&
             user.role_name === "Admin" &&
@@ -168,7 +181,19 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
-        
+
+          {user &&
+            USER_LINKS.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="block text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 py-3 text-center rounded-lg transition"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+
           {user &&
             user.role_name === "Admin" &&
             ADMIN_LINKS.map((link) => (

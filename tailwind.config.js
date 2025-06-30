@@ -73,4 +73,17 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [
+  'text-yellow-600', 'bg-yellow-100',
+  'text-pink-600', 'bg-pink-100',
+  'text-cyan-600', 'bg-cyan-100',
+  'text-indigo-600', 'bg-indigo-100',
+  'text-emerald-600', 'bg-emerald-100',
+  'text-fuchsia-600', 'bg-fuchsia-100',
+  'text-purple-600', 'bg-purple-100',
+  'text-teal-600', 'bg-teal-100',
+  'text-lime-600', 'bg-lime-100',
+  // כל צבע שתשתמש בו דינמית
+],
+
 };

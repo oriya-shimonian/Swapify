@@ -18,6 +18,44 @@ export interface DeleteProductPayload {
 }
 
 
+export interface ProductFilters {
+  search?: string;
+  category?: string | null;
+  subcategory?: string | null;
+  location?: string | null;
+  availability?: string | null;
+  condition?: string | null;
+  fromDate?: string;
+  toDate?: string;
+  author?: string;
+  publisher?: string;
+  publish_year?: string;
+  manufacturer?: string;
+  piecesCount?: string;
+  min_players?: string;
+  max_players?: string;
+  duration?: string;
+}
+
+export const defaultProductFilters: ProductFilters = {
+  search: "",
+  category: null,
+  subcategory: null,
+  condition: null,
+  availability: null,
+  location: null,
+  fromDate: "",
+  toDate: "",
+  author: "",
+  publisher: "",
+  publish_year: "",
+  manufacturer: "",
+  piecesCount: "",
+  min_players: "",
+  max_players: "",
+  duration: "",
+};
+
 // Enum for product conditions
 export enum ProductCondition {
   NEW = "New",
