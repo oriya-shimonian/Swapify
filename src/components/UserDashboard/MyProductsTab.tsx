@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  defaultProductFilters,
   IProduct,
   NUM_PRODUCTS_IN_PAGE,
   ProductCategory,
+  ProductFilters,
 } from "@/types/products";
 import useProducts from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
@@ -34,35 +36,46 @@ export default function MyProductsTab() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingNextPage, setLoadingNextPage] = useState(false);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    category: null,
-    subcategory: null,
-    condition: null,
-    availability: null,
-    location: null,
-    fromDate: "",
-    toDate: "",
-    // שדות דינמיים
-    author: "",
-    publisher: "",
-    publish_year: "",
-    manufacturer: "",
-    piecesCount: "",
-    min_players: "",
-    max_players: "",
-    duration: "",
-  });
+  // const [filters, setFilters] = useState({
+  //   search: "",
+  //   category: null,
+  //   subcategory: null,
+  //   condition: null,
+  //   availability: null,
+  //   location: null,
+  //   fromDate: "",
+  //   toDate: "",
+  //   // שדות דינמיים
+  //   author: "",
+  //   publisher: "",
+  //   publish_year: "",
+  //   manufacturer: "",
+  //   piecesCount: "",
+  //   min_players: "",
+  //   max_players: "",
+  //   duration: "",
+  // });
+  const [filters, setFilters] = useState<ProductFilters>(defaultProductFilters);
+
+
+  // const selectedCategory = filters.category as ProductCategory | null;
+  // const extendedFields = useMemo(() => {
+  //   return selectedCategory
+  //     ? [
+  //         ...homePageFields(user),
+  //         ...(extraFieldsByCategory[selectedCategory] || []),
+  //       ]
+  //     : homePageFields(user);
+  // }, [selectedCategory, user]);
 
   const selectedCategory = filters.category as ProductCategory | null;
-  const extendedFields = useMemo(() => {
-    return selectedCategory
-      ? [
-          ...homePageFields(user),
-          ...(extraFieldsByCategory[selectedCategory] || []),
-        ]
-      : homePageFields(user);
-  }, [selectedCategory, user]);
+
+const extendedFields = useMemo(() => {
+  return selectedCategory
+    ? [...homePageFields(user), ...(extraFieldsByCategory[selectedCategory] || [])]
+    : homePageFields(user);
+}, [selectedCategory, user]);
+
 
   const bottomRef = useInfiniteScroll({
     isFetching: loadingNextPage,
@@ -148,8 +161,8 @@ export default function MyProductsTab() {
 
       <div className="mb-4 w-full sm:w-auto">
         <DateRangePicker
-          fromDate={filters.fromDate}
-          toDate={filters.toDate}
+          fromDate={filters.fromDate ?? ""}
+          toDate={filters.toDate ?? ""}
           onChange={(from, to) =>
             setFilters((prev) => ({
               ...prev,

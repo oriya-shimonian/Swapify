@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ import { SkeletonProductCard } from "@/components/skelton/SkeletonProductCard";
 import { homePageFields } from "@/lib/filters/homePageFilters";
 import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
 import { DateRangePicker } from "@/components/DateRangePicker";
-import { ProductCategory } from "@/types/products";
+import { defaultProductFilters, ProductCategory, ProductFilters } from "@/types/products";
 import { extraFieldsByCategory } from "@/lib/filters/extraFieldsByCategory";
 
 export default function HomePage() {
@@ -21,24 +21,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    category: null,
-    subcategory: null,
-    location: null,
-    availability: null,
-    fromDate: "",
-    toDate: "",
-    // שדות דינמיים
-    author: "",
-    publisher: "",
-    publish_year: "",
-    manufacturer: "",
-    piecesCount: "",
-    min_players: "",
-    max_players: "",
-    duration: "",
-  });
+const [filters, setFilters] = useState<ProductFilters>(defaultProductFilters);
+
 
   useEffect(() => {
     fetchProducts(page, filters, true);
@@ -50,11 +34,19 @@ export default function HomePage() {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
+  // const selectedCategory = filters.category as ProductCategory | null;
+
+  // const extendedFields = selectedCategory
+  //   ? [...homePageFields(user), ...(extraFieldsByCategory[selectedCategory] || [])]
+  //   : homePageFields(user);
   const selectedCategory = filters.category as ProductCategory | null;
 
-  const extendedFields = selectedCategory
+const extendedFields = useMemo(() => {
+  return selectedCategory
     ? [...homePageFields(user), ...(extraFieldsByCategory[selectedCategory] || [])]
     : homePageFields(user);
+}, [selectedCategory, user]);
+
 
   return (
     <div className="container mx-auto px-4 py-6 mt-[4.5rem]">

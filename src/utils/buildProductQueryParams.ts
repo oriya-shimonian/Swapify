@@ -13,6 +13,7 @@ export function buildProductQueryParams(
   const keyMap: Record<keyof ProductFilters, string> = {
     fromDate: "from",
     toDate: "to",
+    condition: "condition",
     // כל השאר לא משתנים
     search: "search",
     category: "category",
