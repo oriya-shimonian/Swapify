@@ -4,9 +4,9 @@ const productsController = require('../controllers/productsController');
 const { authenticateUser } = require('../middlewares/authMiddleware');
 const { canManageItem } = require('../middlewares/canManageItem');
 const checkBanStatus = require('../middlewares/checkBanStatus');
-
+const { optionalAuth } = require('../middlewares/optionalAuth');
 // קבלת כל המוצרים
-router.get('/', productsController.getAllProducts);
+router.get('/', optionalAuth, productsController.getAllProducts);
 
 // קבלת מוצר לפי ID
 router.get('/:id', productsController.getProductById);

@@ -774,7 +774,7 @@ exports.cancelExchangeRequest = async (req, res) => {
     client.release();
   }
 };
-
+// TODO fix this function
 // קביעת פגישה בין שני הצדדים אחרי ששניהם הסכימו
 exports.confirmMeeting = async (req, res) => {
   const { requestId } = req.params;
