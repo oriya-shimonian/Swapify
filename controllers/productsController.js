@@ -196,8 +196,7 @@ exports.createProduct = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   const { limit = 12, offset = 0, excludeMyProducts } = req.query;
-
-  const { whereClause, values } = buildProductFilters(req.query, {
+    const { whereClause, values } = buildProductFilters(req.query, {
     includeSearch: true,
     includeAvailabilityDefault: true,
     excludeUserId:

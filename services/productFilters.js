@@ -53,6 +53,7 @@ function buildProductFilters(query, options = {}) {
   if (query.min_players) add("bg.min_players <= ?", query.min_players);
   if (query.max_players) add("bg.max_players >= ?", query.max_players);
   if (query.duration) add("bg.duration <= ?", query.duration);
+  if (query.condition) add("Products.condition = ?", query.condition);
 
   if (excludeUserId) {
     add("Products.user_id != ?", excludeUserId);
