@@ -12,6 +12,7 @@ import { SkeletonTable } from "./exchangeTabsHelpers/SkeletonTable";
 import { RequestsTable } from "./exchangeTabsHelpers/RequestsTable";
 import { Pagination } from "./exchangeTabsHelpers/Pagination";
 import { useLocation } from "react-router-dom";
+import { DateRangePicker } from "../DateRangePicker";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -130,14 +131,30 @@ export default function MyReceivedRequestsTab() {
 
   return (
     <div className="p-6 min-w-96">
-      <h1 className="text-2xl font-bold mb-4">בקשות שהתקבלו</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">בקשות שהתקבלו</h1> */}
 
-      <Filters
-        filters={filters}
-        setFilters={setFilters}
-        resetPage={() => setCurrentPage(1)}
-        fields={receivedRequestFilters}
-      />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              resetPage={() => setCurrentPage(1)}
+              fields={receivedRequestFilters}
+            />
+          </div>
+
+          {/* <div className="min-w-[200px] self-baseline">
+                  <DateRangePicker
+                    fromDate={filters.fromDate ?? ""}
+                    toDate={filters.toDate ?? ""}
+                    onChange={(from, to) =>
+                      setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
+                    }
+                  />
+                </div> */}
+        </div>
+      </div>
 
       {loading ? (
         <SkeletonTable />

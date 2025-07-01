@@ -380,7 +380,7 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {isOwner && !isEditing && (
+            {(isOwner || user?.role_name === "Admin" ) && !isEditing && (
               <div className="grid grid-cols-2 gap-4">
                 <AppButton
                   onClick={() => setIsEditing(true)}
