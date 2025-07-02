@@ -1,54 +1,78 @@
-const db = require('../config/db'); // חיבור ל-PostgreSQL
-const bcrypt = require('bcryptjs');
+const db = require("../config/db"); // חיבור ל-PostgreSQL
+const bcrypt = require("bcryptjs");
 const admin = require("firebase-admin");
-const { emitForceLogout } = require('../services/socketEmitter');
-const logAudit  = require('../utils/auditLogger'); // פונקציה לרישום פעולות מנהל
+const { emitForceLogout } = require("../services/socketEmitter");
+const logAudit = require("../utils/auditLogger"); // פונקציה לרישום פעולות מנהל
 
 exports.createUser = async (req, res) => {
-    try {
-        const { username, email, password, roleId = 2, isBanned = false, notificationEnabled, locations } = req.body;
-        if (!username || !email || !password || !locations || locations.length === 0) {
-            return res.status(400).json({ error: ' שרת!!!! יש למלא את כל השדות' });
-        }
+  try {
+    const {
+      username,
+      email,
+      password,
+      roleId = 2,
+      isBanned = false,
+      notificationEnabled,
+      locations,
+    } = req.body;
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !locations ||
+      locations.length === 0
+    ) {
+      return res.status(400).json({ error: " שרת!!!! יש למלא את כל השדות" });
+    }
 
-        // בדיקה אם האימייל כבר קיים
-        const existingUser = await db.query('SELECT 1 FROM Users WHERE email = $1', [email]);
-        if (existingUser.rows.length > 0) {
-          return res.status(409).json({ error: 'כתובת אימייל כבר קיימת במערכת' });
-        }
+    // בדיקה אם האימייל כבר קיים
+    const existingUser = await db.query(
+      "SELECT 1 FROM Users WHERE email = $1",
+      [email]
+    );
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({ error: "כתובת אימייל כבר קיימת במערכת" });
+    }
 
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        const result = await db.query(
-            `INSERT INTO Users (name, email, password_hash, role_id, is_banned, notification_enabled, location)
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const result = await db.query(
+      `INSERT INTO Users (name, email, password_hash, role_id, is_banned, notification_enabled, location)
             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id`,
-            [username, email, hashedPassword, roleId, isBanned, notificationEnabled, locations.join(', ')]
-        );
+      [
+        username,
+        email,
+        hashedPassword,
+        roleId,
+        isBanned,
+        notificationEnabled,
+        locations.join(", "),
+      ]
+    );
 
-        const userId = result.rows[0].user_id;
+    const userId = result.rows[0].user_id;
 
-        // שליפת המשתמש החדש עם שם התפקיד (Role_name)
-        const userQuery = `
+    // שליפת המשתמש החדש עם שם התפקיד (Role_name)
+    const userQuery = `
             SELECT u.user_id, u.name, u.email, u.is_banned, u.notification_enabled, u.location, 
                    r.Role_name AS role_name
             FROM Users u
             JOIN Roles r ON u.Role_id = r.Role_id
             WHERE u.user_id = $1
         `;
-        const userResult = await db.query(userQuery, [userId]);
+    const userResult = await db.query(userQuery, [userId]);
 
-        if (userResult.rows.length === 0) {
-            return res.status(500).json({ error: 'Failed to retrieve user data' });
-        }
-
-        const newUser = userResult.rows[0];
-
-        res.status(201).json(newUser);
-    } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).json({ error: `Failed to create user ${error.detail}` });
+    if (userResult.rows.length === 0) {
+      return res.status(500).json({ error: "Failed to retrieve user data" });
     }
+
+    const newUser = userResult.rows[0];
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: `Failed to create user ${error.detail}` });
+  }
 };
 
 // Get All Users
@@ -74,55 +98,57 @@ exports.getAllUsers = async (req, res) => {
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ error: 'Failed to fetch users' });
+    res.status(500).json({ error: "Failed to fetch users" });
   }
 };
 
-
 // Get User by ID
 exports.getUserById = async (req, res) => {
-    const { id } = req.params;  // ה-ID שמבקש המשתמש
-    const userId = req.user.id; // ה-ID של המשתמש המחובר
-    const userRole = req.user.role_id; // הרול של המשתמש המחובר
+  const { id } = req.params; // ה-ID שמבקש המשתמש
+  const userId = req.user.id; // ה-ID של המשתמש המחובר
+  const userRole = req.user.role_id; // הרול של המשתמש המחובר
 
-    try {
-        // Admin יכול לגשת לכל משתמש, משתמש רגיל רק לעצמו
-        if (userId !== parseInt(id) && userRole !== 1) { 
-            return res.status(403).json({ error: 'Access denied' });
-        }
-
-        const result = await db.query('SELECT user_id, name, email, location, profile_picture, auth_provider, role_id, is_banned, notification_enabled, created_at, updated_at FROM Users WHERE user_id = $1', [id]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.status(200).json(result.rows[0]);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to fetch user' });
+  try {
+    // Admin יכול לגשת לכל משתמש, משתמש רגיל רק לעצמו
+    if (userId !== parseInt(id) && userRole !== 1) {
+      return res.status(403).json({ error: "Access denied" });
     }
+
+    const result = await db.query(
+      "SELECT user_id, name, email, location, profile_picture, auth_provider, role_id, is_banned, notification_enabled, created_at, updated_at FROM Users WHERE user_id = $1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
 };
 
 // Update User
 exports.updateUser = async (req, res) => {
-    const { id } = req.params;
-    const { name, email, location } = req.body;
-    try {
-        const result = await db.query(
-            `UPDATE Users 
+  const { id } = req.params;
+  const { name, email, location } = req.body;
+  try {
+    const result = await db.query(
+      `UPDATE Users 
             SET name = $1, email = $2, location = $3, updated_at = CURRENT_TIMESTAMP 
             WHERE user_id = $4 RETURNING *`,
-            [name, email, location, id]
-        );
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        res.status(200).json(result.rows[0]);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to update user' });
+      [name, email, location, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
     }
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update user" });
+  }
 };
 
 // Delete User
@@ -131,7 +157,9 @@ exports.deleteUser = async (req, res) => {
 
   try {
     // שליפת המשתמש מה־DB
-    const result = await db.query("SELECT * FROM Users WHERE user_id = $1", [userId]);
+    const result = await db.query("SELECT * FROM Users WHERE user_id = $1", [
+      userId,
+    ]);
     const user = result.rows[0];
 
     if (!user) {
@@ -152,10 +180,10 @@ exports.deleteUser = async (req, res) => {
     // מחיקת המשתמש מה־DB
     await db.query("DELETE FROM Users WHERE user_id = $1", [userId]);
     await logAudit(
-      'מחיקת משתמש',
+      "מחיקת משתמש",
       req.user.id,
       req.user.name,
-      `המשתמש ${userId} (${user.email}) נמחק על ידי ${req.user.name}`
+      `המשתמש ${userId} (${user.email}) נמחק`
     );
     return res.status(200).json({ message: "המשתמש נמחק בהצלחה" });
   } catch (err) {
@@ -208,10 +236,10 @@ exports.deleteUsers = async (req, res) => {
     );
 
     await logAudit(
-      'מחיקת משתמשים',
+      "מחיקת משתמשים",
       req.user.id,
       req.user.name,
-      `המשתמשים ${deleted.join(', ')} נמחקו על ידי ${req.user.name}`
+      `המשתמשים ${deleted.join(", ")} נמחקו`
     );
     return res.status(200).json({
       message: "בוצעה מחיקה קבוצתית",
@@ -230,21 +258,29 @@ exports.banUser = async (req, res) => {
   const adminId = req.user.id;
 
   try {
-    const adminCheck = await db.query('SELECT role_id FROM Users WHERE user_id = $1', [adminId]);
+    const adminCheck = await db.query(
+      "SELECT role_id FROM Users WHERE user_id = $1",
+      [adminId]
+    );
     if (adminCheck.rows.length === 0 || adminCheck.rows[0].role_id !== 3) {
-      return res.status(403).json({ error: 'Unauthorized: Only Admins can ban users' });
+      return res
+        .status(403)
+        .json({ error: "Unauthorized: Only Admins can ban users" });
     }
 
-    const userResult = await db.query('SELECT is_banned FROM Users WHERE user_id = $1', [id]);
+    const userResult = await db.query(
+      "SELECT is_banned FROM Users WHERE user_id = $1",
+      [id]
+    );
     if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const currentStatus = userResult.rows[0].is_banned;
     const newStatus = !currentStatus;
 
     const result = await db.query(
-      'UPDATE Users SET is_banned = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING *',
+      "UPDATE Users SET is_banned = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING *",
       [newStatus, id]
     );
 
@@ -252,20 +288,34 @@ exports.banUser = async (req, res) => {
       emitForceLogout(Number(id));
     }
 
+    const {
+      rows: [targetUser],
+    } = await db.query("SELECT name, email FROM Users WHERE user_id = $1", [
+      id,
+    ]);
+
+    const {
+      rows: [adminUser],
+    } = await db.query("SELECT name, email FROM Users WHERE user_id = $1", [
+      req.user.id,
+    ]);
+
     await logAudit(
-      'עדכון סטטוס משתמש',
+      "עדכון סטטוס משתמש",
       adminId,
-      req.user.name,  
-      `המשתמש ${id} הועבר למצב ${newStatus ? 'חסום' : 'לא חסום'} על ידי ${req.user.name}`
+      adminUser?.name ?? "מפעיל לא ידוע",
+      `המשתמש ${targetUser?.name ?? "לא ידוע"} (${
+        targetUser?.email ?? "אין מייל"
+      }) הועבר למצב ${newStatus ? "חסום" : "לא חסום"}`
     );
 
     res.status(200).json({
-      message: `User has been ${newStatus ? 'banned' : 'unbanned'}`,
+      message: `User has been ${newStatus ? "banned" : "unbanned"}`,
       user: result.rows[0],
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to update user status' });
+    res.status(500).json({ error: "Failed to update user status" });
   }
 };
 
@@ -285,7 +335,9 @@ exports.banUsers = async (req, res) => {
       [adminId]
     );
     if (adminCheck.rows.length === 0 || adminCheck.rows[0].role_id !== 3) {
-      return res.status(403).json({ error: "Unauthorized: Only Admins can ban users" });
+      return res
+        .status(403)
+        .json({ error: "Unauthorized: Only Admins can ban users" });
     }
 
     // שליפת המשתמשים הרלוונטיים
@@ -303,7 +355,7 @@ exports.banUsers = async (req, res) => {
     for (const user of users) {
       const newStatus = !user.is_banned;
 
-      const result = await db.query(
+      await db.query(
         "UPDATE Users SET is_banned = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING user_id",
         [newStatus, user.user_id]
       );
@@ -316,11 +368,38 @@ exports.banUsers = async (req, res) => {
       }
     }
 
+   const { rows: affectedUsers } = await db.query(
+      "SELECT user_id, name, email FROM Users WHERE user_id = ANY($1::int[])",
+      [[...banned, ...unbanned]]
+    );
+
+    const { rows: [adminUser] } = await db.query(
+      "SELECT name, email FROM Users WHERE user_id = $1",
+      [adminId]
+    );
+
+    const describeUsers = (ids) =>
+      ids
+        .map((id) => {
+          const u = affectedUsers.find((u) => u.user_id === id);
+          return u ? `${u.name} (${u.email})` : `משתמש ${id}`;
+        })
+        .join(", ");
+
+    const bannedText = banned.length
+      ? `המשתמשים ${describeUsers(banned)} נחסמו`
+      : "";
+    const unbannedText = unbanned.length
+      ? `בוטלה חסימת המשתמשים ${describeUsers(unbanned)}`
+      : "";
+
+    const separator = bannedText && unbannedText ? " ו־" : "";
+
     await logAudit(
-      'עדכון סטטוס משתמשים',
+      "עדכון סטטוס משתמשים",
       adminId,
-      req.user.name,  
-      `המשתמשים ${banned.join(', ')} נחסמו ו־${unbanned.join(', ')} שוחררו על ידי ${req.user.name}`
+      adminUser?.name ?? "מפעיל לא מזוהה",
+      `${bannedText}${separator}${unbannedText}`
     );
 
     return res.status(200).json({
@@ -347,7 +426,7 @@ exports.updateUserRole = async (req, res) => {
     }
 
     const { rows } = await db.query(
-      'SELECT name, role_id FROM Users WHERE user_id = $1',
+      "SELECT name, role_id FROM Users WHERE user_id = $1",
       [id]
     );
 
@@ -359,20 +438,19 @@ exports.updateUserRole = async (req, res) => {
     const targetUserName = rows[0].name;
 
     await db.query(
-      'UPDATE Users SET role_id = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+      "UPDATE Users SET role_id = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2",
       [newRoleId, id]
     );
 
     const rolesMap = {
       1: "Guest",
       2: "User",
-      3: "Admin"
+      3: "Admin",
     };
-
 
     // Audit Log
     await logAudit(
-      'שינוי תפקיד',
+      "שינוי תפקיד",
       currentAdminId,
       currentAdminName,
       `המשתמש ${targetUserName} עודכן מרול ${rolesMap[prevRoleId]} לרול ${rolesMap[newRoleId]}`
@@ -384,7 +462,6 @@ exports.updateUserRole = async (req, res) => {
     res.status(500).json({ error: "שגיאה בשרת" });
   }
 };
-
 
 exports.getLocationStats = async (req, res) => {
   try {
