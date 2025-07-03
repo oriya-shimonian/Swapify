@@ -66,7 +66,7 @@ export default function ProductDetailPage() {
         );
         setProduct(res.data);
         console.log("Fetched product:", res.data);
-        
+
         setEditedProduct(res.data);
       } catch (err) {
         console.error("Failed to fetch product", err);
@@ -130,7 +130,7 @@ export default function ProductDetailPage() {
         id: String(product.product_id),
         data: editedProduct,
       });
-      
+
       setProduct(updated);
       setIsEditing(false);
       toast.success("המוצר עודכן בהצלחה!");
@@ -363,7 +363,11 @@ export default function ProductDetailPage() {
                 <AppButton
                   onClick={() => setShowExchangeDialog(true)}
                   className="inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-current"
-                  disabled={!product.availability || product.availability === "Pending" || product.availability === "Exchanged"}
+                  disabled={
+                    !product.availability ||
+                    product.availability === "Pending" ||
+                    product.availability === "Exchanged"
+                  }
                 >
                   <>
                     <Send size={20} />
@@ -380,22 +384,32 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {(isOwner || user?.role_name === "Admin" ) && !isEditing && (
+            {(isOwner || user?.role_name === "Admin") && !isEditing && (
               <div className="grid grid-cols-2 gap-4">
-                <AppButton
-                  onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!product.availability || product.availability === "Pending" || product.availability === "Exchanged"}
-                >
-                  <>
-                    <Edit3 size={20} />
-                    ערוך מוצר
-                  </>
-                </AppButton>
+                {isOwner && !isEditing && (
+                  <AppButton
+                    onClick={() => setIsEditing(true)}
+                    className="inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={
+                      !product.availability ||
+                      product.availability === "Pending" ||
+                      product.availability === "Exchanged"
+                    }
+                  >
+                    <>
+                      <Edit3 size={20} />
+                      ערוך מוצר
+                    </>
+                  </AppButton>
+                )}
                 <button
                   onClick={() => setShowDeleteDialog(true)}
                   className="flex items-center justify-center gap-3 bg-white text-red-700 font-semibold py-4 px-6 rounded-2xl shadow border disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!product.availability || product.availability === "Pending" || product.availability === "Exchanged"}
+                  disabled={
+                    !product.availability ||
+                    product.availability === "Pending" ||
+                    product.availability === "Exchanged"
+                  }
                 >
                   <Trash2 size={20} />
                   מחק מוצר
@@ -405,22 +419,22 @@ export default function ProductDetailPage() {
 
             {isEditing && (
               <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => {
-                    setEditedProduct(product);
-                    setIsEditing(false);
-                  }}
-                  className="flex items-center justify-center gap-3 bg-gray-100 text-gray-700 font-semibold py-4 px-6 rounded-2xl shadow border"
-                >
-                  <X size={20} />
-                  ביטול
-                </button>
-                <button
+                <AppButton
                   onClick={handleUpdateProduct}
                   className="flex items-center justify-center gap-3 bg-green-500 text-white font-semibold py-4 px-6 rounded-2xl shadow"
                 >
                   <Save size={20} />
                   שמור שינויים
+                </AppButton>
+                                <button
+                  onClick={() => {
+                    setEditedProduct(product);
+                    setIsEditing(false);
+                  }}
+                  className="flex items-center justify-center gap-3 bg-white text-red-700 font-semibold py-4 px-6 rounded-2xl shadow border disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <X size={20} />
+                  ביטול
                 </button>
               </div>
             )}

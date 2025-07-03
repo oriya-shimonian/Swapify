@@ -1,6 +1,7 @@
-function getRelativeTime(date: Date) {
+export function getRelativeTime(date: Date) {
   const now = new Date();
-  const diff = date.getTime() - now.getTime();
+  const diff = now.getTime() - date.getTime(); // ⬅️ הפוך את כיוון הזמן
+
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
@@ -8,11 +9,12 @@ function getRelativeTime(date: Date) {
 
   const rtf = new Intl.RelativeTimeFormat("he-IL", { numeric: "auto" });
 
-  if (Math.abs(days) >= 1) return rtf.format(days, "day");
-  if (Math.abs(hours) >= 1) return rtf.format(hours, "hour");
-  if (Math.abs(minutes) >= 1) return rtf.format(minutes, "minute");
-  return rtf.format(seconds, "second");
+  if (days >= 1) return rtf.format(-days, "day");
+  if (hours >= 1) return rtf.format(-hours, "hour");
+  if (minutes >= 1) return rtf.format(-minutes, "minute");
+  return rtf.format(-seconds, "second");
 }
+
 
 export function getFormattedDate(date: Date) {
   return date.toLocaleString("he-IL", {

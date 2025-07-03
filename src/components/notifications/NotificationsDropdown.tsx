@@ -70,9 +70,9 @@ export default function NotificationsDropdown() {
               </div>
             ) : (
               <div className="max-h-72 overflow-y-auto">
-                {notifications.map((n) => (
+                {notifications.map((n, index) => (
                   <NotificationsDropdownRow
-                    key={n.notification_id}
+                    key={`${n.notification_id}-${index}`}
                     notification={n}
                     onClick={() => handleClick(n.notification_id, n.link)}
                   />

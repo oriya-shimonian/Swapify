@@ -1,4 +1,3 @@
-// lib/filters/extraFieldsByCategory.ts
 import {
   Book,
   FileText,

@@ -68,6 +68,8 @@ export function Filters<T extends Record<string, any>>({
       )
     : [];
 
+
+
   return (
     <div className={`flex flex-wrap gap-4 mb-6 ${design}`}>
       {fields.map((field) => {
@@ -135,9 +137,12 @@ export function Filters<T extends Record<string, any>>({
           }
         }
 
+        
+
         if (field.type === "location") {
           return (
             <LocationPicker
+              key={Date.now()}
               selectedLocations={filters.location ? [filters.location] : []}
               onChange={(locs) =>
                 setFilters((prev) => ({ ...prev, location: locs[0] || null }))
