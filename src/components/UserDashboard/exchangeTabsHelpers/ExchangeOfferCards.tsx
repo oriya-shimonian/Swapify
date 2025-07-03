@@ -151,8 +151,7 @@ export function ExchangeOfferCards({
       </div>
 
       <div className="flex justify-end gap-4 mt-4">
-        {request.status !== "Pending" ||
-        selectedId === null ||
+        {request.status === "Approved" || request.status === "Completed" ||
         request.offered_products.filter((p) => p.availability != "Pending")
           .length === 0 ? (
           <Button variant="secondary" onClick={handleOpenChat}>
@@ -170,12 +169,13 @@ export function ExchangeOfferCards({
                   (p) => p.availability != "Pending"
                 ).length === 0
               }
+              className="!disabled:hover:cursor-not-allowed"
             >
               דחה הצעה
             </Button>
             <Button
               onClick={handleApprove}
-              className="bg-green-300 text-green-600 hover:bg-green-400"
+              className="bg-green-300 text-green-600 hover:bg-green-400 disabled:hover:cursor-not-allowed"
               disabled={
                 request.status !== "Pending" ||
                 selectedId === null ||

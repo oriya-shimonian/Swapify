@@ -61,21 +61,17 @@ export default function ExchangeRequestDialog({
     );
   };
 
-  const handleSubmit = async () => {
-    if (mode === "edit") {
-      if (onEditConfirm) onEditConfirm(selectedIds);
-      handleClose();
-      return;
-    }
+const handleSubmit = async () => {
+  if (mode === "edit") {
+    if (onEditConfirm) onEditConfirm(selectedIds);
+    handleClose();
+    return;
+  }
 
-    if (!user || selectedIds.length === 0 || selectedIds.length > 4) return;
-    if (hasPartialOverlap) {
-      // ניסיון שני – נשלח בכל זאת
-      onSuccess?.();
-      handleClose();
-      return;
-    }
+  if (!user || selectedIds.length === 0 || selectedIds.length > 4) return;
 
+  // אם יש חפיפה – רק מראה הודעה ולא שולח עדיין
+  if (!hasPartialOverlap) {
     try {
       const response = await createRequest({
         userId: user.user_id,
@@ -83,16 +79,34 @@ export default function ExchangeRequestDialog({
         productId,
         offeredProductIds: selectedIds,
       });
+
       if (response.hasPartialOverlap) {
         setHasPartialOverlap(true);
+        return; // מחכים ללחיצה שנייה
       } else {
         onSuccess?.();
         handleClose();
       }
     } catch {
-      // Error is already handled in hook
+      // error כבר מטופל ב-hook
     }
-  };
+  } else {
+    // לחיצה שנייה אחרי שהוזהר
+    try {
+      const response = await createRequest({
+        userId: user.user_id,
+        userName: user.name,
+        productId,
+        offeredProductIds: selectedIds,
+      });
+      onSuccess?.();
+      handleClose();
+    } catch {
+      // error כבר מטופל
+    }
+  }
+};
+
 
   const handleClose = () => {
     onClose();
@@ -127,7 +141,8 @@ export default function ExchangeRequestDialog({
       description="בחר עד 4 מוצרים משלך להציע למשתמש השני"
       open={open}
       title={mode === "edit" ? "ערוך מוצרים מוצעים" : "הגש בקשת החלפה"}
-      confirmText={mode === "edit" ? "שמור שינויים" : "שלח בקשה"}
+      confirmText={mode === "edit" ? "שמור שינויים" : hasPartialOverlap
+    ? "אישור ושליחה בכל זאת" : "שלח בקשה"}
       cancelText="ביטול"
       confirmVariant="default"
       onCancel={handleClose}

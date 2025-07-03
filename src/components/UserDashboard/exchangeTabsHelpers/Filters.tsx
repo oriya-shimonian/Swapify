@@ -68,6 +68,8 @@ export function Filters<T extends Record<string, any>>({
       )
     : [];
 
+
+
   return (
     <div className={`flex flex-wrap gap-4 mb-6 ${design}`}>
       {fields.map((field) => {
@@ -97,7 +99,7 @@ export function Filters<T extends Record<string, any>>({
                 }
                 disabled={!selectedCategory}
               >
-                <SelectTrigger className="w-max md:w-1/4">
+                <SelectTrigger className="w-max md:w-1/4 rtl">
                   <SelectValue placeholder="בחר תת קטגוריה" />
                 </SelectTrigger>
                 <SelectContent>
@@ -119,7 +121,7 @@ export function Filters<T extends Record<string, any>>({
                   handleChange(field.key, val === "all" ? null : val)
                 }
               >
-                <SelectTrigger className="w-max md:w-1/4">
+                <SelectTrigger className="w-max md:w-1/4 !rtl">
                   <SelectValue placeholder={field.placeholder} />
                 </SelectTrigger>
                 <SelectContent>
@@ -135,9 +137,12 @@ export function Filters<T extends Record<string, any>>({
           }
         }
 
+        
+
         if (field.type === "location") {
           return (
             <LocationPicker
+              key={Date.now()}
               selectedLocations={filters.location ? [filters.location] : []}
               onChange={(locs) =>
                 setFilters((prev) => ({ ...prev, location: locs[0] || null }))

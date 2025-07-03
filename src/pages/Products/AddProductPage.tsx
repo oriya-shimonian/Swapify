@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/tooltip";
 import ImageUploader from "@/components/ImageUploader";
 import { useAutoFillProduct } from "@/hooks/useAutoFillProduct";
+import AppButton from "@/components/Buttons/AppButton";
 
 const initialState = {
   productId: "",
@@ -108,6 +109,7 @@ export default function AddProductPage() {
     // שינוי כאן: אולי לא חובה אם אנחנו מצפים שה-AI יזהה
     // אבל עדיין כדאי לאפשר בחירה ידנית או לאמת אחרי זיהוי
     if (!state.category) newErrors.category = "יש לזהות קטגוריה או לבחור ידנית";
+    if (!state.subcategory) newErrors.subcategory = "יש לבחור תת-קטגוריה";
     if (!state.condition) newErrors.condition = "שדה חובה";
     dispatch({ type: "SET_ERRORS", errors: newErrors });
     return Object.keys(newErrors).length === 0;
@@ -289,7 +291,7 @@ export default function AddProductPage() {
       </FormField>
 
       {state.category && (
-        <FormField label="תת-קטגוריה">
+        <FormField label="תת-קטגוריה" required error={state.errors.subcategory}>
           <Select
             onValueChange={(val) =>
               dispatch({ type: "SET_FIELD", field: "subcategory", value: val })
@@ -366,13 +368,13 @@ export default function AddProductPage() {
       </FormField>
 
       <div className="flex justify-end">
-        <Button
+        <AppButton
           disabled={state.loading}
-          className="bg-green-600 text-white"
+          
           onClick={handleSubmit}
         >
           {state.loading ? "שולח..." : "הוסף מוצר"}
-        </Button>
+        </AppButton>
       </div>
     </div>
   );

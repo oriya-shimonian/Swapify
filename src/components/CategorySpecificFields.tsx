@@ -2,6 +2,7 @@ import { IProduct, ProductCategory } from "@/types/products";
 import { extraFieldsByCategory } from "@/lib/filters/extraFieldsByCategory";
 import IconAndBgWithText from "./ProductDetails/IconAndBgWithText";
 import { LucideIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Props {
   product: IProduct;
@@ -19,16 +20,12 @@ export default function CategorySpecificFields({
   const fields = extraFieldsByCategory[product.category];
   if (!fields) return null;
 
-
-
   return (
     <div className="grid grid-cols-2 gap-4 mt-6">
       {fields.map((field, index) => {
         const key = field.key as keyof IProduct;
         const value = product[key] ?? "";
-        // @ts-ignore
-          console.log("product.category", key, product["pieces_count"]);
-  
+
         if (isEditing && onChange) {
           return (
             <input
@@ -46,15 +43,43 @@ export default function CategorySpecificFields({
             />
           );
         }
+        console.log(
+          "Rendering icon for field:",
+          field.key,
+          "with value:",
+          value
+        );
 
         return field.icon ? (
-          <IconAndBgWithText
-            key={field.key}
-            Icon={field.icon as LucideIcon}
-            label={field.placeholder}
-            value={value?.toString() || ""}
-            color={COLORS[index % COLORS.length]} // 🎨 צבע משתנה לפי סדר
-          />
+          !value ? (
+            <TooltipProvider key={field.key}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <IconAndBgWithText
+                      key={field.key}
+                      Icon={field.icon as LucideIcon}
+                      label={field.placeholder}
+                      value="לא צוין"
+                      color={COLORS[index % COLORS.length]}
+                      valueDesign="opacity-60"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  ניתן לעדכן בלחיצה על כפתור העריכה למטה
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <IconAndBgWithText
+              key={field.key}
+              Icon={field.icon as LucideIcon}
+              label={field.placeholder}
+              value={value.toString()}
+              color={COLORS[index % COLORS.length]}
+            />
+          )
         ) : null;
       })}
     </div>

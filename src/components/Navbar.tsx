@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Sun, Moon, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
 import ButtonLink from "@/components/ButtonLink";
@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { IoNotifications } from "react-icons/io5";
 import { useNotifications } from "@/hooks/useNotifications";
 import NotificationsDropdown from "./notifications/NotificationsDropdown";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -20,9 +21,20 @@ const Navbar = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications(user);
+  const menuRef = useRef(null);
+  const profileRef = useRef(null);
+  const location = useLocation();
+
+  useClickOutside(menuRef, () => setIsMenuOpen(false));
+  useClickOutside(profileRef, () => setIsProfileMenuOpen(false));
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   return (
-    <nav className="fixed top-0 right-0 w-full bg-gray-100/15 dark:bg-black/30 shadow-md transition-all duration-300 z-50">
+    <nav className="fixed top-0 right-0 w-full bg-white/70 backdrop-blur-sm dark:bg-zinc-900/70
+ shadow-md transition-all duration-300 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* לוגו + שם האפליקציה */}
         <div className="flex items-center space-x-reverse space-x-3">
@@ -106,17 +118,9 @@ const Navbar = () => {
               <Moon className="sm:h-4 sm:w-4 lg:w-5 lg:h-5 text-gray-500" />
             )}
           </button>
-          {/* כפתור התראות 
-          {user && <button className="relative">
-            <IoNotifications size={26} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-2.5 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {unreadCount}
-              </span>
-            )}ReceivedRequestsTab
-          </button>}*/}
+          {/* כפתור התראות */}
           {user && <NotificationsDropdown />}
-          {/* כפתו�� כני��ה/תפרי�� משתמש */}
+          {/* כפתור כניסה\תפריט משתמש */}
           {user ? (
             // 🟢 תפריט למשתמש מחובר
             <div className="relative">
@@ -131,6 +135,7 @@ const Navbar = () => {
 
               {isProfileMenuOpen && (
                 <motion.div
+                  ref={profileRef}
                   className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden z-50"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -166,6 +171,7 @@ const Navbar = () => {
       {/* תפריט למובייל */}
       {isMenuOpen && (
         <motion.div
+          ref={menuRef}
           className="mt-3 md:hidden flex flex-col bg-gray-100/15 dark:bg-black/30 shadow-lg absolute top-16 right-0 w-full p-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

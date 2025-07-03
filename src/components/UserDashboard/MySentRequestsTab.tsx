@@ -7,25 +7,34 @@ import { filterRequests } from "@/utils/filterRequests";
 import toast from "react-hot-toast";
 import { SkeletonTable } from "./exchangeTabsHelpers/SkeletonTable";
 import { Filters } from "./exchangeTabsHelpers/Filters";
-import { RequestsTable } from "./exchangeTabsHelpers/RequestsTable";
 import { Pagination } from "./exchangeTabsHelpers/Pagination";
 import ImageDialog from "@/components/dialogs/ImageDialog";
 import AppDialog from "@/components/AppDialog";
 import ExchangeRequestDialog from "../dialogs/ExchangeRequestDialog";
+import { RequestsCardsList } from "./exchangeTabsHelpers/RequestsCardsList";
 
 const ITEMS_PER_PAGE = 12;
 
 export default function MySentRequestsTab() {
   const { user } = useAuth();
-  const { getUserRequests, updateExchangeRequestProposalOptions, cancelMyRequest } = useExchangeRequest();
+  const {
+    getUserRequests,
+    updateExchangeRequestProposalOptions,
+    cancelMyRequest,
+  } = useExchangeRequest();
 
   const [requests, setRequests] = useState<IExchangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [modalImage, setModalImage] = useState<string | null>(null);
-  const [editingRequest, setEditingRequest] = useState<IExchangeRequest | null>(null);
+  const [editingRequest, setEditingRequest] = useState<IExchangeRequest | null>(
+    null
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [confirmDeleteDialog, setConfirmDeleteDialog] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+  const [confirmDeleteDialog, setConfirmDeleteDialog] = useState<{
+    open: boolean;
+    id: number | null;
+  }>({ open: false, id: null });
   const [filters, setFilters] = useState({
     searchTerm: "",
     category: null as string | null,
@@ -60,7 +69,7 @@ export default function MySentRequestsTab() {
 
   const handleDelete = async (id: number) => {
     if (!user) return;
-    const request = requests.find(r => r.request_id === id);
+    const request = requests.find((r) => r.request_id === id);
     if (!request) return;
 
     if (request.status !== "Pending") {
@@ -86,26 +95,41 @@ export default function MySentRequestsTab() {
 
   return (
     <div className="p-6 min-w-96">
-      <h1 className="text-2xl font-bold mb-4">בקשות ששלחתי</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">בקשות ששלחתי</h1> */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              resetPage={() => setCurrentPage(1)}
+              fields={sentRequestFilters}
+            />
+          </div>
 
-      <Filters
-        filters={filters}
-        setFilters={setFilters}
-        resetPage={() => setCurrentPage(1)}
-        fields={sentRequestFilters}
-      />
+          {/* <div className="min-w-[200px] self-baseline"> */}
+            {/* <DateRangePicker
+              fromDate={filters.fromDate ?? ""}
+              toDate={filters.toDate ?? ""}
+              onChange={(from, to) =>
+                setFilters((prev) => ({ ...prev, fromDate: from, toDate: to }))
+              }
+            /> */}
+          {/* </div> */}
+        </div>
+      </div>
 
       {loading ? (
         <SkeletonTable />
       ) : filteredRequests.length === 0 ? (
         <p className="text-center text-gray-500">לא נמצאו בקשות תואמות.</p>
       ) : (
-        <RequestsTable
+        <RequestsCardsList
           requests={paginatedRequests}
           onImageClick={setModalImage}
           type="sent"
           onEditClick={(id) => {
-            const req = requests.find(r => r.request_id === id);
+            const req = requests.find((r) => r.request_id === id);
             if (req) {
               setEditingRequest(req);
               setDialogOpen(true);
@@ -122,10 +146,13 @@ export default function MySentRequestsTab() {
       />
 
       {modalImage && (
-        <ImageDialog imageUrl={modalImage} onClose={() => setModalImage(null)} />
+        <ImageDialog
+          imageUrl={modalImage}
+          onClose={() => setModalImage(null)}
+        />
       )}
 
-       {editingRequest && (
+      {editingRequest && (
         <ExchangeRequestDialog
           open={dialogOpen}
           productId={editingRequest.product_id}
@@ -138,9 +165,12 @@ export default function MySentRequestsTab() {
             setEditingRequest(null);
           }}
           onEditConfirm={(newIds) =>
-            updateExchangeRequestProposalOptions(editingRequest.request_id, newIds, fetchRequests)
+            updateExchangeRequestProposalOptions(
+              editingRequest.request_id,
+              newIds,
+              fetchRequests
+            )
           }
-          
         />
       )}
 
