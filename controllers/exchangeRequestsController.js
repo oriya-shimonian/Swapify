@@ -100,23 +100,19 @@ exports.createExchangeRequest = async (req, res) => {
     );
     const productTitle = productInfo[0]?.title || `#${productId}`;
 
-    // await client.query(
-    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-    //    VALUES ('יצירת בקשת החלפה', $1, $2, $3)`,
-    //   [
-    //     userId,
-    //     userName,
-    //     `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(
-    //       ", "
-    //     )}`,
-    //   ]
-    // );
+    // שליפת שמות המוצרים שהוצעו
+    const { rows: offeredTitles } = await db.query(
+      `SELECT title FROM Products WHERE product_id = ANY($1)`,
+      [offeredProductIds]
+    );
 
-    await logAudit(
+    const offeredNames = offeredTitles.map((r) => `"${r.title}"`).join(", ");
+
+    await logAction(
       "יצירת בקשת החלפה",
       userId,
       userName,
-      `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredProductIds.join(", ")}`
+      `נשלחה בקשת החלפה על המוצר "${requestedProduct.title}" עם הצעות: ${offeredNames}`
     );
 
     const { rows: targetProductOwner } = await client.query(
@@ -147,6 +143,7 @@ exports.createExchangeRequest = async (req, res) => {
   }
 };
 
+// אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 // אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 exports.approveExchangeRequest = async (req, res) => {
   const { id } = req.params;
@@ -205,25 +202,42 @@ exports.approveExchangeRequest = async (req, res) => {
       [[chosenProductId, targetProductId]]
     );
 
-    // לוג
-    // await client.query(
-    //   `INSERT INTO Audit_Logs (action, user_id, user_name, details)
-    //    VALUES ('אישור בקשת החלפה', $1, $2, $3)`,
-    //   [
-    //     userId,
-    //     userName,
-    //     `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`,
-    //   ]
-    // );
-
-    await logAudit(
-      "אישור בקשת החלפה",
-      userId,
-      userName,
-      `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`
+    // דחיית בקשות אחרות על אותו מוצר (שעדיין בסטטוס Pending)
+    await client.query(
+      `UPDATE Exchange_Requests
+       SET status = 'Rejected', updated_at = CURRENT_TIMESTAMP
+       WHERE product_id = $1 AND status = 'Pending' AND request_id <> $2`,
+      [targetProductId, id]
     );
 
-    // יצירת התראות עבור ההצעות שלא נבחרו
+    // יצירת התראה למי שהצעתו התקבלה
+    await createNotification({
+      userId,
+      type: "approved",
+      message: `ההצעה שלך למוצר "${targetTitle}" התקבלה!`,
+      contextId: id,
+    });
+
+    // יצירת התראות עבור בקשות שנדחו אוטומטית
+    const { rows: rejectedRequests } = await client.query(
+      `SELECT er.request_id, u.user_id, u.name AS requester_name, p.title AS product_title
+       FROM Exchange_Requests er
+       JOIN Users u ON er.user_id = u.user_id
+       JOIN Products p ON er.product_id = p.product_id
+       WHERE er.product_id = $1 AND er.status = 'Rejected' AND er.request_id <> $2`,
+      [targetProductId, id]
+    );
+
+    for (const request of rejectedRequests) {
+      await createNotification({
+        userId: request.user_id,
+        type: "auto_rejected",
+        message: `הבקשה שלך למוצר "${request.product_title}" נדחתה לאחר שנבחרה בקשה אחרת.`,
+        contextId: request.request_id,
+      });
+    }
+
+    // יצירת התראות עבור ההצעות שלא נבחרו (offered products אחרים)
     const { rows: rejectedProposers } = await client.query(
       `SELECT DISTINCT proposer.user_id, proposerProduct.title AS proposer_product_title,
               targetUser.name AS target_user_name, targetProduct.title AS target_product_title
@@ -241,10 +255,18 @@ exports.approveExchangeRequest = async (req, res) => {
       await createNotification({
         userId: proposer.user_id,
         type: "auto_rejected",
-        message: `ההצעה שלך למוצר "${proposer.target_product_title}" של ${proposer.target_user_name} נדחתה אוטומטית לאחר שנבחרה הצעה אחרת`,
+        message: `ההצעה שלך למוצר "${proposer.target_product_title}" של ${proposer.target_user_name} נדחתה אוטומטית לאחר שנבחרה הצעה אחרת.`,
         contextId: id,
       });
     }
+
+    // לוג
+    await logAudit(
+      "אישור בקשת החלפה",
+      userId,
+      userName,
+      `אושר המוצר "${chosenTitle}" לבקשה ${id}. עודכן גם המוצר המבוקש "${targetTitle}"`
+    );
 
     await client.query("COMMIT");
     res
@@ -818,7 +840,8 @@ exports.confirmMeeting = async (req, res) => {
       "Meeting Confirmed",
       userId,
       userName,
-      `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`)
+      `אישר פגישה לבקשה ${requestId} ב-${city}, ${location_name} בתאריך ${meeting_date} בשעה ${hour}`
+    );
 
     res.status(200).json({ message: "Meeting confirmed successfully." });
   } catch (error) {

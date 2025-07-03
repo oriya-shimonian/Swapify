@@ -68,9 +68,9 @@ const db = require('../config/db');
 
 exports.canManageItem = (tableName, idColumn, extraCheck) => async (req, res, next) => {
     const userId = req.user.id;
-    const userRole = req.user.role_id;
+    const userRole = req.user.role_id || req.user.role;
     const { id } = req.params;
-  
+    console.log(req.user)
     const usesJoinWithProducts = ["Books", "Puzzles", "Board_Games"].includes(tableName);
   
     try {
@@ -95,7 +95,7 @@ exports.canManageItem = (tableName, idColumn, extraCheck) => async (req, res, ne
   
       const itemOwner = result.rows[0].user_id;
   
-      if (userId === itemOwner || userRole === 1) {
+      if (userId === itemOwner || userRole === 3 || userRole === 'Admin') {
         return next();
       }
   
