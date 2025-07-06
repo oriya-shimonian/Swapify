@@ -4,6 +4,7 @@ const tabs = [
   { label: "המוצרים שלי", to: "my-products" },
   { label: "בקשות ששלחתי", to: "requests/sent" },
   { label: "בקשות שהתקבלו", to: "requests/received" },
+  // { label: "כל בקשות ההחלפה", to: "requests/exchange" }, // Only visible to Admins
 ];
 
 export default function UserDashboardWrapper() {

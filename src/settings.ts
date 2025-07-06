@@ -37,8 +37,7 @@ const notificationRoutes = {
 // Products
 const productRoutes = {
   getAllProducts: () => `${baseBackendAddress}/products`,
-
-  // getAllProducts: (limit: number, offset?: number, excludeMyProducts?: boolean) => `${baseBackendAddress}/products?limit=${limit}&offset=${offset}${excludeMyProducts ? "&excludeMyProducts=true" : ""}`,
+  getgetAllProductsImages: () => `${baseBackendAddress}/products/images`, // כל התמונות של המוצרים
   getProductById: (id: number) => `${baseBackendAddress}/products/${id}`, // דורש התחברות
   // getProductsByUser: (userId: number) => `${baseBackendAddress}/products/user/${userId}`,
 
