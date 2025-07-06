@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ButtonLink from "../ButtonLink";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import AppButton from "../Buttons/AppButton";
 
 const testimonials = [
   {
@@ -45,13 +46,14 @@ const testimonials = [
 ];
 
 export default function Recommendations() {
+  const navigate = useNavigate();
   return (
     <section className="h-screen md:min-h-screen flex flex-col items-center bg-white dark:bg-gray-900 dark:text-gray-300 text-center px-8 py-16">
       
       {/* כותרת */}
       <div className="max-w-4xl mx-auto mb-12">
         <h3 className="text-4xl font-bold text-gray-900 dark:text-white leading-snug">
-          ?מה המשתמשים שלנו אומרים
+          מה המשתמשים שלנו אומרים?
         </h3>
         <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
           הצטרפו לאלפי משתמשים שמחליפים ספרים, פאזלים ומשחקי קופסה בקלות ובביטחון
@@ -63,7 +65,7 @@ export default function Recommendations() {
         <CarouselContent>
           {testimonials.map((testimonial, index) => (
             <CarouselItem key={index} className="basis-1/3 p-4">
-              <Card className="shadow-lg border-none">
+              <Card className="shadow-lg border-none dark:bg-gray-800">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center">
                     <Avatar className="w-16 h-16 mb-4">
@@ -86,16 +88,16 @@ export default function Recommendations() {
       {/* הצטרפות לקהילה */}
       <div className="mt-20 text-center">
         <h3 className="text-4xl font-bold text-gray-900 dark:text-white">
-          !הצטרפו לקהילה שלנו עוד היום
+          הצטרפו לקהילה שלנו עוד היום!
         </h3>
         <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-          !עולם של ספרים, פאזלים ומשחקים מחכה לכם. הירשמו עכשיו
+          עולם של ספרים, פאזלים ומשחקים מחכה לכם. הירשמו עכשיו!
         </p>
         <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-4">
-          <ButtonLink className="" to="/login">הירשמו עכשיו</ButtonLink>
+          <AppButton onClick={() => navigate("/login")}>הירשמו עכשיו</AppButton>
           <Button variant="outline" asChild>
-            <Link to="/aboutUs"  className="px-6 py-[1.37rem] rounded-lg font-semibold text-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-x-105 text-black dark:text-white" >למידע נוסף </Link>
-            </Button>
+            <Link to="/about"  className="px-6 py-[1.37rem] rounded-lg font-semibold text-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-x-105 text-black dark:text-white" >למידע נוסף </Link>
+          </Button>
         </div>
       </div>
     </section>
