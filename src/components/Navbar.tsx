@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
@@ -14,6 +14,7 @@ import { IoNotifications } from "react-icons/io5";
 import { useNotifications } from "@/hooks/useNotifications";
 import NotificationsDropdown from "./notifications/NotificationsDropdown";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import AppButton from "./Buttons/AppButton";
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
@@ -24,6 +25,7 @@ const Navbar = () => {
   const menuRef = useRef(null);
   const profileRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useClickOutside(menuRef, () => setIsMenuOpen(false));
   useClickOutside(profileRef, () => setIsProfileMenuOpen(false));
@@ -163,7 +165,7 @@ const Navbar = () => {
             </div>
           ) : (
             // 🔹 כפתור "כניסה" אם המשתמש לא מחובר
-            <ButtonLink to="/login">כניסה</ButtonLink>
+            <AppButton onClick={() => navigate("/login")} className="text-lg">כניסה</AppButton>
           )}
         </div>
       </div>

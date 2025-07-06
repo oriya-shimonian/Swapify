@@ -357,6 +357,14 @@ export default function ProductDetailPage() {
             <LocationBubbles locations={locations} />
           </div>
 
+          {!user && (
+            // <div className="">
+              <p className="text-gray-800 text-md p-2">
+                כדי לשלוח בקשת החלפה, יש להתחבר לחשבון שלך.
+              </p>
+            // </div>
+          )}
+
           <div className="space-y-4">
             {!isOwner && user && (
               <div className="grid grid-cols-2 gap-4">
