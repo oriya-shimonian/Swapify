@@ -1,8 +1,9 @@
+import CoverAnimation from "@/components/CoverAnimation";
 import HeroMainSection from "@/components/Hero/HeroMainSection";
 import Recommendations from "@/components/Hero/Recommendations";
 import SomeProducts from "@/components/Hero/SomeProducts";
 import WhySwapify from "@/components/Hero/WhySwapify";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 // import HeroSection from "@/components/explore/HeroSection";
 // import PuzzleTransition from "@/components/explore/PuzzleTransition";
 // import FeaturesSection from "@/components/explore/FeaturesSection";
@@ -17,7 +18,7 @@ const HeroPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white overflow-x-hidden">
       <HeroMainSection />
       <WhySwapify />
       <SomeProducts />
