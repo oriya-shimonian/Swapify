@@ -4,18 +4,14 @@ const pool = require("./config/db");
 const cors = require("cors");
 const http = require("http");
 const cron = require("node-cron");
-// const {
-//   cleanupPastMeetings,
-// } = require("./controllers/exchangeRequestsController");
 
-// // להריץ כל יום ב־00:00
+// const { cleanupPastMeetings } = require("./controllers/exchangeRequestsController");
 // cron.schedule("0 0 * * *", async () => {
 //   console.log("📆 רץ cron job למחיקת פגישות ישנות...");
 //   await cleanupPastMeetings();
 // });
 
 const { Server } = require("socket.io");
-
 const {
   initSocketIO,
   setUserCurrentChat,
@@ -38,61 +34,19 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com", "https://swapify-6f271.web.app"];
-// ✅ הגדרת Socket.IO
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  },
-});
 
-// ✅ ניהול משתמשים מחוברים
-const connectedUsers = new Map();
+// ✅ דומיינים מורשים
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://swapify-nb6b.onrender.com", // ← השרת ברנדר
+  "https://swapify-6f271.web.app",     // ← הפרונט ב־Firebase
+];
 
-io.on("connection", (socket) => {
-  // console.log("🔌 New socket connected:", socket.id);
-
-  // רישום משתמש מחובר
-  socket.on("register", (userId) => {
-    connectedUsers.set(userId, socket.id);
-    // console.log("🟢 userId registered:", userId);
-  });
-
-  // הצטרפות לצ’אט מסוים
-  socket.on("join_chat", ({ userId, chatId }) => {
-    console.log(`📥 User ${userId} joined chat_${chatId}`);
-    setUserCurrentChat(userId, chatId); // ← Map<userId, chatId>
-    socket.join(`chat_${chatId}`);
-    console.log(`👥 user ${userId} joined chat ${chatId}`);
-  });
-
-  // עזיבת הצ’אט
-  socket.on("leave_chat", (userId) => {
-    clearUserCurrentChat(userId);
-    console.log(`👤 user ${userId} left their current chat`);
-  });
-
-  // ניתוק
-  socket.on("disconnect", () => {
-    for (const [userId, socketId] of connectedUsers.entries()) {
-      if (socketId === socket.id) {
-        connectedUsers.delete(userId);
-        clearUserCurrentChat(userId);
-        console.log(`🔴 user ${userId} disconnected`);
-      }
-    }
-  });
-});
-
-// ✅ חיבור בין io למערכת
-initSocketIO(io, connectedUsers);
-
-// ✅ JSON + CORS
+// ✅ הגדרת JSON לפני הכול
 app.use(express.json({ limit: "15mb" }));
 
-
+// ✅ CORS לפני כל הראוטים
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -107,6 +61,48 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ הגדרת Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  },
+});
+
+// ✅ ניהול משתמשים מחוברים
+const connectedUsers = new Map();
+
+io.on("connection", (socket) => {
+  socket.on("register", (userId) => {
+    connectedUsers.set(userId, socket.id);
+  });
+
+  socket.on("join_chat", ({ userId, chatId }) => {
+    console.log(`📥 User ${userId} joined chat_${chatId}`);
+    setUserCurrentChat(userId, chatId);
+    socket.join(`chat_${chatId}`);
+  });
+
+  socket.on("leave_chat", (userId) => {
+    clearUserCurrentChat(userId);
+    console.log(`👤 user ${userId} left their current chat`);
+  });
+
+  socket.on("disconnect", () => {
+    for (const [userId, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(userId);
+        clearUserCurrentChat(userId);
+        console.log(`🔴 user ${userId} disconnected`);
+      }
+    }
+  });
+});
+
+// ✅ חיבור Socket למערכת
+initSocketIO(io, connectedUsers);
 
 // ✅ ראוטים
 app.use("/api/auth", require("./routes/authRoutes"));
@@ -125,7 +121,8 @@ app.use("/api/chats", require("./routes/chatsRoutes"));
 app.use("/api/messages", require("./routes/messagesRoutes"));
 app.use("/api", require("./routes/autoFillRoutes"));
 app.use("/api/statistics", require("./routes/statisticsRoutes"));
-// ✅ 404
+
+// ✅ 404 – אם אף ראוט לא תפס
 const { notFoundHandler } = require("./middlewares/404Midlleware");
 app.use(notFoundHandler);
 
