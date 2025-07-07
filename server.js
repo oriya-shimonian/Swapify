@@ -92,7 +92,7 @@ initSocketIO(io, connectedUsers);
 // ✅ JSON + CORS
 app.use(express.json({ limit: "15mb" }));
 
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com", "https://swapify-584w.onrender.com"];
 app.use(
   cors({
     origin: function (origin, callback) {
