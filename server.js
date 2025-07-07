@@ -92,7 +92,7 @@ initSocketIO(io, connectedUsers);
 // ✅ JSON + CORS
 app.use(express.json({ limit: "15mb" }));
 
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com"];
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -138,5 +138,5 @@ app.use((err, req, res, next) => {
 // ✅ הפעלת השרת
 connectDB();
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port:${PORT}`);
 });
