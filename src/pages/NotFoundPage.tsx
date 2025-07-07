@@ -1,17 +1,3 @@
-// import { Link } from 'react-router-dom';
-
-// export default function NotFoundPage() {
-//     return (
-//         <div className="flex items-center justify-center min-h-[80vh] bg-white dark:bg-gray-900">
-//           <div className="max-w-md p-8 shadow-lg rounded-lg bg-white dark:bg-gray-800">
-//             <h2 className="text-3xl font-bold mb-4 text-center">404 - Page Not Found</h2>
-//             <p className="text-gray-700 dark:text-gray-400 text-center">Sorry, the page you are looking for could not be found.</p>
-//             <Link className="font-semibold text-center underline mx-auto block mt-5" to={"/"}>Go Home</Link>
-//           </div>
-//         </div>
-//       );
-// }
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 

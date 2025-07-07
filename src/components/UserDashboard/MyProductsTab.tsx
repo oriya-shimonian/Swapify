@@ -8,12 +8,9 @@ import {
 } from "@/types/products";
 import useProducts from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import ProductCard from "@/components/ProductCard";
 import AppDialog from "@/components/AppDialog";
 import toast from "react-hot-toast";
-import { GoTrash } from "react-icons/go";
-import { FaEdit } from "react-icons/fa";
 import { SkeletonProductCard } from "../skelton/SkeletonProductCard";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { Filters } from "./exchangeTabsHelpers/Filters";
@@ -24,7 +21,6 @@ import { homePageFields } from "@/lib/filters/homePageFilters";
 
 export default function MyProductsTab() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { deleteProduct, fetchUserProducts } = useProducts();
 
   const [myProducts, setMyProducts] = useState<IProduct[]>([]);
@@ -35,47 +31,18 @@ export default function MyProductsTab() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingNextPage, setLoadingNextPage] = useState(false);
-
-  // const [filters, setFilters] = useState({
-  //   search: "",
-  //   category: null,
-  //   subcategory: null,
-  //   condition: null,
-  //   availability: null,
-  //   location: null,
-  //   fromDate: "",
-  //   toDate: "",
-  //   // שדות דינמיים
-  //   author: "",
-  //   publisher: "",
-  //   publish_year: "",
-  //   manufacturer: "",
-  //   piecesCount: "",
-  //   min_players: "",
-  //   max_players: "",
-  //   duration: "",
-  // });
   const [filters, setFilters] = useState<ProductFilters>(defaultProductFilters);
-
-
-  // const selectedCategory = filters.category as ProductCategory | null;
-  // const extendedFields = useMemo(() => {
-  //   return selectedCategory
-  //     ? [
-  //         ...homePageFields(user),
-  //         ...(extraFieldsByCategory[selectedCategory] || []),
-  //       ]
-  //     : homePageFields(user);
-  // }, [selectedCategory, user]);
 
   const selectedCategory = filters.category as ProductCategory | null;
 
-const extendedFields = useMemo(() => {
-  return selectedCategory
-    ? [...homePageFields(user), ...(extraFieldsByCategory[selectedCategory] || [])]
-    : homePageFields(user);
-}, [selectedCategory, user]);
-
+  const extendedFields = useMemo(() => {
+    return selectedCategory
+      ? [
+          ...homePageFields(user),
+          ...(extraFieldsByCategory[selectedCategory] || []),
+        ]
+      : homePageFields(user);
+  }, [selectedCategory, user]);
 
   const bottomRef = useInfiniteScroll({
     isFetching: loadingNextPage,
@@ -152,25 +119,31 @@ const extendedFields = useMemo(() => {
         <AddProductButton />
       </div>
 
-      <Filters
-        filters={filters}
-        setFilters={setFilters}
-        resetPage={() => setPage(0)}
-        fields={extendedFields}
-      />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              resetPage={() => setPage(0)}
+              fields={extendedFields}
+            />
+          </div>
 
-      <div className="mb-4 w-full sm:w-auto">
-        <DateRangePicker
-          fromDate={filters.fromDate ?? ""}
-          toDate={filters.toDate ?? ""}
-          onChange={(from, to) =>
-            setFilters((prev) => ({
-              ...prev,
-              fromDate: from,
-              toDate: to,
-            }))
-          }
-        />
+          <div className="min-w-[200px] self-baseline">
+            <DateRangePicker
+              fromDate={filters.fromDate ?? ""}
+              toDate={filters.toDate ?? ""}
+              onChange={(from, to) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  fromDate: from,
+                  toDate: to,
+                }))
+              }
+            />
+          </div>
+        </div>
       </div>
 
       {loadingNextPage && page === 0 ? (
@@ -187,24 +160,6 @@ const extendedFields = useMemo(() => {
             <ProductCard
               key={product.product_id}
               product={product}
-              actionButtons={
-                <>
-                  <FaEdit
-                    className="text-blue-600 cursor-pointer"
-                    size={18}
-                    title="ערוך"
-                    onClick={() =>
-                      navigate(`/edit-product/${product.product_id}`)
-                    }
-                  />
-                  <GoTrash
-                    className="text-red-600 cursor-pointer"
-                    size={18}
-                    title="מחק"
-                    onClick={() => setSelectedToDelete(product)}
-                  />
-                </>
-              }
             />
           ))}
           {hasMore && <div ref={bottomRef} className="h-10 col-span-full" />}
