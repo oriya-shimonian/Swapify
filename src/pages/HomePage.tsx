@@ -1,8 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { FaEdit } from "react-icons/fa";
-import { GoTrash } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
-
 import { useAuth } from "@/context/AuthContext";
 import useProducts from "@/hooks/useProducts";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
@@ -18,7 +14,6 @@ export default function HomePage() {
   const { products, loading, loadingNextPage, hasMore, fetchProducts } =
     useProducts();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [page, setPage] = useState(0);
 
 const [filters, setFilters] = useState<ProductFilters>(defaultProductFilters);
@@ -93,48 +88,12 @@ const extendedFields = useMemo(() => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-full">
             {products.map((product) => {
-              const isOwner = user?.user_id === product.user_id;
+              // const isOwner = user?.user_id === product.user_id;
               return (
                 <ProductCard
                   key={product.product_id}
                   product={product}
-                  actionButtons={
-                    isOwner ? (
-                      <>
-                        <FaEdit
-                          onClick={() =>
-                            navigate(`/edit-product/${product.product_id}`)
-                          }
-                          className="text-blue-600 cursor-pointer"
-                          title="ערוך"
-                        />
-                        <GoTrash
-                          onClick={() => console.log("TODO: מחיקת מוצר")}
-                          className="text-red-600 cursor-pointer"
-                          title="מחק"
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() =>
-                            navigate(`/product/${product.product_id}`)
-                          }
-                        >
-                          צפה בפרטים
-                        </button>
-                        <button
-                          className="bg-blue-600 text-white rounded px-2 py-1"
-                          onClick={() =>
-                            console.log("TODO: פתיחת דיאלוג החלפה")
-                          }
-                        >
-                          שלח בקשה
-                        </button>
-                      </>
-                    )
-                  }
+
                 />
               );
             })}

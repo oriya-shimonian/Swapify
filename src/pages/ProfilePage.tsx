@@ -18,7 +18,7 @@ interface Errors {
 export default function ProfilePage() {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const { updateUser, loading } = useUserActions();
+  const {  loading } = useUserActions();
   const [form, setForm] = useState({
     username: user!.name,
     email: user!.email,

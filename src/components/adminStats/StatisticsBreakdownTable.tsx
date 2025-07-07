@@ -263,7 +263,7 @@ const TableGroupedByCategory = ({ data }: Props) => {
     <div className="space-y-10 mt-6">
       {Object.entries(subcategoryMaps).map(([category, map]) => {
         const fullList: ProductBreakdownItem[] = Object.entries(map.toLabel).map(
-          ([subcategoryValue, label]) => {
+          ([subcategoryValue]) => {
             const item =
               grouped[category]?.[subcategoryValue] ??
               ({

@@ -17,7 +17,7 @@ export const useUserActions = () => {
   ) => {
     setLoading(true);
     try {
-      const response = await axios.post(userRoutes.createUser, {
+      await axios.post(userRoutes.createUser, {
         username,
         email,
         password,

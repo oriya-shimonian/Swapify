@@ -83,7 +83,9 @@ export default function MySentRequestsTab() {
   const confirmDelete = async () => {
     if (!user || confirmDeleteDialog.id === null) return;
     try {
-      await cancelMyRequest(confirmDeleteDialog.id, user.user_id, user.name);
+      await cancelMyRequest(confirmDeleteDialog.id, 
+        // user.user_id, user.name
+      );
       toast.success("הבקשה בוטלה בהצלחה.");
       fetchRequests();
     } catch {
