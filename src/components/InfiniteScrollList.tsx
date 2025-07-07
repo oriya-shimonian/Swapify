@@ -5,13 +5,11 @@ export function InfiniteScrollList({
   renderItem,
   isFetching,
   hasMore,
-  bottomRef,
 }: {
   items: any[];
   renderItem: (item: any, isLast: boolean) => ReactNode;
   isFetching: boolean;
   hasMore: boolean;
-  bottomRef: (node: HTMLElement | null) => void;
 }) {
   return (
     <div className="space-y-4">

@@ -131,7 +131,6 @@ export default function NotificationsPage() {
         )}
         isFetching={isFetchingMore}
         hasMore={hasMore}
-        bottomRef={lastNotificationRef}
       />
 
       {filtered.length === 0 && !loadingNotifications && !isFetchingMore && (
