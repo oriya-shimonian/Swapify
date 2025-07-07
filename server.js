@@ -38,11 +38,11 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com", "https://swapify-6f271.web.app"];
 // ✅ הגדרת Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -92,7 +92,7 @@ initSocketIO(io, connectedUsers);
 // ✅ JSON + CORS
 app.use(express.json({ limit: "15mb" }));
 
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com", "https://swapify-584w.onrender.com"];
+
 app.use(
   cors({
     origin: function (origin, callback) {
