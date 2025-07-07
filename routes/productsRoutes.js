@@ -8,6 +8,7 @@ const { optionalAuth } = require('../middlewares/optionalAuth');
 // קבלת כל המוצרים
 router.get('/', optionalAuth, productsController.getAllProducts);
 
+router.get('/images', productsController.getAllProductsImages);
 // קבלת מוצר לפי ID
 router.get('/:id', productsController.getProductById);
 
