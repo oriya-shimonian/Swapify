@@ -12,7 +12,6 @@ import { SkeletonTable } from "./exchangeTabsHelpers/SkeletonTable";
 import { RequestsTable } from "./exchangeTabsHelpers/RequestsTable";
 import { Pagination } from "./exchangeTabsHelpers/Pagination";
 import { useLocation } from "react-router-dom";
-import { DateRangePicker } from "../DateRangePicker";
 
 const ITEMS_PER_PAGE = 12;
 

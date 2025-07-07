@@ -1,7 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 
-const baseClasses = "text-white px-2 py-1 rounded-full text-xs font-bold";
-
 export function getStatusBadge(status?: string) {
   const baseClasses = "inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-sm";
   

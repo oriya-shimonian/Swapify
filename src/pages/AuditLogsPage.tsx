@@ -2,10 +2,7 @@ import { useState } from "react";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { AuditLogFilters } from "@/types/auditLog";
 import GenericTable, { Column } from "@/components/table/GenericTable";
-import {
-  FilterField,
-  Filters,
-} from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
+import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
 import { DateRangePicker } from "@/components/DateRangePicker";
 
 export default function AuditLogsPage() {
@@ -24,20 +21,6 @@ export default function AuditLogsPage() {
   const handleNext = () => setPage((prev) => Math.min(prev + 1, totalPages));
   const toggleRow = (id: number) =>
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
-
-  const fields: FilterField[] = [
-    { key: "user", type: "input", placeholder: "סינון לפי משתמש" },
-    {
-      key: "action",
-      type: "select",
-      placeholder: "סינון לפי פעולה",
-      options: [
-        { label: "הוספה", value: "הוספת" },
-        { label: "עדכון", value: "עדכון" },
-        { label: "מחיקה", value: "מחיקת" },
-      ],
-    },
-  ];
 
   const columns: Column<any>[] = [
     {

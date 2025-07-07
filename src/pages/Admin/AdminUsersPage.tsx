@@ -1,5 +1,3 @@
-// export default AdminUsersPage;
-
 import { useEffect, useState } from "react";
 import { useUserActions } from "@/hooks/useUserActions";
 import { IUser } from "@/types/type";
@@ -14,9 +12,6 @@ import { UserCheck, UserX, UsersRound, Shield } from "lucide-react";
 import AppDialog from "@/components/AppDialog";
 import { getUsersTableColumns } from "@/components/adminUsers/UsersTableColumns";
 import UsersBulkActions from "@/components/adminUsers/UsersBulkActions";
-import { useUserLocationStats } from "@/hooks/useUserLocationStats";
-import StatisticsChart from "@/components/adminStats/StatisticsChart";
-import { normalizeLocations } from "@/utils/manageUserUtils";
 
 const AdminUsersPage = () => {
   const {
@@ -70,14 +65,6 @@ const AdminUsersPage = () => {
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
         : [...prev, userId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    setSelectedUsers(
-      selectedUsers.length === filteredUsers.length
-        ? []
-        : filteredUsers.map((u) => u.user_id)
     );
   };
 

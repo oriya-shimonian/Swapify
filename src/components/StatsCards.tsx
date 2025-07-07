@@ -1,5 +1,3 @@
-// components/common/StatsCards.tsx
-import React from "react";
 import type { LucideIcon } from "lucide-react";
 
 export interface StatsCardItem {

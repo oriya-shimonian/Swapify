@@ -3,15 +3,12 @@ import { Sun, Moon, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { motion } from "framer-motion";
-import ButtonLink from "@/components/ButtonLink";
 import {
   ADMIN_LINKS,
   NAV_LINKS,
   USER_LINKS,
 } from "@/constants/navigationLinks";
 import { useAuth } from "@/context/AuthContext";
-import { IoNotifications } from "react-icons/io5";
-import { useNotifications } from "@/hooks/useNotifications";
 import NotificationsDropdown from "./notifications/NotificationsDropdown";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import AppButton from "./Buttons/AppButton";
@@ -21,7 +18,6 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { unreadCount } = useNotifications(user);
   const menuRef = useRef(null);
   const profileRef = useRef(null);
   const location = useLocation();
