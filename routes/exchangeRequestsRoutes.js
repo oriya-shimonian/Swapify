@@ -4,12 +4,15 @@ const db = require('../config/db');
 
 
 const exchangeRequestsController = require('../controllers/exchangeRequestsController');
-const { authenticateUser } = require('../middlewares/authMiddleware');
+const { authenticateUser, isAdmin } = require('../middlewares/authMiddleware');
 const { canManageItem } = require('../middlewares/canManageItem');
 const checkBanStatus = require('../middlewares/checkBanStatus');
 
 // יצירת בקשה חדשה
 router.post('/', authenticateUser, checkBanStatus, exchangeRequestsController.createExchangeRequest);
+
+// קבלת כל בקשות ההחלפה (לאדמין בלבד)
+router.get('/all-exchange-requests', authenticateUser, checkBanStatus, isAdmin, exchangeRequestsController.getAllExchangeRequestsAdmin);
 
 // אישור בקשה
 router.post('/:id/approve', authenticateUser, checkBanStatus, exchangeRequestsController.approveExchangeRequest);

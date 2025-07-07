@@ -1,6 +1,8 @@
 const db = require("../config/db");
 const { createNotification } = require("../services/notificationsService");
 const logAudit = require("../utils/auditLogger");
+const { buildProductFilters } = require("../services/productFilters");
+
 // יצירת בקשת החלפה חדשה עם אפשרות להצעת עד 4 מוצרים
 
 exports.createExchangeRequest = async (req, res) => {
@@ -143,7 +145,6 @@ exports.createExchangeRequest = async (req, res) => {
   }
 };
 
-// אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 // אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 exports.approveExchangeRequest = async (req, res) => {
   const { id } = req.params;
@@ -365,13 +366,102 @@ exports.completeExchangeRequest = async (req, res) => {
 // todo clean code!!!
 
 // קבלת כל בקשות ההחלפה
-exports.getAllExchangeRequests = async (req, res) => {
+exports.getAllExchangeRequestsAdmin = async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM Exchange_Requests");
-    res.status(200).json(result.rows);
+    const limit = parseInt(req.query.limit) || 20;
+    const afterId = parseInt(req.query.after); // טעינה אינסופית לפי request_id
+
+    const fromUserId = req.query.from_user_id;
+    const toUserId = req.query.to_user_id;
+
+    const { whereClause, values } = buildProductFilters(req.query, {
+      includeSearch: true,
+      includeAvailabilityDefault: false,
+    });
+
+    const conditions = [];
+    let idx = values.length + 1;
+
+    if (fromUserId) {
+      conditions.push(`er.user_id = $${idx++}`);
+      values.push(fromUserId);
+    }
+
+    if (toUserId) {
+      conditions.push(`owner.user_id = $${idx++}`);
+      values.push(toUserId);
+    }
+
+    if (afterId) {
+      conditions.push(`er.request_id < $${idx++}`);
+      values.push(afterId);
+    }
+
+    const finalWhere =
+      (whereClause ? whereClause.replace("WHERE", "") : "") +
+      (conditions.length ? (whereClause ? " AND " : "WHERE ") + conditions.join(" AND ") : "");
+
+    const query = `
+      SELECT 
+        er.request_id,
+        er.status,
+        er.created_at,
+        er.updated_at,
+        er.user_id,
+        requester.name AS requester_name,
+        target.title AS requested_title,
+        target.category AS requested_category,
+        target.subcategory AS requested_subcategory,
+        target.location AS requested_location,
+        target.image_url AS requested_image_url,
+        target.condition AS requested_condition,
+        target.availability AS requested_availability,
+        owner.user_id AS owner_user_id,
+        owner.name AS owner_name
+      FROM Exchange_Requests er
+      JOIN Products target ON er.product_id = target.product_id
+      JOIN Users requester ON er.user_id = requester.user_id
+      JOIN Users owner ON target.user_id = owner.user_id
+      ${finalWhere}
+      ORDER BY er.request_id DESC
+      LIMIT $${idx}
+    `;
+
+    const baseRows = await db.query(query, [...values, limit]);
+
+    // הוספת מוצרים מוצעים לכל בקשה
+    const enriched = await Promise.all(
+      baseRows.rows.map(async (row) => {
+        const { rows: offered } = await db.query(
+          `SELECT 
+             p.product_id, p.title, p.category, p.subcategory, p.availability
+           FROM Exchange_Proposal_Options epo
+           JOIN Products p ON epo.offered_product_id = p.product_id
+           WHERE epo.request_id = $1`,
+          [row.request_id]
+        );
+
+        return {
+          ...row,
+          offered_products: offered,
+          requested_product: {
+            product_id: row.product_id,
+            title: row.requested_title,
+            category: row.requested_category,
+            subcategory: row.requested_subcategory,
+            location: row.requested_location,
+            image_url: row.requested_image_url,
+            condition: row.requested_condition,
+            availability: row.requested_availability,
+          },
+        };
+      })
+    );
+
+    res.json(enriched);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch exchange requests" });
+    console.error("❌ שגיאה ב־getAllExchangeRequestsAdmin:", error);
+    res.status(500).json({ error: "שגיאה בטעינת הבקשות" });
   }
 };
 
