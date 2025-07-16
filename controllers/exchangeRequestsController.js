@@ -110,7 +110,7 @@ exports.createExchangeRequest = async (req, res) => {
 
     const offeredNames = offeredTitles.map((r) => `"${r.title}"`).join(", ");
 
-    await logAction(
+    await logAudit(
       "יצירת בקשת החלפה",
       userId,
       userName,
