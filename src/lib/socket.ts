@@ -9,6 +9,10 @@ export const connectSocket = (userId: number) => {
       withCredentials: true,
     });
 
+    // socket = io("https://swapify-nb6b.onrender.com", {
+    //   withCredentials: true,
+    // });
+
     socket.on("connect", () => {
       console.log("✅ Socket connected:", socket?.id);
       socket?.emit("register", userId);

@@ -1,4 +1,5 @@
-export const baseBackendAddress = "http://localhost:3000/api";
+export const baseBackendAddress = "http://localhost:3000/api"; // development
+// export const baseBackendAddress = "https://swapify-nb6b.onrender.com/api";
 
 // Authentication
 const authRoutes = {

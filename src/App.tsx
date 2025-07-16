@@ -49,7 +49,7 @@ function App() {
 
   const AppLayout = (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 transition-all">
-      <FancyBackground />
+      {/* <FancyBackground /> */}
       <Navbar />
 
       <main className={`flex-grow ${hideFooter ? "pb-0" : "pb-6"}`}>
