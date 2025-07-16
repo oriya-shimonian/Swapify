@@ -4,18 +4,14 @@ const pool = require("./config/db");
 const cors = require("cors");
 const http = require("http");
 const cron = require("node-cron");
-// const {
-//   cleanupPastMeetings,
-// } = require("./controllers/exchangeRequestsController");
 
-// // להריץ כל יום ב־00:00
+// const { cleanupPastMeetings } = require("./controllers/exchangeRequestsController");
 // cron.schedule("0 0 * * *", async () => {
 //   console.log("📆 רץ cron job למחיקת פגישות ישנות...");
 //   await cleanupPastMeetings();
 // });
 
 const { Server } = require("socket.io");
-
 const {
   initSocketIO,
   setUserCurrentChat,
@@ -38,11 +34,11 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https://swapify-nb6b.onrender.com", "https://swapify-6f271.web.app"];
+
 // ✅ הגדרת Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: ["http://localhost:5173", "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -52,29 +48,21 @@ const io = new Server(server, {
 const connectedUsers = new Map();
 
 io.on("connection", (socket) => {
-  // console.log("🔌 New socket connected:", socket.id);
-
-  // רישום משתמש מחובר
   socket.on("register", (userId) => {
     connectedUsers.set(userId, socket.id);
-    // console.log("🟢 userId registered:", userId);
   });
 
-  // הצטרפות לצ’אט מסוים
   socket.on("join_chat", ({ userId, chatId }) => {
     console.log(`📥 User ${userId} joined chat_${chatId}`);
-    setUserCurrentChat(userId, chatId); // ← Map<userId, chatId>
+    setUserCurrentChat(userId, chatId);
     socket.join(`chat_${chatId}`);
-    console.log(`👥 user ${userId} joined chat ${chatId}`);
   });
 
-  // עזיבת הצ’אט
   socket.on("leave_chat", (userId) => {
     clearUserCurrentChat(userId);
     console.log(`👤 user ${userId} left their current chat`);
   });
 
-  // ניתוק
   socket.on("disconnect", () => {
     for (const [userId, socketId] of connectedUsers.entries()) {
       if (socketId === socket.id) {
@@ -86,7 +74,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ חיבור בין io למערכת
+// ✅ חיבור Socket למערכת
 initSocketIO(io, connectedUsers);
 
 // ✅ JSON + CORS
@@ -125,7 +113,8 @@ app.use("/api/chats", require("./routes/chatsRoutes"));
 app.use("/api/messages", require("./routes/messagesRoutes"));
 app.use("/api", require("./routes/autoFillRoutes"));
 app.use("/api/statistics", require("./routes/statisticsRoutes"));
-// ✅ 404
+
+// ✅ 404 – אם אף ראוט לא תפס
 const { notFoundHandler } = require("./middlewares/404Midlleware");
 app.use(notFoundHandler);
 
@@ -138,5 +127,5 @@ app.use((err, req, res, next) => {
 // ✅ הפעלת השרת
 connectDB();
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port:${PORT}`);
 });
