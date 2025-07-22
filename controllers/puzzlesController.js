@@ -1,0 +1,179 @@
+const db = require("../config/db");
+const { getProductById } = require("./productsController");
+// יצירת פאזל חדש
+exports.createPuzzle = async (req, res) => {
+  const {
+    userId,
+    title,
+    description,
+    condition,
+    locations,
+    imageUrl,
+    manufacturer,
+    piecesCount,
+    subcategory,
+  } = req.body;
+
+  try {
+    // 1️⃣ קודם כל נכניס את הפריט לטבלת Products
+    const productResult = await db.query(
+      `INSERT INTO Products (user_id, title, description, category, subcategory, condition, location, image_url) 
+             VALUES ($1, $2, $3, 'Puzzle', $4, $5, $6, $7) RETURNING product_id`,
+      [userId, title, description, subcategory, condition, locations, imageUrl]
+    );
+
+    const productId = productResult.rows[0].product_id;
+
+    // 2️⃣ עכשיו נוסיף את הפרטים הייחודיים לטבלת Puzzles
+    const puzzleResult = await db.query(
+      `INSERT INTO Puzzles (product_id, manufacturer, pieces_count, image_url, subcategory) 
+             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [productId, manufacturer, piecesCount, imageUrl, subcategory]
+    );
+
+    res.status(201).json(puzzleResult.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to create puzzle" });
+  }
+};
+
+// קבלת כל הפאזלים
+exports.getAllPuzzles = async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM Puzzles");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch puzzles" });
+  }
+};
+
+// קבלת כל הפאזלים
+exports.getAllPuzzles = async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM Puzzles");
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch puzzles" });
+  }
+};
+
+// קבלת כל הפאזלים של משתמש
+exports.getAllUserPuzzles = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const result = await db.query("SELECT * FROM Puzzles WHERE user_id = $1", [
+      userId,
+    ]);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch user's puzzles" });
+  }
+};
+
+// קבלת פאזל לפי ID
+exports.getPuzzleById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await db.query(
+      "SELECT * FROM Puzzles WHERE product_id = $1",
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Puzzle not found" });
+    }
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch puzzle" });
+  }
+};
+
+// עדכון פאזל (גם Products וגם Puzzles)
+exports.updatePuzzle = async (req, res) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    condition,
+    category,
+    subcategory,
+    location,
+    image_url,
+    availability,
+    manufacturer,
+    pieces_count,
+  } = req.body;
+
+  try {
+    await db.query("BEGIN");
+
+    // עדכון טבלת Products
+    await db.query(
+      `UPDATE Products SET
+        title = $1, description = $2, condition = $3, category = $4,
+        subcategory = $5, location = $6, image_url = $7, availability = $8,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE product_id = $9`,
+      [
+        title,
+        description,
+        condition,
+        category,
+        subcategory,
+        location,
+        image_url,
+        availability,
+        id,
+      ]
+    );
+
+    // עדכון טבלת Puzzles
+    await db.query(
+      `UPDATE Puzzles SET
+        manufacturer = $1, pieces_count = $2
+      WHERE product_id = $3`,
+      [manufacturer, pieces_count, id]
+    );
+
+    await db.query("COMMIT");
+
+    const updatedProduct = await getProductById(
+      { params: { id } },
+      { status: () => ({ json: (x) => x }) }
+    );
+    res.status(200).json(updatedProduct);
+  } catch (err) {
+    await db.query("ROLLBACK");
+    console.error("Failed to update puzzle", err);
+    res.status(500).json({ error: "Failed to update puzzle" });
+  }
+};
+
+// מחיקת פאזל
+exports.deletePuzzle = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // 1️⃣ קודם כל נמחק את הפאזל עצמו
+    const puzzleResult = await db.query(
+      "DELETE FROM Puzzles WHERE product_id = $1 RETURNING *",
+      [id]
+    );
+
+    if (puzzleResult.rows.length === 0) {
+      return res.status(404).json({ error: "Puzzle not found" });
+    }
+
+    // 2️⃣ עכשיו נמחק את הרשומה מהטבלה הראשית (Products)
+    await db.query("DELETE FROM Products WHERE product_id = $1", [id]);
+
+    res.status(200).json({ message: "Puzzle deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete puzzle" });
+  }
+};
