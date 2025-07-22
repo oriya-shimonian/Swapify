@@ -5,7 +5,7 @@ export function InfiniteScrollList({
   renderItem,
   isFetching,
   hasMore,
-  bottomRef,
+  // bottomRef,
 }: {
   items: any[];
   renderItem: (item: any, isLast: boolean) => ReactNode;

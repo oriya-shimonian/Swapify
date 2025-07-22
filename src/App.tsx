@@ -1,11 +1,9 @@
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
 } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { ThemeProvider } from "./providers/ThemeProvider";
 import HeroPage from "./pages/HeroPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import LoginPage from "./pages/LoginPage";
@@ -54,7 +52,7 @@ function App() {
       <FancyBackground />
       <Navbar />
 
-      <main className={`flex-grow ${hideFooter ? "pb-0" : "pb-6"}`}>
+      <main className={`flex-grow pb-0`}>
         {loading &&
         !publicRoutes.some((route) => location.pathname.startsWith(route)) ? (
           <div className="flex flex-col items-center justify-center min-h-[30vh] text-gray-500 dark:text-gray-300 mt-8">

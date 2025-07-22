@@ -74,6 +74,7 @@ const StatisticsChart = ({
                 innerRadius={60}
                 label
               >
+                 {/* @ts-ignore */}
                 {formattedData.map((entry, index) => (
                   <Cell key={index} fill={colors[index % colors.length]} />
                 ))}

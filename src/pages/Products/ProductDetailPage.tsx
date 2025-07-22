@@ -8,7 +8,6 @@ import {
   getSubcategoryLabel,
   IProduct,
   IProductWithOwnerName,
-  IPuzzleProduct,
   ProductCategory,
   ProductCondition,
   PuzzleSubcategory,

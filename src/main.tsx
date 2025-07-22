@@ -6,7 +6,6 @@ import { ThemeProvider } from "./providers/ThemeProvider.tsx";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { TooltipProvider } from "./components/ui/tooltip.tsx";
-import { NotificationsProvider } from "./context/NotificationsContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider>

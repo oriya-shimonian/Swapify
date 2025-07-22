@@ -83,7 +83,7 @@ const AdminStatisticsPage = () => {
   return (
     <section className="p-6 space-y-8">
       <h1 className="text-2xl font-bold">סטטיסטיקות כלליות</h1>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+      <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 p-6 mb-8 pb-0">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           {/* 🟦 Date Picker */}
           <div className="w-full lg:w-auto mb-6">

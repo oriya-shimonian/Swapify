@@ -1,4 +1,6 @@
-export const baseBackendAddress = "http://localhost:3000/api";
+// export const baseBackendAddress = "http://localhost:3000/api";
+export const baseBackendAddress = "/api";
+
 
 // Authentication
 const authRoutes = {

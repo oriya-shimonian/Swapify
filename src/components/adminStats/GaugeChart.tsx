@@ -1,7 +1,6 @@
 import {
   RadialBarChart,
   RadialBar,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";

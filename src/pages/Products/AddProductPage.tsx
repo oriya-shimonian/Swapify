@@ -17,10 +17,6 @@ import {
   getProductCategoryLabel,
   getProductConditionLabel,
   getSubcategoryValueFromLabel,
-  // ודא שאתה מייבא את כל האנומים ותת-הקטגוריות כדי שתוכל לאמת אותם
-  BookSubcategory,
-  BoardGameSubcategory,
-  PuzzleSubcategory,
 } from "@/types/products";
 import useProducts from "@/hooks/useProducts";
 import CategoryFields from "./CategoryFields";
@@ -81,6 +77,7 @@ export default function AddProductPage() {
   const {
     autoFill,
     loading: autoFillLoading,
+    // @ts-ignore
     error: autoFillError,
   } = useAutoFillProduct();
   const [autoFillNote, setAutoFillNote] = useState<string | null>(null);

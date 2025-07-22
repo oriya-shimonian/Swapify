@@ -3,11 +3,9 @@ import {
   FileText,
   Calendar,
   Puzzle,
-  Users,
   Clock3,
   ChevronLeftSquare,
   ChevronRightSquare,
-  BookOpen,
   Factory,
 } from "lucide-react";
 import { ProductCategory } from "@/types/products";

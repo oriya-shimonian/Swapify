@@ -11,7 +11,7 @@ export default function UserDashboardWrapper() {
   const getTabClass = (isActive: boolean) =>
     `px-4 py-2 rounded-t-md border-b-2 ${
       isActive
-        ? "text-blue-600 border-blue-600 font-bold bg-white"
+        ? "text-blue-600 border-blue-600 font-bold bg-white dark:bg-white/10 dark:backdrop-blur-md"
         : "text-gray-500 border-transparent hover:text-gray-700"
     }`;
 

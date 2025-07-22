@@ -83,7 +83,8 @@ export default function MySentRequestsTab() {
   const confirmDelete = async () => {
     if (!user || confirmDeleteDialog.id === null) return;
     try {
-      await cancelMyRequest(confirmDeleteDialog.id, user.user_id, user.name);
+      // , user.user_id, user.name
+      await cancelMyRequest(confirmDeleteDialog.id);
       toast.success("הבקשה בוטלה בהצלחה.");
       fetchRequests();
     } catch {
@@ -96,7 +97,7 @@ export default function MySentRequestsTab() {
   return (
     <div className="p-6 min-w-96">
       {/* <h1 className="text-2xl font-bold mb-4">בקשות ששלחתי</h1> */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+      <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 p-6 mb-8 pb-0">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
             <Filters
