@@ -4,7 +4,6 @@ const logAudit = require("../utils/auditLogger");
 const { buildProductFilters } = require("../services/productFilters");
 
 // יצירת בקשת החלפה חדשה עם אפשרות להצעת עד 4 מוצרים
-
 exports.createExchangeRequest = async (req, res) => {
   const { userId, productId, offeredProductIds, userName } = req.body;
 
@@ -88,7 +87,7 @@ exports.createExchangeRequest = async (req, res) => {
       );
     }
 
-    // 👇 השינוי החשוב – עדכון זמינות של המוצר שעליו הוגשה הבקשה
+    // עדכון זמינות של המוצר שאליו נשלחת הבקשה
     await client.query(
       `UPDATE Products
        SET availability = 'Interested'
@@ -114,7 +113,7 @@ exports.createExchangeRequest = async (req, res) => {
       "יצירת בקשת החלפה",
       userId,
       userName,
-      `נשלחה בקשת החלפה על המוצר "${requestedProduct.title}" עם הצעות: ${offeredNames}`
+      `נשלחה בקשת החלפה על המוצר "${productTitle}" עם הצעות: ${offeredNames}`
     );
 
     const { rows: targetProductOwner } = await client.query(
@@ -144,6 +143,7 @@ exports.createExchangeRequest = async (req, res) => {
     client.release();
   }
 };
+
 
 // אישור בקשה והעברת המוצר לסטטוס Pending בלבד
 exports.approveExchangeRequest = async (req, res) => {
@@ -399,7 +399,9 @@ exports.getAllExchangeRequestsAdmin = async (req, res) => {
 
     const finalWhere =
       (whereClause ? whereClause.replace("WHERE", "") : "") +
-      (conditions.length ? (whereClause ? " AND " : "WHERE ") + conditions.join(" AND ") : "");
+      (conditions.length
+        ? (whereClause ? " AND " : "WHERE ") + conditions.join(" AND ")
+        : "");
 
     const query = `
       SELECT 
