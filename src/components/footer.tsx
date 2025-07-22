@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export default function Footer({ design }: { design?: string }) {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
   const linksToShow = [
     ...NAV_LINKS,

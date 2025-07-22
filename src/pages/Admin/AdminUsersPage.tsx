@@ -14,9 +14,6 @@ import { UserCheck, UserX, UsersRound, Shield } from "lucide-react";
 import AppDialog from "@/components/AppDialog";
 import { getUsersTableColumns } from "@/components/adminUsers/UsersTableColumns";
 import UsersBulkActions from "@/components/adminUsers/UsersBulkActions";
-import { useUserLocationStats } from "@/hooks/useUserLocationStats";
-import StatisticsChart from "@/components/adminStats/StatisticsChart";
-import { normalizeLocations } from "@/utils/manageUserUtils";
 
 const AdminUsersPage = () => {
   const {
@@ -73,13 +70,13 @@ const AdminUsersPage = () => {
     );
   };
 
-  const handleSelectAll = () => {
-    setSelectedUsers(
-      selectedUsers.length === filteredUsers.length
-        ? []
-        : filteredUsers.map((u) => u.user_id)
-    );
-  };
+  // const handleSelectAll = () => {
+  //   setSelectedUsers(
+  //     selectedUsers.length === filteredUsers.length
+  //       ? []
+  //       : filteredUsers.map((u) => u.user_id)
+  //   );
+  // };
 
   const handleBulkDelete = async () => {
     await deleteUsers(selectedUsers);
@@ -180,7 +177,7 @@ const AdminUsersPage = () => {
         <StatsCards items={manageUsersCardstats}/>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 pb-0 mb-8">
+        <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 p-6 pb-0 mb-8">
           <Filters
             filters={filters}
             setFilters={setFilters}

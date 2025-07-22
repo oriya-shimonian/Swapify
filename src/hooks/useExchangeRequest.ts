@@ -86,10 +86,12 @@ export function useExchangeRequest() {
 
   const cancelMyRequest = async (
     id: number,
-    userId: number,
-    userName: string
+    // userId: number,
+    // userName: string
   ) => {
     try {
+      // console.log(userId, userName, "cancelMyRequest");
+      
       const res = await axios.delete(
         exchangeRequestRoutes.cancelExchangeRequest(id),
         {
