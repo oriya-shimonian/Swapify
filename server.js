@@ -48,7 +48,7 @@ const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "https
 // ✅ הגדרת Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },

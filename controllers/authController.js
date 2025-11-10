@@ -9,7 +9,8 @@ const { getFullUserById } = require("../services/userService");
 
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
-
+  console.log(1111, email);
+  
   try {
     // חיפוש לפי אימייל כולל סיסמה
     const query = `
@@ -21,7 +22,8 @@ exports.loginUser = async (req, res) => {
       WHERE u.email = $1
     `;
     const result = await db.query(query, [email]);
-
+    console.log(222, email, password, result, "res");
+    
     if (result.rows.length === 0) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
