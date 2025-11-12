@@ -1,5 +1,3 @@
-// export default AdminUsersPage;
-
 import { useEffect, useState } from "react";
 import { useUserActions } from "@/hooks/useUserActions";
 import { IUser } from "@/types/type";
@@ -14,9 +12,6 @@ import { UserCheck, UserX, UsersRound, Shield } from "lucide-react";
 import AppDialog from "@/components/AppDialog";
 import { getUsersTableColumns } from "@/components/adminUsers/UsersTableColumns";
 import UsersBulkActions from "@/components/adminUsers/UsersBulkActions";
-import { useUserLocationStats } from "@/hooks/useUserLocationStats";
-import StatisticsChart from "@/components/adminStats/StatisticsChart";
-import { normalizeLocations } from "@/utils/manageUserUtils";
 
 const AdminUsersPage = () => {
   const {
@@ -73,13 +68,13 @@ const AdminUsersPage = () => {
     );
   };
 
-  const handleSelectAll = () => {
-    setSelectedUsers(
-      selectedUsers.length === filteredUsers.length
-        ? []
-        : filteredUsers.map((u) => u.user_id)
-    );
-  };
+  // const handleSelectAll = () => {
+  //   setSelectedUsers(
+  //     selectedUsers.length === filteredUsers.length
+  //       ? []
+  //       : filteredUsers.map((u) => u.user_id)
+  //   );
+  // };
 
   const handleBulkDelete = async () => {
     await deleteUsers(selectedUsers);
@@ -167,11 +162,11 @@ const AdminUsersPage = () => {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6"
+      className="min-h-screen "
       dir="rtl"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-900">ניהול משתמשים</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">ניהול משתמשים</h1>
         <p className="text-gray-600 mt-1">נהל וצפה במשתמשי המערכת</p>
       </div>
 
@@ -180,7 +175,7 @@ const AdminUsersPage = () => {
         <StatsCards items={manageUsersCardstats}/>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 pb-0 mb-8">
+        <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 dark:border-none p-6 pb-1 mb-8">
           <Filters
             filters={filters}
             setFilters={setFilters}

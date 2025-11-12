@@ -15,9 +15,9 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password); // 🔹 ניסיון התחברות
+      let res = await login(email, password); // 🔹 ניסיון התחברות
       await checkAuth(); // 🔹 בדיקת התחברות לאחר ההתחברות
-      navigate("/all-products"); // 🟢 מעבר לדף הבית
+      if (res) navigate("/all-products"); // 🟢 מעבר לדף הבית
     } catch (error) {
       //
     }
@@ -54,7 +54,7 @@ const LoginPage = () => {
             onClick={() => socialLogin("facebook")}
           >
             <FaFacebook size={24} />
-            Facebook התחברו עם 
+            התחברו עם Facebook
           </motion.button>
 
           <motion.button 
@@ -63,7 +63,7 @@ const LoginPage = () => {
             onClick={() => socialLogin("google")}
           >
             <FaGoogle size={24} />
-            Google התחברו עם 
+            התחברו עם Google
           </motion.button>
         </div>
 

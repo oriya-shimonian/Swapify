@@ -81,8 +81,6 @@ const fetchProducts = useCallback(
   ): Promise<IProduct[]> => {
     try {
       const params = new URLSearchParams();
-      params.append("limit", String(limit));
-      params.append("offset", String(offset));
 
       if (filters?.search) params.append("search", filters.search);
       if (filters?.category) params.append("category", filters.category);

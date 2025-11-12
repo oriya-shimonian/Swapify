@@ -248,9 +248,10 @@ import { Button } from "./ui/button";
 interface Props {
   onSelect: (imageData: string) => void;
   initialImage?: string;
+  design?: string; 
 }
 
-export default function ImageUploader({ onSelect, initialImage }: Props) {
+export default function ImageUploader({ onSelect, initialImage, design }: Props) {
   const [preview, setPreview] = useState<string | null>(initialImage || null);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -341,7 +342,7 @@ export default function ImageUploader({ onSelect, initialImage }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative w-56 h-56">
+      <div className={`relative w-56 h-56 ${design}`}>
         <input
           type="file"
           accept="image/*"

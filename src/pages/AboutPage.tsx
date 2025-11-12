@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useAboutSections } from "@/hooks/useAboutSections";
 import AppDialog from "@/components/AppDialog";
+import GlassCard from "@/components/GlassCard";
+import AppButton from "@/components/Buttons/AppButton";
 
 export default function AboutPage() {
   const { user } = useAuth();
@@ -28,12 +30,11 @@ export default function AboutPage() {
 
       {isAdmin && (
         <div className="text-right">
-          <button
+          <AppButton
             onClick={() => setIsAddDialogOpen(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded mb-4 hover:bg-green-700 transition"
           >
             ➕ הוספת חלק חדש
-          </button>
+          </AppButton>
         </div>
       )}
 

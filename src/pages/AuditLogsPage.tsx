@@ -2,10 +2,7 @@ import { useState } from "react";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { AuditLogFilters } from "@/types/auditLog";
 import GenericTable, { Column } from "@/components/table/GenericTable";
-import {
-  FilterField,
-  Filters,
-} from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
+import { Filters } from "@/components/UserDashboard/exchangeTabsHelpers/Filters";
 import { DateRangePicker } from "@/components/DateRangePicker";
 
 export default function AuditLogsPage() {
@@ -25,19 +22,19 @@ export default function AuditLogsPage() {
   const toggleRow = (id: number) =>
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  const fields: FilterField[] = [
-    { key: "user", type: "input", placeholder: "סינון לפי משתמש" },
-    {
-      key: "action",
-      type: "select",
-      placeholder: "סינון לפי פעולה",
-      options: [
-        { label: "הוספה", value: "הוספת" },
-        { label: "עדכון", value: "עדכון" },
-        { label: "מחיקה", value: "מחיקת" },
-      ],
-    },
-  ];
+  // const fields: FilterField[] = [
+  //   { key: "user", type: "input", placeholder: "סינון לפי משתמש" },
+  //   {
+  //     key: "action",
+  //     type: "select",
+  //     placeholder: "סינון לפי פעולה",
+  //     options: [
+  //       { label: "הוספה", value: "הוספת" },
+  //       { label: "עדכון", value: "עדכון" },
+  //       { label: "מחיקה", value: "מחיקת" },
+  //     ],
+  //   },
+  // ];
 
   const columns: Column<any>[] = [
     {
@@ -89,7 +86,7 @@ export default function AuditLogsPage() {
     <div className="min-h-screen flex flex-col p-6 max-w-5xl mx-auto mt-[4.5rem]">
       <h1 className="text-2xl font-bold mb-4">לוגים</h1>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 pb-0 mb-6">
+      <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 dark:border-none p-6 pb-0 mb-6">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="self-baseline">
             <DateRangePicker

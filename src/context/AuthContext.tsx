@@ -49,7 +49,7 @@ const AuthContext = createContext<{
   user: IUser | null;
   state: AuthState;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 } | null>(null);
@@ -58,7 +58,7 @@ const AuthContext = createContext<{
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
  
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await axios.post(authRoutes.login, { email, password });
       const { token, user } = response.data;
@@ -71,11 +71,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // 🧠 התחברות ל־Socket אחרי login
       connectSocket(user.user_id);
+      return true;
     } catch (error: any) {
       console.log("Login error:", error.status);
       if(error.status === 403) {
         toast.error("המשתמש נחסם. פנה למנהל המערכת.");
-        return;
+        return false;
       }
       if (error.response) {
         toast.error(
@@ -84,6 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         toast.error("אירעה שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
       }
+      return false;
     }
   };
 

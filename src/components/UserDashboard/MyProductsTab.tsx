@@ -57,7 +57,6 @@ export default function MyProductsTab() {
   // });
   const [filters, setFilters] = useState<ProductFilters>(defaultProductFilters);
 
-
   // const selectedCategory = filters.category as ProductCategory | null;
   // const extendedFields = useMemo(() => {
   //   return selectedCategory
@@ -70,12 +69,14 @@ export default function MyProductsTab() {
 
   const selectedCategory = filters.category as ProductCategory | null;
 
-const extendedFields = useMemo(() => {
-  return selectedCategory
-    ? [...homePageFields(user), ...(extraFieldsByCategory[selectedCategory] || [])]
-    : homePageFields(user);
-}, [selectedCategory, user]);
-
+  const extendedFields = useMemo(() => {
+    return selectedCategory
+      ? [
+          ...homePageFields(user),
+          ...(extraFieldsByCategory[selectedCategory] || []),
+        ]
+      : homePageFields(user);
+  }, [selectedCategory, user]);
 
   const bottomRef = useInfiniteScroll({
     isFetching: loadingNextPage,
@@ -152,7 +153,7 @@ const extendedFields = useMemo(() => {
         <AddProductButton />
       </div>
 
-      <Filters
+      {/* <Filters
         filters={filters}
         setFilters={setFilters}
         resetPage={() => setPage(0)}
@@ -171,6 +172,34 @@ const extendedFields = useMemo(() => {
             }))
           }
         />
+      </div> */}
+
+      <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 dark:border-none p-6 mb-8 pb-0">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              resetPage={() => setPage(0)}
+              fields={extendedFields}
+              design="w-full"
+            />
+          </div>
+
+          <div className="min-w-[200px] self-baseline">
+            <DateRangePicker
+              fromDate={filters.fromDate ?? ""}
+              toDate={filters.toDate ?? ""}
+              onChange={(from, to) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  fromDate: from,
+                  toDate: to,
+                }))
+              }
+            />
+          </div>
+        </div>
       </div>
 
       {loadingNextPage && page === 0 ? (

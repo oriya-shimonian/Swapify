@@ -53,7 +53,7 @@ const extendedFields = useMemo(() => {
       <h1 className="text-3xl font-bold text-center mb-6">גלה והחלף פריטים</h1>
       {/* <AddProductButton /> */}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 pb-0">
+      <div className="bg-white rounded-xl dark:bg-white/5 dark:backdrop-blur-mdshadow-sm border border-gray-100 dark:border-none dark:border-none p-6 mb-8 pb-0">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
             <Filters

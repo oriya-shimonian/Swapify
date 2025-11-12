@@ -1,14 +1,14 @@
-import React, { useState, useRef, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { motion } from "framer-motion";
-import { FaCamera, FaTimes } from "react-icons/fa";
+// import { FaCamera } from "react-icons/fa";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { MdImageNotSupported } from "react-icons/md";
+// import { MdImageNotSupported } from "react-icons/md"; , useRef
 import { useUserActions } from "@/hooks/useUserActions";
-import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LocationPicker from "@/components/LocationPicker";
+import ImageUploader from "@/components/ImageUploader";
 
 interface Errors {
   [key: string]: string;
@@ -20,12 +20,12 @@ export default function SignupPage() {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [notifications, setNotifications] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<boolean>(true);
   const [locations, setLocations] = useState<string[]>([]);
   const [errors, setErrors] = useState<Errors>({});
   const { checkAuth } = useAuth();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
   const { createUser, loading } = useUserActions();
 
   const validateField = (name: string, value: string): void => {
@@ -79,17 +79,16 @@ export default function SignupPage() {
     }
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  // const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setProfileImage(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,49 +137,24 @@ export default function SignupPage() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl p-6 mt-[4.5rem]"
+        className="relative w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl py-6 px-3 mt-[4.5rem]"
       >
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-3">
           הרשמה
         </h2>
 
-        <div className="flex justify-center mb-3">
-          <div className="relative">
-            {profileImage ? (
-              <img
-                src={profileImage}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-fit border-4 border-blue-500"
-              />
-            ) : (
-              <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <MdImageNotSupported className="text-gray-500 text-3xl" />
-              </div>
-            )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
-            >
-              <FaCamera />
-            </button>
-          </div>
+        <div className="flex justify-center self-center mx-auto !max-h-40 !max-w-40">
+          <ImageUploader
+            initialImage={profileImage || undefined}
+            onSelect={(base64) => setProfileImage(base64)}
+            design="mx-auto !max-h-40 !max-w-40"
+          />
         </div>
 
         <form onSubmit={handleSignup} className="space-y-2">
           <div>
-            <label
-              className="block text-red-500 text-sm min-h-6 "
-              
-            >
+            <label className="block text-red-500 text-sm min-h-6 ">
               {errors.username && `* ${errors.username}`}
             </label>
             <Input
@@ -192,14 +166,10 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.username && "border border-red-500"
               }`}
-              
             />
           </div>
           <div>
-            <label
-              className="block text-red-500 text-sm min-h-6 "
-              
-            >
+            <label className="block text-red-500 text-sm min-h-6 ">
               {errors.email && `* ${errors.email}`}
             </label>
             <Input
@@ -211,15 +181,11 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.email && "border border-red-500"
               }`}
-              
             />
           </div>
 
           <div>
-            <label
-              className="block text-red-500 text-sm min-h-6 "
-              
-            >
+            <label className="block text-red-500 text-sm min-h-6 ">
               {errors.password && `* ${errors.password}`}
             </label>
             <Input
@@ -231,15 +197,11 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.password && "border border-red-500"
               }`}
-              
             />
           </div>
 
           <div>
-            <label
-              className="block text-red-500 text-sm min-h-6 "
-              
-            >
+            <label className="block text-red-500 text-sm min-h-6 ">
               {errors.confirmPassword && `* ${errors.confirmPassword}`}
             </label>
             <Input
@@ -251,7 +213,6 @@ export default function SignupPage() {
               className={`w-full dark:bg-white ${
                 errors.confirmPassword && "border border-red-500"
               }`}
-              
             />
           </div>
 

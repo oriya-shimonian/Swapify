@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IProduct, ProductCategory } from "@/types/products";
+import { BoardGameSubcategory, BookSubcategory, getProductCategoryLabel, getSubcategoryLabel, IProduct, ProductCategory, PuzzleSubcategory } from "@/types/products";
 import { useExchangeRequest } from "@/hooks/useExchangeRequest";
 import { useAuth } from "@/context/AuthContext";
 import AppDialog from "@/components/AppDialog";
@@ -134,7 +134,7 @@ const handleSubmit = async () => {
   const confirmDisabled =
     (mode === "edit" && !hasChanges) ||
     selectedIds.length === 0 ||
-    selectedIds.length > 4;
+    selectedIds.length > 4 || !!error;
 
   return (
     <AppDialog
@@ -149,6 +149,7 @@ const handleSubmit = async () => {
       onConfirm={handleSubmit}
       loading={loading || loadingProducts}
       confirmDisabled={confirmDisabled}
+
     >
       <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
         ניתן לבחור עד <strong>4 מוצרים</strong> להחלפה.
@@ -166,7 +167,7 @@ const handleSubmit = async () => {
           <option value="">הכל</option>
           {Object.values(ProductCategory).map((cat) => (
             <option key={cat} value={cat}>
-              {cat}
+              {getProductCategoryLabel(cat)}
             </option>
           ))}
         </select>
@@ -210,7 +211,7 @@ const handleSubmit = async () => {
               }}
             >
               <div>
-                <strong>{p.title}</strong> – {p.category} / {p.subcategory}
+                <strong>{p.title}</strong> – {getProductCategoryLabel(p.category)} / {getSubcategoryLabel(p.category, p.subcategory as PuzzleSubcategory | BookSubcategory | BoardGameSubcategory)}
               </div>
               {isSelected && <span className="text-blue-500 font-bold">✓</span>}
             </div>
