@@ -1,9 +1,9 @@
-import CoverAnimation from "@/components/CoverAnimation";
+// import CoverAnimation from "@/components/CoverAnimation";
 import HeroMainSection from "@/components/Hero/HeroMainSection";
 import Recommendations from "@/components/Hero/Recommendations";
 import SomeProducts from "@/components/Hero/SomeProducts";
 import WhySwapify from "@/components/Hero/WhySwapify";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 // import HeroSection from "@/components/explore/HeroSection";
 // import PuzzleTransition from "@/components/explore/PuzzleTransition";
 // import FeaturesSection from "@/components/explore/FeaturesSection";

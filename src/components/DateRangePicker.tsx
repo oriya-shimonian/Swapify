@@ -20,9 +20,9 @@ interface DateRangePickerProps {
 export function DateRangePicker({ fromDate, toDate, onChange }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
 
-  const currentYear = new Date().getFullYear();
-  const fromYear = currentYear - 30;
-  const toYear = currentYear;
+  // const currentYear = new Date().getFullYear();
+  // const fromYear = currentYear - 30;
+  // const toYear = currentYear;
 
   const [range, setRange] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
     from: fromDate ? new Date(fromDate) : undefined,

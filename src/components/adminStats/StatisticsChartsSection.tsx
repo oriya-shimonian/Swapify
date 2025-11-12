@@ -139,13 +139,14 @@ interface Props {
 }
 
 const StatisticsChartsSection = ({ data }: Props) => {
-  const total = data.exchangeRequests.total;
+  // const total = data.exchangeRequests.total;
+  // @ts-ignore
   const { data: locationStats, loading: loadingLocations } =
     useUserLocationStats();
-  const approved =
-    data.exchangeRequests.byStatus.find((s) => s.status === "Approved")
-      ?.count || 0;
-  const approvalPercentage = total > 0 ? (approved / total) * 100 : 0;
+  // const approved =
+  //   data.exchangeRequests.byStatus.find((s) => s.status === "Approved")
+  //     ?.count || 0;
+  // const approvalPercentage = total > 0 ? (approved / total) * 100 : 0;
   const totalProducts =
     data.productsCount.available + data.productsCount.unavailable;
 

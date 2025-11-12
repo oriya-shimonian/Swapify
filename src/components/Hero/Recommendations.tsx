@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import ButtonLink from "../ButtonLink";
 import { Link, useNavigate } from "react-router-dom";
 import AppButton from "../Buttons/AppButton";
 

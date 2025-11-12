@@ -1,4 +1,3 @@
-import ButtonLink from "../ButtonLink";
 import CoverAnimation from "../CoverAnimation";
 
 const HeroMainSection = () => {

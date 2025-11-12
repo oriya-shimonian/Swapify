@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useAboutSections } from "@/hooks/useAboutSections";
 import AppDialog from "@/components/AppDialog";
-import GlassCard from "@/components/GlassCard";
+// import GlassCard from "@/components/GlassCard";
 import AppButton from "@/components/Buttons/AppButton";
 
 export default function AboutPage() {

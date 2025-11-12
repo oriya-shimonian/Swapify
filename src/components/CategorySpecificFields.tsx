@@ -1,4 +1,4 @@
-import { IProduct, ProductCategory } from "@/types/products";
+import { IProduct } from "@/types/products";
 import { extraFieldsByCategory } from "@/lib/filters/extraFieldsByCategory";
 import IconAndBgWithText from "./ProductDetails/IconAndBgWithText";
 import { LucideIcon } from "lucide-react";

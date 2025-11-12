@@ -93,7 +93,7 @@ const handleSubmit = async () => {
   } else {
     // לחיצה שנייה אחרי שהוזהר
     try {
-      const response = await createRequest({
+      await createRequest({
         userId: user.user_id,
         userName: user.name,
         productId,
