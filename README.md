@@ -1,6 +1,5 @@
 <p align="center"> <img src="https://github.com/oriya-shimonian/Swapify/blob/frontend/public/logo-without%20bg.png?raw=true" width="200" alt="Swapify Logo" /> </p> <h1 align="center">🧩 Swapify — Swap Smarter. Play More.</h1> <p align="center"> 🔗 <strong>Live Demo:</strong> <a href="https://swapify-6f271.web.app/" target="_blank">https://swapify-6f271.web.app/</a> </p>
 
-# 🧩 Swapify — Swap Smarter. Play More.
 
 **Swapify** is a full-stack web platform that enables users to **swap puzzles, board games, and books** within their community.
 The platform replaces unstructured WhatsApp groups and manual coordination with a **smart, organized, and user-friendly experience**.
@@ -138,7 +137,7 @@ ClipDrop API • SerpAPI • OpenAI GPT • Firebase Hosting & Storage
 
 ---
 
-🌐 Try Swapify Live
+# 🌐 Try Swapify Live
 
 🔗 Live Demo:
 https://swapify-6f271.web.app/
