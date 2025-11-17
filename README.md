@@ -1,8 +1,66 @@
 # 🔄 Swapify
+<p align="center">
+  <img src="https://github.com/oriya-shimonian/Swapify/blob/frontend/public/logo-without%20bg.png?raw=true" width="200" alt="Swapify Logo" />
+</p>
 
-**Swapify** is a full-stack web platform designed for users to easily swap puzzles, board games, and books within their community. The project was built with a focus on user experience, modular architecture, and modern development practices.
+
+Swapify is a full-stack web platform for swapping puzzles, board games, and books. Built with a focus on simplicity, smart automation, and community-driven exchange, this project combines modern UI/UX, real-time collaboration, and AI-powered product onboarding.
+
+# 📄 Project Overview
+
+**Swapify** is a full-stack platform that enables users to swap puzzles, board games, and books with others in their area or community.
+
+The platform addresses the growing need for organized item exchange communities, replacing unstructured WhatsApp groups and inefficient manual coordination.
 
 ---
+
+### 👥 Target Audience
+
+- Puzzle and board game enthusiasts
+- Families with children who outgrow games or books
+- Community organizers and local groups
+
+---
+
+### 🔍 Core Problems Solved
+
+- Cluttered homes with unused games and books
+- Limited access to variety due to high costs
+- Lack of centralized, trusted exchange platforms
+
+---
+
+### 🧠 Our Approach
+
+Swapify automates, simplifies, and enhances the exchange process with:
+- Smart product onboarding using AI
+- Real-time chat and notifications
+- Clear and intuitive request management
+
+# 🎯 Our Mission
+
+At **Swapify**, our mission is to empower people to **swap smarter**, reduce waste, and **connect through shared interests**.
+
+We believe that every puzzle, book, or game has the potential to bring joy to someone new — and that technology should make this transition simple and fun.
+
+---
+
+### 🌍 Values We Stand For
+
+- 🔁 **Reuse before buy** – promoting circular use of entertainment
+- 🤝 **Trust and community** – verified users and direct communication
+- 🧩 **Simplicity first** – intuitive interfaces that require no manual
+
+---
+
+### 💡 Long-Term Vision
+
+We aim to become a leading exchange platform for physical entertainment items, expand to other categories (e.g. toys, educational kits), and support more localized community-driven swaps.
+
+
+# ✨ Key Features
+
+Swapify combines rich functionality with a clean interface to deliver a seamless swapping experience.
 
 ## ✨ Key Features
 
@@ -14,6 +72,57 @@
 - 🗂️ Personalized product management with edit/delete/infinite scroll
 - 👮 Admin panel for managing meeting locations
 - 🕵️ Internal audit log system to track key user actions
+
+---
+
+### 📸 AI-powered Product Detection
+
+- Uses ClipDrop API to recognize uploaded images
+- Autofills fields like category, title, and description
+- Saves time and improves listing accuracy
+
+---
+
+### 🔄 Swap Requests
+
+- Send a request offering 1–4 products in exchange
+- Accept or reject received offers
+- Visual tracking of request status (Pending, Approved, Rejected)
+
+---
+
+### 💬 In-App Chat
+
+- Real-time communication between matched users
+- Designed for coordinating meeting details and confirming swaps
+
+---
+
+### 🔔 Real-Time Notifications
+
+- Socket.IO-based alerts for new requests, approvals, and chat messages
+- Unread count in navbar + notification dropdown
+
+---
+
+### 🗂️ Product Management
+
+- Add, edit, delete listings
+- Infinite scroll with filters by date, category, subcategory, and location
+
+---
+
+### 👮 Admin Tools
+
+- Full CRUD management of meeting locations
+- Internal audit log for traceability
+
+---
+
+Want to learn more? Go back to the [Home](./Home) page.
+
+
+**Swapify** is a full-stack web platform designed for users to easily swap puzzles, board games, and books within their community. The project was built with a focus on user experience, modular architecture, and modern development practices.
 
 ---
 
