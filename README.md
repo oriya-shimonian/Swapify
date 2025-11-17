@@ -1,171 +1,170 @@
-# 🔄 Swapify
-<p align="center">
-  <img src="https://github.com/oriya-shimonian/Swapify/blob/frontend/public/logo-without%20bg.png?raw=true" width="200" alt="Swapify Logo" />
-</p>
+<p align="center"> <img src="https://github.com/oriya-shimonian/Swapify/blob/frontend/public/logo-without%20bg.png?raw=true" width="200" alt="Swapify Logo" /> </p> <h1 align="center">🧩 Swapify — Swap Smarter. Play More.</h1> <p align="center"> 🔗 <strong>Live Demo:</strong> <a href="https://swapify-6f271.web.app/" target="_blank">https://swapify-6f271.web.app/</a> </p>
 
+# 🧩 Swapify — Swap Smarter. Play More.
 
-Swapify is a full-stack web platform for swapping puzzles, board games, and books. Built with a focus on simplicity, smart automation, and community-driven exchange, this project combines modern UI/UX, real-time collaboration, and AI-powered product onboarding.
-
-# 📄 Project Overview
-
-**Swapify** is a full-stack platform that enables users to swap puzzles, board games, and books with others in their area or community.
-
-The platform addresses the growing need for organized item exchange communities, replacing unstructured WhatsApp groups and inefficient manual coordination.
+**Swapify** is a full-stack web platform that enables users to **swap puzzles, board games, and books** within their community.
+The platform replaces unstructured WhatsApp groups and manual coordination with a **smart, organized, and user-friendly experience**.
 
 ---
 
-### 👥 Target Audience
+## 📄 Project Overview
 
-- Puzzle and board game enthusiasts
-- Families with children who outgrow games or books
-- Community organizers and local groups
+Swapify was built to solve the growing need for a **centralized and trusted exchange system** for physical entertainment items.
 
----
-
-### 🔍 Core Problems Solved
-
-- Cluttered homes with unused games and books
-- Limited access to variety due to high costs
-- Lack of centralized, trusted exchange platforms
+Today, many communities rely on chaotic message groups and inefficient manual logistics.
+Swapify simplifies this process through automation, clear workflows, and real-time communication.
 
 ---
 
-### 🧠 Our Approach
+## 🎯 Mission
 
-Swapify automates, simplifies, and enhances the exchange process with:
-- Smart product onboarding using AI
-- Real-time chat and notifications
-- Clear and intuitive request management
+To help people **swap smarter**, reduce waste, and **connect through shared interests** — turning unused items into new experiences.
 
-# 🎯 Our Mission
-
-At **Swapify**, our mission is to empower people to **swap smarter**, reduce waste, and **connect through shared interests**.
-
-We believe that every puzzle, book, or game has the potential to bring joy to someone new — and that technology should make this transition simple and fun.
+We believe every puzzle, book, or game deserves a second life, and technology should make that transition effortless and enjoyable.
 
 ---
 
-### 🌍 Values We Stand For
+## 👥 Target Audience
 
-- 🔁 **Reuse before buy** – promoting circular use of entertainment
-- 🤝 **Trust and community** – verified users and direct communication
-- 🧩 **Simplicity first** – intuitive interfaces that require no manual
+* Puzzle & board game enthusiasts
+* Families with children who outgrow books or games
+* Community organizers & local swap groups
+* Sustainable-living and minimalism communities
 
 ---
 
-### 💡 Long-Term Vision
+## 🔍 Core Problems We Solve
 
-We aim to become a leading exchange platform for physical entertainment items, expand to other categories (e.g. toys, educational kits), and support more localized community-driven swaps.
+| Without Swapify             | With Swapify                            |
+| --------------------------- | --------------------------------------- |
+| Disorganized WhatsApp posts | Structured swap request system          |
+| Hard to find relevant items | Advanced search & filtering             |
+| Manual coordination chaos   | Built-in chat & real-time notifications |
+| High costs of new games     | Free exchanges with neighbors           |
 
+---
+
+## 🌍 Values We Stand For
+
+* 🔁 **Reuse before buy** – encouraging circular use
+* 🤝 **Community & trust** – verified users & transparent requests
+* 🧩 **Simplicity first** – intuitive UI that works without tutorials
+
+---
+
+## 💡 Long-Term Vision
+
+Expand beyond games & books into:
+
+* Toys
+* Educational kits & hobby gear
+* Community swap events & local pickup hubs
+
+---
 
 # ✨ Key Features
 
-Swapify combines rich functionality with a clean interface to deliver a seamless swapping experience.
+### 🔍 Powerful Search & Filtering
 
-## ✨ Key Features
+Search products by category, subcategory, location, date range, availability, and keyword — with infinite scrolling.
 
-- 🔍 Advanced product search and filtering by category, location, date, and more
-- 🧠 AI-powered image processing to autofill product details when uploading new listings
-- 🔄 Swap request system: send, receive, approve, reject
-- 💬 Built-in chat for coordinating swaps after approval
-- 🔔 Real-time notifications using WebSocket and in-app dropdown
-- 🗂️ Personalized product management with edit/delete/infinite scroll
-- 👮 Admin panel for managing meeting locations
-- 🕵️ Internal audit log system to track key user actions
+### 🧠 AI-Assisted Product Onboarding
 
----
+* Autofills details from product **name only**
+* Uses SERP API for search + GPT for structured summarization
+* Extracts metadata like title, description, category, author, number of players, etc.
 
-### 📸 AI-powered Product Detection
+> *Note: AI does not upload or detect images — based only on text and search results.*
 
-- Uses ClipDrop API to recognize uploaded images
-- Autofills fields like category, title, and description
-- Saves time and improves listing accuracy
+### 🔄 Smart Swap Request System
 
----
+* Offer **1–4 products** for a swap
+* Approve or reject offers
+* Clear status flow (Pending / Approved / Rejected)
+* Automatic rejection if items become unavailable
 
-### 🔄 Swap Requests
+### 💬 Built-In Real-Time Chat
 
-- Send a request offering 1–4 products in exchange
-- Accept or reject received offers
-- Visual tracking of request status (Pending, Approved, Rejected)
-
----
-
-### 💬 In-App Chat
-
-- Real-time communication between matched users
-- Designed for coordinating meeting details and confirming swaps
-
----
+Coordinate meeting details immediately after request approval.
 
 ### 🔔 Real-Time Notifications
 
-- Socket.IO-based alerts for new requests, approvals, and chat messages
-- Unread count in navbar + notification dropdown
-
----
+* WebSocket-based updates
+* Notification bell + unread counter + dropdown preview
 
 ### 🗂️ Product Management
 
-- Add, edit, delete listings
-- Infinite scroll with filters by date, category, subcategory, and location
-
----
+Add, edit, delete & filter personal listings with smooth infinite scroll.
 
 ### 👮 Admin Tools
 
-- Full CRUD management of meeting locations
-- Internal audit log for traceability
+* CRUD for meeting location suggestions
+* Internal audit log for monitoring critical user actions
 
 ---
 
-Want to learn more? Go back to the [Home](./Home) page.
+# 🤖 How AI Is Used
 
+When a user clicks **Auto-Fill** after entering a product name:
 
-**Swapify** is a full-stack web platform designed for users to easily swap puzzles, board games, and books within their community. The project was built with a focus on user experience, modular architecture, and modern development practices.
+1. Search runs via SERP API
+2. Relevant public data is collected
+3. GPT processes & structures the extracted information
+4. The form auto-completes fields such as:
+
+   * Title
+   * Description
+   * Category & subcategory
+   * Extra type-specific fields (e.g., author, player count)
+
+This significantly reduces the time and cognitive effort needed to add new items.
 
 ---
 
-## 🛠 Technologies
+# 🛠 Technologies
 
-**Frontend:** React, TypeScript, Tailwind CSS, React Router, Socket.IO  
-**Backend:** Node.js, Express, PostgreSQL, Socket.IO, JWT, Google & Facebook OAuth  
-**AI & Tools:** ClipDrop API (for image understanding), Firebase (for image uploads and hosting only)
+### Frontend
+
+React • TypeScript • Tailwind CSS • React Router • Socket.IO
+
+### Backend
+
+Node.js • Express • PostgreSQL • JWT • Socket.IO
+Google & Facebook OAuth
+
+### Tools & Services
+
+ClipDrop API • SerpAPI • OpenAI GPT • Firebase Hosting & Storage
 
 ---
 
-Set up a PostgreSQL database and configure the .env file
+🌐 Try Swapify Live
 
-Run both frontend and backend using:
+🔗 Live Demo:
+https://swapify-6f271.web.app/
+
+No installation needed — sign up with Google/Facebook or email and start swapping.
+
+---
+
+# 💻 Running Locally
+
+```bash
+# Install dependencies
+npm i          # Run in both frontend and backend folders
+
+# Start development
 npm run dev
-(the command `npm i` is required both frontend and backend)
+```
+
+Configure PostgreSQL credentials in `.env` before running.
 
 ---
 
-## 🤖 About AI Usage
-Swapify includes a smart autofill feature to help users complete product details based on the product name only.
 
-When a user enters the product name and clicks “Auto-fill”, the following process takes place:
 
-Web search via SERP API – the product name is used to fetch relevant search snippets and pages from the internet (e.g., product listings, reviews, store descriptions).
+# 📄 License
 
-Content analysis via OpenAI's GPT – the fetched data is then summarized and structured by a GPT model to extract relevant metadata such as:
+MIT © 2025 Oriya Shimonian
 
-Title
-
-Description
-
-Category
-
-Subcategory
-
-Extra fields based on product type (e.g., number of players for board games, author for books)
-
-📌 Note: This process does not use image recognition and does not autofill images. The AI works solely based on the product name.
-
-This feature reduces the effort required to fill in product forms and helps users list items more efficiently – especially for well-known games, books, and puzzles.
-
----
-
-## 📄 License
-MIT © 2025 Oriya
+--- 
